@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'add_food_screen.dart';
 import 'food_list_screen.dart';
-import 'notifications_screen.dart'; // <-- IMPORT THIS
+import 'notifications_screen.dart';
+import 'reports_screen.dart'; // ⭐ ADD THIS
+import 'kitchen_needs_screen.dart'; // ⭐ AND THIS
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -42,7 +44,6 @@ class HomeScreen extends StatelessWidget {
                 // Buttons list
                 Column(
                   children: [
-                    // ADD FOOD BUTTON → opens AddFoodScreen
                     menuButton("Add food", () {
                       Navigator.push(
                         context,
@@ -53,7 +54,6 @@ class HomeScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 25),
 
-                    // FOOD LIST BUTTON → opens FoodListScreen
                     menuButton("Food List", () {
                       Navigator.push(
                         context,
@@ -64,7 +64,6 @@ class HomeScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 25),
 
-                    // NOTIFICATIONS BUTTON → opens NotificationsScreen
                     menuButton("Notifications", () {
                       Navigator.push(
                         context,
@@ -75,10 +74,26 @@ class HomeScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 25),
 
-                    menuButton("Reports", () {}),
+                    // ⭐ REPORTS BUTTON → reports_screen.dart
+                    menuButton("Reports", () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ReportsScreen(),
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 25),
 
-                    menuButton("Kitchen Needs", () {}),
+                    // ⭐ KITCHEN NEEDS BUTTON → kitchen_needs_screen.dart
+                    menuButton("Kitchen Needs", () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const KitchenNeedsScreen(),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ],

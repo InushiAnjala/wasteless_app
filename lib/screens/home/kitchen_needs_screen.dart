@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 
-class KitchenNeedsNotification extends StatefulWidget {
-  const KitchenNeedsNotification({super.key});
+class KitchenNeedsScreen extends StatefulWidget {
+  const KitchenNeedsScreen({super.key});
 
   @override
-  State<KitchenNeedsNotification> createState() =>
-      _KitchenNeedsNotificationState();
+  State<KitchenNeedsScreen> createState() => _KitchenNeedsScreenState();
 }
 
-class _KitchenNeedsNotificationState extends State<KitchenNeedsNotification> {
+class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
   // Checkbox states
   bool check1 = false;
   bool check2 = false;
@@ -51,6 +50,7 @@ class _KitchenNeedsNotificationState extends State<KitchenNeedsNotification> {
                         );
                       },
                     ),
+
                     Expanded(
                       child: Center(
                         child: Text(
@@ -62,13 +62,14 @@ class _KitchenNeedsNotificationState extends State<KitchenNeedsNotification> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 40), // keeps symmetry for home icon
+
+                    const SizedBox(width: 40), // Symmetry
                   ],
                 ),
 
                 const SizedBox(height: 25),
 
-                // ---------- FIRST FILLED CARD ----------
+                // ---------- FIRST ITEM ----------
                 _itemCard(
                   title: "Carrot",
                   subtitle: "Expires in 2 days",
@@ -79,7 +80,7 @@ class _KitchenNeedsNotificationState extends State<KitchenNeedsNotification> {
 
                 const SizedBox(height: 18),
 
-                // ---------- EMPTY CARDS ----------
+                // ---------- EMPTY ITEMS ----------
                 _itemCardEmpty(
                   value: check2,
                   onChanged: (v) => setState(() => check2 = v!),

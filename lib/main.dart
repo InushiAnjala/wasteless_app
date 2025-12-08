@@ -4,6 +4,13 @@ import 'package:wasteless_app/screens/auth/login_screen.dart';
 import 'package:wasteless_app/screens/auth/otp_screen.dart';
 import 'package:wasteless_app/screens/auth/reset_password_screen.dart';
 import 'package:wasteless_app/screens/auth/signup_screen.dart';
+import 'package:wasteless_app/screens/chef/ai_food_recipes_screen.dart';
+import 'package:wasteless_app/screens/chef/ai_recipe_detail_screen.dart';
+import 'package:wasteless_app/screens/chef/ai_screen.dart';
+import 'package:wasteless_app/screens/chef/chef_food_screen.dart';
+import 'package:wasteless_app/screens/chef/chef_home_screen.dart';
+import 'package:wasteless_app/screens/chef/not_in_stock_screen.dart';
+import 'package:wasteless_app/screens/chef/recipe_screen.dart';
 import 'package:wasteless_app/screens/home/add_food_screen.dart';
 import 'package:wasteless_app/screens/home/customize_notifications_screen.dart';
 import 'package:wasteless_app/screens/home/food_list_screen.dart';
@@ -41,7 +48,7 @@ class WasteLessApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const ReportsScreen(),
+      home: const RecipeScreen(),
     );
   }
 }
