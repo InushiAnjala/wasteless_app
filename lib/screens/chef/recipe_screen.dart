@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class RecipeScreen extends StatelessWidget {
-  const RecipeScreen({super.key});
+  final String recipeName; // <-- Added this
+
+  const RecipeScreen({super.key, required this.recipeName}); // <-- Added this
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +14,7 @@ class RecipeScreen extends StatelessWidget {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFFC8FEC8), // light green
-              Color(0xFFF4FFF4), // fade to light white
-            ],
+            colors: [Color(0xFFC8FEC8), Color(0xFFF4FFF4)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -27,15 +26,35 @@ class RecipeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 10),
 
-                // Title
-                const Text(
-                  "AI Food Recipies",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                // -------- TOP BAR WITH BACK BUTTON + CENTER TITLE --------
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          size: 28,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const Center(
+                      child: Text(
+                        "AI Food Recipes",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 25),
 
-                // MAIN WHITE PANEL (big container)
+                // ---------------- MAIN WHITE PANEL ----------------
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -47,17 +66,26 @@ class RecipeScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 40),
 
-                        // (Empty scroll area — recipe will appear here)
-                        const Expanded(
+                        // ---------- RECIPE CONTENT ----------
+                        Expanded(
                           child: SingleChildScrollView(
-                            padding: EdgeInsets.symmetric(horizontal: 30),
-                            child: Text("", style: TextStyle(fontSize: 18)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30,
+                              vertical: 10,
+                            ),
+                            child: Text(
+                              recipeName,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
-                        // Search bar INSIDE the big box (bottom)
+                        // ---------- SEARCH BAR AT BOTTOM ----------
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 20),
                           padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -67,14 +95,14 @@ class RecipeScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.black),
                           ),
-                          child: Row(
+                          child: const Row(
                             children: [
-                              const Icon(Icons.search, size: 20),
-                              const SizedBox(width: 8),
-                              const Expanded(
+                              Icon(Icons.search, size: 20),
+                              SizedBox(width: 8),
+                              Expanded(
                                 child: TextField(
                                   decoration: InputDecoration(
-                                    hintText: "",
+                                    hintText: "Search inside recipe...",
                                     border: InputBorder.none,
                                   ),
                                 ),

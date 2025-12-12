@@ -48,7 +48,7 @@ class WasteLessApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const RecipeScreen(),
+      home: const ChefHomeScreen(),
     );
   }
 }

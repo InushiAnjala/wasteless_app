@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../onboarding/login_signup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -22,22 +23,45 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xffD4F8D3),
+
       body: SafeArea(
         child: Center(
           child: Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            width: width * 0.90, // responsive width
+            margin: const EdgeInsets.symmetric(vertical: 12),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(40),
+              border: Border.all(color: Colors.green, width: 2), // your frame
             ),
+
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 🔙 BACK BUTTON
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, size: 30),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginSignupScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
                   const Center(
                     child: Text(
                       "Sign Up Here",
@@ -47,7 +71,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 6),
+
                   const Center(
                     child: Text(
                       "Personal Information",
@@ -58,6 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 24),
 
                   // Name
@@ -106,7 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   customTextField(controller: nicController, hint: "Enter NIC"),
                   const SizedBox(height: 14),
 
-                  // Contact Number
+                  // Contact
                   const Text("Contact Number"),
                   const SizedBox(height: 6),
                   customTextField(
@@ -151,6 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const Text("I agree to the terms and conditions"),
                     ],
                   ),
+
                   const SizedBox(height: 30),
 
                   // Signup Button

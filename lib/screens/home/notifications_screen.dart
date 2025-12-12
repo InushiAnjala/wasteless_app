@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'customize_notifications_screen.dart';
-import 'alert_screen.dart'; // <-- IMPORTANT: added this import
+import 'alert_screen.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -85,8 +85,7 @@ class NotificationsScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            const AlertScreen(), // <-- WORKING
+                        builder: (context) => const AlertScreen(),
                       ),
                     );
                   },

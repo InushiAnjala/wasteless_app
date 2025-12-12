@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../onboarding/login_signup_screen.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -6,11 +7,13 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -18,32 +21,56 @@ class LoginScreen extends StatelessWidget {
             colors: [Color(0xFFC8F8C8), Color(0xFFEFFFEF)],
           ),
         ),
-
         child: Center(
           child: SingleChildScrollView(
             child: Container(
-              width: 330,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              width: width * 0.9, // responsive width
+              padding: EdgeInsets.symmetric(
+                horizontal: width * 0.05,
+                vertical: height * 0.03,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(45),
+                borderRadius: BorderRadius.circular(
+                  width * 0.08,
+                ), // responsive radius
                 border: Border.all(color: Colors.green, width: 2),
               ),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // 🔙 Back Button
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, size: 30),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginSignupScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  SizedBox(height: height * 0.01),
+
+                  // Title
                   const Text(
                     "Welcome Back",
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: height * 0.025),
 
-                  Image.asset("assets/onboarding_3.png", height: 180),
+                  // Image
+                  Image.asset("assets/onboarding_3.png", height: height * 0.25),
 
-                  const SizedBox(height: 30),
+                  SizedBox(height: height * 0.03),
 
+                  // Email
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -54,9 +81,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-
+                  SizedBox(height: height * 0.01),
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
@@ -71,8 +96,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: height * 0.025),
 
+                  // Password
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -83,9 +109,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-
+                  SizedBox(height: height * 0.01),
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
@@ -101,8 +125,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: height * 0.01),
 
+                  // Forgot Password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -121,13 +146,14 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: height * 0.015),
 
+                  // Login Button
                   GestureDetector(
                     onTap: () {},
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(vertical: height * 0.02),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25),
                         border: Border.all(color: Colors.green, width: 2),
@@ -144,6 +170,8 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  SizedBox(height: height * 0.02),
                 ],
               ),
             ),

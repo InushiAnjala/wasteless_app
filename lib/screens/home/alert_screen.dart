@@ -21,13 +21,35 @@ class AlertScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 10),
+            // ---------------- TOP ROW: BACK BUTTON + TITLE ----------------
+            Row(
+              children: [
+                // Back Button
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    size: 30,
+                    color: Colors.black,
+                  ),
+                ),
 
-            // ---------------- TITLE ----------------
-            const Text(
-              "Your\nNotifications",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                // Center Title
+                Expanded(
+                  child: Center(
+                    child: const Text(
+                      "Your Notifications",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Spacer to balance Row (same width as back button)
+                const SizedBox(width: 30),
+              ],
             ),
 
             const SizedBox(height: 35),

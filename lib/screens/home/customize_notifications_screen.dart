@@ -40,10 +40,30 @@ class _CustomizeNotificationsScreenState
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const Text(
-                "Customize\nNotifications",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              // -------------------- BACK + TITLE ROW --------------------
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 28,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: const Text(
+                      "Customize Notifications",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 40),
@@ -91,7 +111,7 @@ class _CustomizeNotificationsScreenState
   }
 
   // -------------------------------------------------------------------
-  // CLEAN REUSABLE SECTION CARD
+  // REUSABLE INPUT + DROPDOWN CARD
   // -------------------------------------------------------------------
   Widget buildSection({
     required String title,
