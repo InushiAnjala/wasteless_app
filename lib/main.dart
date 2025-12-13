@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'package:wasteless_app/screens/auth/forgot_password_screen.dart';
 import 'package:wasteless_app/screens/auth/login_screen.dart';
 import 'package:wasteless_app/screens/auth/otp_screen.dart';
@@ -23,7 +26,11 @@ import 'package:wasteless_app/widgets/bottom_nav.dart';
 import 'constants/colors.dart';
 import 'screens/onboarding/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const WasteLessApp());
 }
 
@@ -48,7 +55,9 @@ class WasteLessApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const ChefHomeScreen(),
+
+      // 🔥 TEMP: Start from Login / Signup
+      home: const LoginSignupScreen(),
     );
   }
 }

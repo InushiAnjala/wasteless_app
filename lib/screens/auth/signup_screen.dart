@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../onboarding/login_signup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -22,24 +24,33 @@ class _SignupScreenState extends State<SignupScreen> {
   final List<String> roles = ["Store Manager", "Chef"];
 
   @override
+  void dispose() {
+    nameController.dispose();
+    nicController.dispose();
+    contactController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: const Color(0xffD4F8D3),
-
       body: SafeArea(
         child: Center(
           child: Container(
-            width: width * 0.90, // responsive width
+            width: width * 0.90,
             margin: const EdgeInsets.symmetric(vertical: 12),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(40),
-              border: Border.all(color: Colors.green, width: 2), // your frame
+              border: Border.all(color: Colors.green, width: 2),
             ),
-
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Role Dropdown
+                  // Role
                   const Text("Role"),
                   const SizedBox(height: 6),
                   Container(
@@ -171,7 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Terms Checkbox
+                  // Terms (UI only)
                   Row(
                     children: [
                       Checkbox(value: true, onChanged: (v) {}),
@@ -181,10 +192,76 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 30),
 
-                  // Signup Button
+                  // 🔥 SIGNUP BUTTON (FIREBASE CONNECTED)
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        if (nameController.text.isEmpty ||
+                            emailController.text.isEmpty ||
+                            passwordController.text.isEmpty ||
+                            confirmPasswordController.text.isEmpty ||
+                            selectedRole == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please fill all required fields"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (passwordController.text !=
+                            confirmPasswordController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Passwords do not match"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          // 1️⃣ Create user in Firebase Auth
+                          UserCredential userCredential = await FirebaseAuth
+                              .instance
+                              .createUserWithEmailAndPassword(
+                                email: emailController.text.trim(),
+                                password: passwordController.text.trim(),
+                              );
+
+                          String uid = userCredential.user!.uid;
+
+                          // 2️⃣ Save user data in Firestore
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(uid)
+                              .set({
+                                'name': nameController.text.trim(),
+                                'role': selectedRole,
+                                'nic': nicController.text.trim(),
+                                'contact': contactController.text.trim(),
+                                'email': emailController.text.trim(),
+                                'createdAt': FieldValue.serverTimestamp(),
+                              });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Signup successful")),
+                          );
+
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginSignupScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.message ?? "Signup failed"),
+                            ),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,

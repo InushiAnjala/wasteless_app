@@ -10,7 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   cupertino_icons: ^1.0.8
+
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.4.0
 
 dev_dependencies:
   flutter_test:
@@ -25,4 +30,3 @@ flutter:
     - assets/onboarding_1.png
     - assets/onboarding_2.png
     - assets/onboarding_3.png
-
