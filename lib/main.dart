@@ -1,36 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
-import 'package:wasteless_app/screens/auth/forgot_password_screen.dart';
-import 'package:wasteless_app/screens/auth/login_screen.dart';
-import 'package:wasteless_app/screens/auth/otp_screen.dart';
-import 'package:wasteless_app/screens/auth/reset_password_screen.dart';
-import 'package:wasteless_app/screens/auth/signup_screen.dart';
-import 'package:wasteless_app/screens/chef/ai_food_recipes_screen.dart';
-import 'package:wasteless_app/screens/chef/ai_recipe_detail_screen.dart';
-import 'package:wasteless_app/screens/chef/ai_screen.dart';
-import 'package:wasteless_app/screens/chef/chef_food_screen.dart';
-import 'package:wasteless_app/screens/chef/chef_home_screen.dart';
-import 'package:wasteless_app/screens/chef/not_in_stock_screen.dart';
-import 'package:wasteless_app/screens/chef/recipe_screen.dart';
-import 'package:wasteless_app/screens/home/add_food_screen.dart';
-import 'package:wasteless_app/screens/home/customize_notifications_screen.dart';
-import 'package:wasteless_app/screens/home/food_list_screen.dart';
-import 'package:wasteless_app/screens/home/home_screen.dart';
-import 'package:wasteless_app/screens/home/kitchen_needs_screen.dart';
-import 'package:wasteless_app/screens/home/notifications_screen.dart';
-import 'package:wasteless_app/screens/home/reports_screen.dart';
-import 'package:wasteless_app/screens/onboarding/login_signup_screen.dart';
-import 'package:wasteless_app/widgets/bottom_nav.dart';
 import 'constants/colors.dart';
-import 'screens/onboarding/splash_screen.dart';
+
+// Screens
+import 'screens/onboarding/login_signup_screen.dart';
+import 'screens/chef/chef_home_screen.dart';
+import 'screens/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const WasteLessApp());
 }
 
@@ -55,9 +37,36 @@ class WasteLessApp extends StatelessWidget {
           ),
         ),
       ),
+      home: AuthWrapper(), // ✅ IMPORTANT: NO const
+    );
+  }
+}
 
-      // 🔥 TEMP: Start from Login / Signup
-      home: const LoginSignupScreen(),
+/// 🔐 AUTH WRAPPER
+/// Automatically decides where to go
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // ⏳ Loading
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // ❌ Not logged in
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const LoginSignupScreen();
+        }
+
+        // ✅ Logged in
+        // TODO: later we will check role from Firestore
+        return const ChefHomeScreen();
+        // OR use HomeScreen() if Store Manager
+      },
     );
   }
 }

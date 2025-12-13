@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'chef_food_screen.dart';
 import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
+import '../onboarding/login_signup_screen.dart';
 
 class ChefHomeScreen extends StatelessWidget {
   const ChefHomeScreen({super.key});
@@ -13,24 +16,40 @@ class ChefHomeScreen extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
 
-        // Gradient Background
+        // 🌿 Gradient Background
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFA8F5A2), // light green
-              Color(0xFFEFFFEF), // white fade at bottom
-            ],
+            colors: [Color(0xFFA8F5A2), Color(0xFFEFFFEF)],
           ),
         ),
 
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              // 🔴 LOGOUT BUTTON (TOP RIGHT)
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.logout, color: Colors.red),
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
 
-              /// Title
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginSignupScreen(),
+                      ),
+                      (route) => false,
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// ✅ CENTERED TITLE (UNCHANGED)
               const Text(
                 "Chef",
                 style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),

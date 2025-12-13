@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'add_food_screen.dart';
 import 'food_list_screen.dart';
 import 'notifications_screen.dart';
-import 'reports_screen.dart'; // ⭐ ADD THIS
-import 'kitchen_needs_screen.dart'; // ⭐ AND THIS
+import 'reports_screen.dart';
+import 'kitchen_needs_screen.dart';
+import '../onboarding/login_signup_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,9 +34,29 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Title
+                // 🔝 LOGOUT BUTTON (TOP RIGHT, FLOATING)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.red),
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginSignupScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // ✅ CENTERED TITLE (UNCHANGED STYLE)
                 const Text(
                   "Store Manager",
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -74,7 +97,6 @@ class HomeScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 25),
 
-                    // ⭐ REPORTS BUTTON → reports_screen.dart
                     menuButton("Reports", () {
                       Navigator.push(
                         context,
@@ -85,7 +107,6 @@ class HomeScreen extends StatelessWidget {
                     }),
                     const SizedBox(height: 25),
 
-                    // ⭐ KITCHEN NEEDS BUTTON → kitchen_needs_screen.dart
                     menuButton("Kitchen Needs", () {
                       Navigator.push(
                         context,
