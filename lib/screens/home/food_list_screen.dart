@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // ← UPDATE your_app_name
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'home_screen.dart';
 
 class FoodListScreen extends StatefulWidget {
   const FoodListScreen({super.key});
@@ -9,35 +12,16 @@ class FoodListScreen extends StatefulWidget {
 }
 
 class _FoodListScreenState extends State<FoodListScreen> {
-  String selectedCategory = "Veg";
+  String selectedCategory = "Veges";
 
-  // Example food data for demo
-  final Map<String, List<Map<String, String>>> foodData = {
-    "Veg": [
-      {"name": "Carrot", "expiry": "Expires in 2 days", "amount": "5kg"},
-      {"name": "Potato", "expiry": "Expires in 5 days", "amount": "10kg"},
-    ],
-    "Meat": [
-      {"name": "Chicken", "expiry": "Expires tomorrow", "amount": "3kg"},
-      {"name": "Beef", "expiry": "Expires in 3 days", "amount": "4kg"},
-    ],
-    "Fruits": [
-      {"name": "Apple", "expiry": "Expires in 4 days", "amount": "2kg"},
-      {"name": "Banana", "expiry": "Expires tomorrow", "amount": "1.5kg"},
-    ],
-    "Others": [
-      {"name": "Bread", "expiry": "Expires today", "amount": "4 units"},
-      {"name": "Eggs", "expiry": "Expires in 6 days", "amount": "12"},
-    ],
-  };
+  final List<String> categories = ["Veges", "Meat", "Fruits", "Others"];
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFA0F5A0), Color(0xFFF2FFF2)],
@@ -45,16 +29,12 @@ class _FoodListScreenState extends State<FoodListScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // -----------------------------------------------------------------
-                // TOP BAR (HOME LEFT + TITLE CENTERED)
-                // -----------------------------------------------------------------
+                // ---------------- TOP BAR ----------------
                 Stack(
                   children: [
                     Align(
@@ -65,7 +45,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
+                              builder: (_) => const HomeScreen(),
                             ),
                           );
                         },
@@ -85,44 +65,75 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // SEARCH BAR
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.black, width: 1),
-                  ),
-                  child: const TextField(
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.search),
-                      hintText: "Search",
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                // CATEGORY BUTTONS
+                // ---------------- CATEGORY BUTTONS ----------------
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    categoryButton("Veg"),
-                    categoryButton("Meat"),
-                    categoryButton("Fruits"),
-                    categoryButton("Others"),
-                  ],
+                  children: categories.map(categoryButton).toList(),
                 ),
 
                 const SizedBox(height: 15),
 
-                // FOOD LIST
+                // ---------------- FIRESTORE LIST ----------------
                 Expanded(
-                  child: ListView(
-                    children: foodData[selectedCategory]!
-                        .map((food) => buildFoodBox(food))
-                        .toList(),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection("foods")
+                        .where("userId", isEqualTo: uid)
+                        .where("section", isEqualTo: selectedCategory)
+                        .orderBy("expiryDate", descending: false) // ✅ IMPORTANT
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(child: Text("No food items"));
+                      }
+
+                      return ListView(
+                        children: snapshot.data!.docs.map((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+
+                          final DateTime expiry =
+                              (data["expiryDate"] as Timestamp).toDate();
+
+                          // -------- FIXED DATE LOGIC --------
+                          final DateTime today = DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          );
+
+                          final DateTime expiryOnly = DateTime(
+                            expiry.year,
+                            expiry.month,
+                            expiry.day,
+                          );
+
+                          final int daysLeft = expiryOnly
+                              .difference(today)
+                              .inDays;
+
+                          String expiryText;
+                          if (daysLeft < 0) {
+                            expiryText = "Expired";
+                          } else if (daysLeft == 0) {
+                            expiryText = "Expires today";
+                          } else if (daysLeft == 1) {
+                            expiryText = "Expires tomorrow";
+                          } else {
+                            expiryText = "Expires in $daysLeft days";
+                          }
+
+                          return buildFoodBox(
+                            name: data["name"],
+                            expiry: expiryText,
+                            amount: "${data["amount"]} ${data["unit"]}",
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -133,11 +144,9 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  // -----------------------------------------------------------------------
-  // CATEGORY BUTTON
-  // -----------------------------------------------------------------------
+  // ---------------- CATEGORY BUTTON ----------------
   Widget categoryButton(String category) {
-    bool active = selectedCategory == category;
+    final active = selectedCategory == category;
 
     return InkWell(
       onTap: () {
@@ -154,44 +163,40 @@ class _FoodListScreenState extends State<FoodListScreen> {
         ),
         child: Text(
           category,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
 
-  // -----------------------------------------------------------------------
-  // FOOD BOX
-  // -----------------------------------------------------------------------
-  Widget buildFoodBox(Map<String, String> food) {
+  // ---------------- FOOD CARD (UI UNCHANGED) ----------------
+  Widget buildFoodBox({
+    required String name,
+    required String expiry,
+    required String amount,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black, width: 1),
+        border: Border.all(color: Colors.black),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            food["name"]!,
+            name,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 6),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(food["expiry"]!, style: const TextStyle(fontSize: 16)),
+              Text(expiry),
               Text(
-                food["amount"]!,
+                amount,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

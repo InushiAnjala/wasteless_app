@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // ← UPDATE THIS
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'home_screen.dart';
 
 class AddFoodScreen extends StatefulWidget {
   const AddFoodScreen({super.key});
@@ -9,11 +12,56 @@ class AddFoodScreen extends StatefulWidget {
 }
 
 class _AddFoodScreenState extends State<AddFoodScreen> {
-  String? selectedSection;
-  String? selectedAmount;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController amountController = TextEditingController();
 
+  String? selectedSection;
+  String? selectedUnit;
+  DateTime? selectedExpiryDate;
+
+  // ✅ FIXED HERE
   final List<String> sectionList = ["Veges", "Fruits", "Meat", "Others"];
-  final List<String> amountUnits = ["Kg", "L", "Unit"];
+  final List<String> unitList = ["Kg", "L", "Unit"];
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() => selectedExpiryDate = picked);
+    }
+  }
+
+  Future<void> _saveFood() async {
+    if (nameController.text.isEmpty ||
+        amountController.text.isEmpty ||
+        selectedUnit == null ||
+        selectedSection == null ||
+        selectedExpiryDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
+      return;
+    }
+
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    await FirebaseFirestore.instance.collection("foods").add({
+      "userId": uid,
+      "name": nameController.text.trim(),
+      "section": selectedSection, // "Veg"
+      "amount": double.parse(amountController.text),
+      "unit": selectedUnit,
+      "expiryDate": Timestamp.fromDate(selectedExpiryDate!),
+      "createdAt": Timestamp.now(),
+    });
+
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,37 +71,30 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-
         leading: IconButton(
           icon: const Icon(Icons.home, color: Colors.black),
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
             );
           },
         ),
-
         title: const Text(
           "Add Food",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.black,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // SECTION ----------------------------------------------------------
-            const Text("Section", style: TextStyle(fontSize: 16)),
+            const Text("Section"),
             const SizedBox(height: 6),
-            _buildDropdown(
+            _dropdown(
               value: selectedSection,
               hint: "Select Section",
               items: sectionList,
@@ -62,57 +103,77 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
             const SizedBox(height: 18),
 
-            // NAME -------------------------------------------------------------
-            const Text("Name", style: TextStyle(fontSize: 16)),
+            const Text("Name"),
             const SizedBox(height: 6),
-            _roundedTextField(),
+            _input(controller: nameController, hint: "Food name"),
 
             const SizedBox(height: 18),
 
-            // EXPIRY DATE ------------------------------------------------------
-            const Text("Expiry date", style: TextStyle(fontSize: 16)),
+            const Text("Expiry date"),
             const SizedBox(height: 6),
 
             Row(
               children: [
-                Expanded(child: _roundedTextField(hint: "DD")),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _pickDate,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        selectedExpiryDate == null
+                            ? "Select expiry date"
+                            : "${selectedExpiryDate!.day}/${selectedExpiryDate!.month}/${selectedExpiryDate!.year}",
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 10),
-                Expanded(child: _roundedTextField(hint: "MM")),
-                const SizedBox(width: 10),
-                Expanded(child: _roundedTextField(hint: "YYYY")),
+                _icon(Icons.camera_alt, () {}),
+                const SizedBox(width: 8),
+                _icon(Icons.mic, () {}),
+                const SizedBox(width: 8),
+                _icon(Icons.calendar_today, _pickDate),
               ],
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
 
-            // CAMERA / MIC / CALENDAR -----------------------------------------
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _iconCircle(Icons.camera_alt, () {}),
-                _iconCircle(Icons.mic, () => _showMicPopup(context)),
-                _iconCircle(Icons.calendar_today, () {}),
-              ],
-            ),
-
-            const SizedBox(height: 25),
-
-            // AMOUNT -----------------------------------------------------------
-            const Text("Amount", style: TextStyle(fontSize: 16)),
+            const Text("Amount"),
             const SizedBox(height: 6),
-            _buildDropdown(
-              value: selectedAmount,
-              hint: "Select Amount Unit",
-              items: amountUnits,
-              onChanged: (v) => setState(() => selectedAmount = v),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _input(
+                    controller: amountController,
+                    hint: "Amount",
+                    keyboard: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _dropdown(
+                    value: selectedUnit,
+                    hint: "Unit",
+                    items: unitList,
+                    onChanged: (v) => setState(() => selectedUnit = v),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 30),
 
-            // DONE BUTTON ------------------------------------------------------
             Center(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _saveFood,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.green,
@@ -131,35 +192,35 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                 ),
               ),
             ),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // WIDGET HELPERS
-  // ---------------------------------------------------------------------------
-
-  Widget _roundedTextField({String? hint}) {
+  Widget _input({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType keyboard = TextInputType.text,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
+        controller: controller,
+        keyboardType: keyboard,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15),
           hintText: hint,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 15),
           border: InputBorder.none,
         ),
       ),
     );
   }
 
-  Widget _buildDropdown({
+  Widget _dropdown({
     required String? value,
     required String hint,
     required List<String> items,
@@ -185,85 +246,17 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     );
   }
 
-  Widget _iconCircle(IconData icon, VoidCallback onPressed) {
+  Widget _icon(IconData icon, VoidCallback onTap) {
     return InkWell(
-      onTap: onPressed,
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.green, width: 2),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: Colors.green, size: 30),
+        child: Icon(icon, color: Colors.green, size: 26),
       ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // MIC POPUP DIALOG
-  // ---------------------------------------------------------------------------
-
-  void _showMicPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 5),
-                    const Expanded(
-                      child: Text(
-                        "Speak the expiry date clearly in this order",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text(
-                  "📅 Day → Month → Year",
-                  style: TextStyle(fontSize: 16),
-                ),
-
-                const SizedBox(height: 25),
-
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green, width: 2),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text("Start"),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
