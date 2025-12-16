@@ -13,6 +13,7 @@ class FoodListScreen extends StatefulWidget {
 
 class _FoodListScreenState extends State<FoodListScreen> {
   String selectedCategory = "Veges";
+  String searchText = "";
 
   final List<String> categories = ["Veges", "Meat", "Fruits", "Others"];
 
@@ -65,6 +66,30 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
+                // ---------------- SEARCH BAR (RESTORED) ----------------
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value.toLowerCase();
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.search),
+                      hintText: "Search food",
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
                 // ---------------- CATEGORY BUTTONS ----------------
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,14 +98,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // ---------------- FIRESTORE LIST ----------------
+                // ---------------- FOOD LIST ----------------
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection("foods")
                         .where("userId", isEqualTo: uid)
                         .where("section", isEqualTo: selectedCategory)
-                        .orderBy("expiryDate", descending: false) // ✅ IMPORTANT
+                        .orderBy("expiryDate") // ✅ nearest expiry first
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -91,34 +116,33 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         return const Center(child: Text("No food items"));
                       }
 
-                      return ListView(
-                        children: snapshot.data!.docs.map((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
+                      // 🔍 FILTER BY SEARCH TEXT
+                      final filteredDocs = snapshot.data!.docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final name = data["name"].toString().toLowerCase();
+                        return name.contains(searchText);
+                      }).toList();
 
-                          final DateTime expiry =
-                              (data["expiryDate"] as Timestamp).toDate();
+                      if (filteredDocs.isEmpty) {
+                        return const Center(child: Text("No matching food"));
+                      }
 
-                          // -------- FIXED DATE LOGIC --------
-                          final DateTime today = DateTime(
-                            DateTime.now().year,
-                            DateTime.now().month,
-                            DateTime.now().day,
-                          );
+                      return ListView.builder(
+                        itemCount: filteredDocs.length,
+                        itemBuilder: (context, index) {
+                          final data =
+                              filteredDocs[index].data()
+                                  as Map<String, dynamic>;
 
-                          final DateTime expiryOnly = DateTime(
-                            expiry.year,
-                            expiry.month,
-                            expiry.day,
-                          );
+                          final expiry = (data["expiryDate"] as Timestamp)
+                              .toDate();
 
-                          final int daysLeft = expiryOnly
-                              .difference(today)
+                          final daysLeft = expiry
+                              .difference(DateTime.now())
                               .inDays;
 
                           String expiryText;
-                          if (daysLeft < 0) {
-                            expiryText = "Expired";
-                          } else if (daysLeft == 0) {
+                          if (daysLeft == 0) {
                             expiryText = "Expires today";
                           } else if (daysLeft == 1) {
                             expiryText = "Expires tomorrow";
@@ -131,7 +155,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                             expiry: expiryText,
                             amount: "${data["amount"]} ${data["unit"]}",
                           );
-                        }).toList(),
+                        },
                       );
                     },
                   ),
@@ -147,13 +171,8 @@ class _FoodListScreenState extends State<FoodListScreen> {
   // ---------------- CATEGORY BUTTON ----------------
   Widget categoryButton(String category) {
     final active = selectedCategory == category;
-
     return InkWell(
-      onTap: () {
-        setState(() {
-          selectedCategory = category;
-        });
-      },
+      onTap: () => setState(() => selectedCategory = category),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
@@ -169,7 +188,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  // ---------------- FOOD CARD (UI UNCHANGED) ----------------
+  // ---------------- FOOD BOX ----------------
   Widget buildFoodBox({
     required String name,
     required String expiry,
