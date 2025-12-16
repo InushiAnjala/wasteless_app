@@ -66,7 +66,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // ---------------- SEARCH BAR (RESTORED) ----------------
+                // ---------------- SEARCH BAR ----------------
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
@@ -75,16 +75,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     border: Border.all(color: Colors.black),
                   ),
                   child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        searchText = value.toLowerCase();
-                      });
-                    },
                     decoration: const InputDecoration(
                       icon: Icon(Icons.search),
                       hintText: "Search food",
                       border: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      setState(() => searchText = value.toLowerCase());
+                    },
                   ),
                 ),
 
@@ -105,7 +103,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         .collection("foods")
                         .where("userId", isEqualTo: uid)
                         .where("section", isEqualTo: selectedCategory)
-                        .orderBy("expiryDate") // ✅ nearest expiry first
+                        .orderBy("expiryDate") // ✅ NEAREST FIRST
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -113,31 +111,24 @@ class _FoodListScreenState extends State<FoodListScreen> {
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text("No food items"));
+                        return const Center(child: Text("No food items found"));
                       }
 
-                      // 🔍 FILTER BY SEARCH TEXT
-                      final filteredDocs = snapshot.data!.docs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final name = data["name"].toString().toLowerCase();
+                      final docs = snapshot.data!.docs.where((doc) {
+                        final name = (doc["name"] as String).toLowerCase();
                         return name.contains(searchText);
                       }).toList();
 
-                      if (filteredDocs.isEmpty) {
-                        return const Center(child: Text("No matching food"));
-                      }
-
                       return ListView.builder(
-                        itemCount: filteredDocs.length,
+                        itemCount: docs.length,
                         itemBuilder: (context, index) {
-                          final data =
-                              filteredDocs[index].data()
-                                  as Map<String, dynamic>;
+                          final doc = docs[index];
+                          final data = doc.data() as Map<String, dynamic>;
 
-                          final expiry = (data["expiryDate"] as Timestamp)
-                              .toDate();
+                          final DateTime expiry =
+                              (data["expiryDate"] as Timestamp).toDate();
 
-                          final daysLeft = expiry
+                          final int daysLeft = expiry
                               .difference(DateTime.now())
                               .inDays;
 
@@ -146,11 +137,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
                             expiryText = "Expires today";
                           } else if (daysLeft == 1) {
                             expiryText = "Expires tomorrow";
+                          } else if (daysLeft < 0) {
+                            expiryText = "Expired";
                           } else {
                             expiryText = "Expires in $daysLeft days";
                           }
 
                           return buildFoodBox(
+                            docId: doc.id,
                             name: data["name"],
                             expiry: expiryText,
                             amount: "${data["amount"]} ${data["unit"]}",
@@ -170,9 +164,12 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
   // ---------------- CATEGORY BUTTON ----------------
   Widget categoryButton(String category) {
-    final active = selectedCategory == category;
+    final bool active = selectedCategory == category;
+
     return InkWell(
-      onTap: () => setState(() => selectedCategory = category),
+      onTap: () {
+        setState(() => selectedCategory = category);
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
@@ -190,6 +187,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
   // ---------------- FOOD BOX ----------------
   Widget buildFoodBox({
+    required String docId,
     required String name,
     required String expiry,
     required String amount,
@@ -202,26 +200,51 @@ class _FoodListScreenState extends State<FoodListScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.black),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(expiry),
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          // NAME + EXPIRY
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(expiry),
+              ],
+            ),
+          ),
+
+          // AMOUNT
+          Text(
+            amount,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(width: 8),
+
+          // EDIT
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.green),
+            onPressed: () {
+              // 🔧 you can connect edit screen later
+            },
+          ),
+
+          // DELETE
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection("foods")
+                  .doc(docId)
+                  .delete();
+            },
           ),
         ],
       ),

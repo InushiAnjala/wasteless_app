@@ -19,7 +19,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   String? selectedUnit;
   DateTime? selectedExpiryDate;
 
-  // ✅ FIXED HERE
+  // ✅ MATCHES FOOD LIST
   final List<String> sectionList = ["Veges", "Fruits", "Meat", "Others"];
   final List<String> unitList = ["Kg", "L", "Unit"];
 
@@ -53,8 +53,8 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     await FirebaseFirestore.instance.collection("foods").add({
       "userId": uid,
       "name": nameController.text.trim(),
-      "section": selectedSection, // "Veg"
-      "amount": double.parse(amountController.text),
+      "section": selectedSection, // Veges
+      "amount": double.tryParse(amountController.text) ?? 0,
       "unit": selectedUnit,
       "expiryDate": Timestamp.fromDate(selectedExpiryDate!),
       "createdAt": Timestamp.now(),
