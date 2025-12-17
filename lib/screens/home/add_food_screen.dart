@@ -5,7 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
 
 class AddFoodScreen extends StatefulWidget {
-  const AddFoodScreen({super.key});
+  final String? foodId;
+  final Map<String, dynamic>? foodData;
+
+  const AddFoodScreen({super.key, this.foodId, this.foodData});
 
   @override
   State<AddFoodScreen> createState() => _AddFoodScreenState();
@@ -19,14 +22,29 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   String? selectedUnit;
   DateTime? selectedExpiryDate;
 
-  // ✅ MATCHES FOOD LIST
   final List<String> sectionList = ["Veges", "Fruits", "Meat", "Others"];
   final List<String> unitList = ["Kg", "L", "Unit"];
+
+  bool get isEdit => widget.foodId != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isEdit) {
+      final data = widget.foodData!;
+      nameController.text = data["name"];
+      amountController.text = data["amount"].toString();
+      selectedSection = data["section"];
+      selectedUnit = data["unit"];
+      selectedExpiryDate = (data["expiryDate"] as Timestamp).toDate();
+    }
+  }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedExpiryDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
@@ -49,16 +67,26 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
 
     final uid = FirebaseAuth.instance.currentUser!.uid;
-
-    await FirebaseFirestore.instance.collection("foods").add({
+    final foodData = {
       "userId": uid,
       "name": nameController.text.trim(),
-      "section": selectedSection, // Veges
+      "section": selectedSection,
       "amount": double.tryParse(amountController.text) ?? 0,
       "unit": selectedUnit,
       "expiryDate": Timestamp.fromDate(selectedExpiryDate!),
-      "createdAt": Timestamp.now(),
-    });
+    };
+
+    if (isEdit) {
+      await FirebaseFirestore.instance
+          .collection("foods")
+          .doc(widget.foodId)
+          .update(foodData);
+    } else {
+      await FirebaseFirestore.instance.collection("foods").add({
+        ...foodData,
+        "createdAt": Timestamp.now(),
+      });
+    }
 
     Navigator.pop(context);
   }
@@ -67,7 +95,6 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFA0F5A0),
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -80,9 +107,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             );
           },
         ),
-        title: const Text(
-          "Add Food",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        title: Text(
+          isEdit ? "Edit Food" : "Add Food",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
       ),

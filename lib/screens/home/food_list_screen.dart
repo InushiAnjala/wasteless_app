@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'home_screen.dart';
+import 'add_food_screen.dart';
 
 class FoodListScreen extends StatefulWidget {
   const FoodListScreen({super.key});
@@ -35,7 +36,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                // ---------------- TOP BAR ----------------
+                // TOP BAR
                 Stack(
                   children: [
                     Align(
@@ -66,7 +67,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // ---------------- SEARCH BAR ----------------
+                // SEARCH BAR
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
@@ -88,7 +89,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // ---------------- CATEGORY BUTTONS ----------------
+                // CATEGORY BUTTONS
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: categories.map(categoryButton).toList(),
@@ -96,14 +97,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 15),
 
-                // ---------------- FOOD LIST ----------------
+                // FOOD LIST
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection("foods")
                         .where("userId", isEqualTo: uid)
                         .where("section", isEqualTo: selectedCategory)
-                        .orderBy("expiryDate") // ✅ NEAREST FIRST
+                        .orderBy("expiryDate")
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -145,9 +146,8 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                           return buildFoodBox(
                             docId: doc.id,
-                            name: data["name"],
+                            data: data,
                             expiry: expiryText,
-                            amount: "${data["amount"]} ${data["unit"]}",
                           );
                         },
                       );
@@ -162,7 +162,6 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  // ---------------- CATEGORY BUTTON ----------------
   Widget categoryButton(String category) {
     final bool active = selectedCategory == category;
 
@@ -185,12 +184,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  // ---------------- FOOD BOX ----------------
   Widget buildFoodBox({
     required String docId,
-    required String name,
+    required Map<String, dynamic> data,
     required String expiry,
-    required String amount,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -202,13 +199,12 @@ class _FoodListScreenState extends State<FoodListScreen> {
       ),
       child: Row(
         children: [
-          // NAME + EXPIRY
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  data["name"],
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -220,23 +216,23 @@ class _FoodListScreenState extends State<FoodListScreen> {
             ),
           ),
 
-          // AMOUNT
           Text(
-            amount,
+            "${data["amount"]} ${data["unit"]}",
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
-          const SizedBox(width: 8),
-
-          // EDIT
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.green),
             onPressed: () {
-              // 🔧 you can connect edit screen later
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddFoodScreen(foodId: docId, foodData: data),
+                ),
+              );
             },
           ),
 
-          // DELETE
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () async {
