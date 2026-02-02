@@ -37,12 +37,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       amountController.text = data["amount"].toString();
       selectedSection = data["section"];
       selectedUnit = data["unit"];
-<<<<<<< HEAD
-      selectedExpiryDate =
-          (data["expiryDate"] as Timestamp).toDate();
-=======
       selectedExpiryDate = (data["expiryDate"] as Timestamp).toDate();
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
     }
   }
 
@@ -65,15 +60,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
         selectedUnit == null ||
         selectedSection == null ||
         selectedExpiryDate == null) {
-<<<<<<< HEAD
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
-=======
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
       return;
     }
 
@@ -93,16 +82,10 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           .doc(widget.foodId)
           .update(foodData);
     } else {
-<<<<<<< HEAD
-      await FirebaseFirestore.instance
-          .collection("foods")
-          .add({...foodData, "createdAt": Timestamp.now()});
-=======
       await FirebaseFirestore.instance.collection("foods").add({
         ...foodData,
         "createdAt": Timestamp.now(),
       });
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
     }
 
     Navigator.pop(context);

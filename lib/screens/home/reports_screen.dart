@@ -39,15 +39,9 @@ class ReportsScreen extends StatelessWidget {
                     ),
                     Text(
                       "Reports",
-<<<<<<< HEAD
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-=======
                       style: TextStyle(
                         fontSize: width * 0.075,
                         fontWeight: FontWeight.w700,
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
                       ),
                     ),
                     IconButton(
@@ -79,13 +73,8 @@ class ReportsScreen extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "Stock Trend Over Time",
-<<<<<<< HEAD
-                    style: const TextStyle(
-                      fontSize: 18,
-=======
                     style: TextStyle(
                       fontSize: width * 0.058,
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -97,13 +86,8 @@ class ReportsScreen extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "Expiry Status Breakdown",
-<<<<<<< HEAD
-                    style: const TextStyle(
-                      fontSize: 18,
-=======
                     style: TextStyle(
                       fontSize: width * 0.058,
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
                       fontWeight: FontWeight.w600,
                     ),
                   ),
