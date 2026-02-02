@@ -55,9 +55,15 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                       child: Center(
                         child: Text(
                           "Kitchen Needs",
+<<<<<<< HEAD
                           style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
+=======
+                          style: TextStyle(
+                            fontSize: width * 0.075,
+                            fontWeight: FontWeight.w700,
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
                           ),
                         ),
                       ),
@@ -107,8 +113,13 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                     children: [
                       Text(
                         "Not in Stocks",
+<<<<<<< HEAD
                         style: const TextStyle(
                           fontSize: 18,
+=======
+                        style: TextStyle(
+                          fontSize: width * 0.065,
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
                           fontWeight: FontWeight.w700,
                         ),
                       ),

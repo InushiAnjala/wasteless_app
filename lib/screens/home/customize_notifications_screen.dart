@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ...existing code...
+=======
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
 
 class CustomizeNotificationsScreen extends StatefulWidget {
   const CustomizeNotificationsScreen({Key? key}) : super(key: key);
@@ -12,18 +15,27 @@ class CustomizeNotificationsScreen extends StatefulWidget {
 
 class _CustomizeNotificationsScreenState
     extends State<CustomizeNotificationsScreen> {
+<<<<<<< HEAD
   // ---------------- CONTROLLERS ----------------
+=======
+  // Text controllers
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
   final TextEditingController vegCtrl = TextEditingController();
   final TextEditingController fruitsCtrl = TextEditingController();
   final TextEditingController meatCtrl = TextEditingController();
   final TextEditingController othersCtrl = TextEditingController();
 
+<<<<<<< HEAD
   // ---------------- DROPDOWN VALUES ----------------
+=======
+  // Dropdown values
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
   String vegUnit = "Days";
   String fruitUnit = "Days";
   String meatUnit = "Days";
   String otherUnit = "Days";
 
+<<<<<<< HEAD
   // ---------------- LOAD SETTINGS ----------------
   Future<void> _loadSettings() async {
     final doc = await FirebaseFirestore.instance
@@ -71,10 +83,104 @@ class _CustomizeNotificationsScreenState
   }
 
   // ---------------- UI ----------------
+=======
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 45),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFA8F5A3), Color(0xFFE7FFE9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // -------------------- BACK + TITLE ROW --------------------
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 28,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: const Text(
+                      "Customize Notifications",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              buildSection(
+                title: "Veges",
+                controller: vegCtrl,
+                value: vegUnit,
+                onChanged: (v) => setState(() => vegUnit = v!),
+              ),
+
+              const SizedBox(height: 22),
+
+              buildSection(
+                title: "Fruits",
+                controller: fruitsCtrl,
+                value: fruitUnit,
+                onChanged: (v) => setState(() => fruitUnit = v!),
+              ),
+
+              const SizedBox(height: 22),
+
+              buildSection(
+                title: "Meat",
+                controller: meatCtrl,
+                value: meatUnit,
+                onChanged: (v) => setState(() => meatUnit = v!),
+              ),
+
+              const SizedBox(height: 22),
+
+              buildSection(
+                title: "Others",
+                controller: othersCtrl,
+                value: otherUnit,
+                onChanged: (v) => setState(() => otherUnit = v!),
+              ),
+
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------
+  // REUSABLE INPUT + DROPDOWN CARD
+  // -------------------------------------------------------------------
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
   Widget buildSection({
     required String title,
     required TextEditingController controller,
     required String value,
+<<<<<<< HEAD
     required ValueChanged<String?> onChanged,
   }) {
     return Column(
@@ -253,6 +359,87 @@ class _CustomizeNotificationsScreenState
                 ),
               ),
             ),
+=======
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(14),
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              // Number field
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 48,
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                          width: 1.3,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      hintText: "Number",
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 15),
+
+              // Dropdown
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: DropdownButton<String>(
+                    value: value,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: "Days", child: Text("Days")),
+                      DropdownMenuItem(value: "Months", child: Text("Months")),
+                    ],
+                    onChanged: onChanged,
+                  ),
+                ),
+              ),
+            ],
+>>>>>>> 0459bece8bdde4df634011f788a989042e99139c
           ),
         ],
       ),
