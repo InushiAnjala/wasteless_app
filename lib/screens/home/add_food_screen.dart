@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 
 import 'home_screen.dart';
 
@@ -17,6 +20,10 @@ class AddFoodScreen extends StatefulWidget {
 class _AddFoodScreenState extends State<AddFoodScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+  final TextRecognizer _textRecognizer = TextRecognizer();
+  final BarcodeScanner _barcodeScanner = BarcodeScanner();
 
   String? selectedSection;
   String? selectedUnit;
@@ -41,16 +48,103 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
   }
 
-  Future<void> _pickDate() async {
+  @override
+  void dispose() {
+    nameController.dispose();
+    amountController.dispose();
+    _textRecognizer.close();
+    _barcodeScanner.close();
+    super.dispose();
+  }
+
+  Future<void> _pickDate({
+    required DateTime? current,
+    required DateTime firstDate,
+    required ValueChanged<DateTime> onPicked,
+  }) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: selectedExpiryDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: current ?? DateTime.now(),
+      firstDate: firstDate,
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
-      setState(() => selectedExpiryDate = picked);
+      setState(() => onPicked(picked));
+    }
+  }
+
+  DateTime? _parseDateFromText(String text) {
+    final match = RegExp(
+      r'(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})',
+    ).firstMatch(text);
+    if (match == null) return null;
+    final day = int.tryParse(match.group(1) ?? "");
+    final month = int.tryParse(match.group(2) ?? "");
+    var year = int.tryParse(match.group(3) ?? "");
+    if (day == null || month == null || year == null) return null;
+    if (year < 100) year += 2000;
+    return DateTime(year, month, day);
+  }
+
+  Future<void> _scanTextFromCamera() async {
+    try {
+      final image = await _picker.pickImage(source: ImageSource.camera);
+      if (image == null) return;
+
+      final inputImage = InputImage.fromFilePath(image.path);
+      final recognizedText = await _textRecognizer.processImage(inputImage);
+
+      final lines = recognizedText.text
+          .split('\n')
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList();
+
+      if (lines.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("No text detected")));
+        return;
+      }
+
+      DateTime? parsedExpDate;
+
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i];
+        final lower = line.toLowerCase();
+
+        if (lower.contains("exp") || lower.contains("expiry")) {
+          parsedExpDate =
+              _parseDateFromText(line) ??
+              (i + 1 < lines.length ? _parseDateFromText(lines[i + 1]) : null);
+        }
+      }
+
+      if (!mounted) return;
+      bool updated = false;
+      setState(() {
+        if (parsedExpDate != null) {
+          selectedExpiryDate = parsedExpDate;
+          updated = true;
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            updated
+                ? "Expiry date captured."
+                : "Scan captured, but no expiry date was found.",
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Scan failed: $e")));
     }
   }
 
@@ -143,7 +237,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: _pickDate,
+                    onTap: () => _pickDate(
+                      current: selectedExpiryDate,
+                      firstDate: DateTime.now(),
+                      onPicked: (date) => selectedExpiryDate = date,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 15,
@@ -162,11 +260,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                _icon(Icons.camera_alt, () {}),
+                _icon(Icons.camera_alt, _scanTextFromCamera),
                 const SizedBox(width: 8),
                 _icon(Icons.mic, () {}),
-                const SizedBox(width: 8),
-                _icon(Icons.calendar_today, _pickDate),
               ],
             ),
 

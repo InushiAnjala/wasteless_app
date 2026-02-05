@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 
 class KitchenNeedsScreen extends StatefulWidget {
-  const KitchenNeedsScreen({super.key});
+  const KitchenNeedsScreen({Key? key}) : super(key: key);
 
   @override
   State<KitchenNeedsScreen> createState() => _KitchenNeedsScreenState();
@@ -56,7 +56,9 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                         child: Text(
                           "Kitchen Needs",
                           style: TextStyle(
-                            fontSize: width * 0.075,
+                            fontSize:
+                                width *
+                                0.065, // Adjusted font size for better UI
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -77,7 +79,6 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                   value: check1,
                   onChanged: (val) => setState(() => check1 = val!),
                 ),
-
                 const SizedBox(height: 18),
 
                 // ---------- EMPTY ITEMS ----------
@@ -108,7 +109,8 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                       Text(
                         "Not in Stocks",
                         style: TextStyle(
-                          fontSize: width * 0.065,
+                          fontSize:
+                              width * 0.055, // Adjusted font size for better UI
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -160,19 +162,22 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 18, // Adjusted font size for better UI
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(subtitle, style: const TextStyle(fontSize: 16)),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(fontSize: 15),
+                    ), // Adjusted font size for better UI
                     const Spacer(),
                     Text(
                       amount,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15, // Adjusted font size for better UI
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -239,13 +244,16 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
       children: [
         Text(
           "$index.",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ), // Adjusted font size for better UI
         ),
         const SizedBox(width: 20),
         Text(
           name,
           style: const TextStyle(
-            fontSize: 17,
+            fontSize: 15, // Adjusted font size for better UI
             color: Colors.black38,
             fontWeight: FontWeight.w500,
           ),
@@ -254,7 +262,7 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
         Text(
           amount,
           style: const TextStyle(
-            fontSize: 17,
+            fontSize: 15, // Adjusted font size for better UI
             color: Colors.black38,
             fontWeight: FontWeight.w500,
           ),
