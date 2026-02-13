@@ -31,7 +31,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   DateTime? selectedExpiryDate;
 
   final List<String> sectionList = ["Veges", "Fruits", "Meat", "Others"];
-  final List<String> unitList = ["Kg", "L", "Unit"];
+  final List<String> unitList = ["Kg", "g", "L", "ml", "Unit"];
 
   int _currentIndex = 0;
 
