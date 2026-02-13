@@ -17,11 +17,19 @@ class _CustomizeNotificationsScreenState
   final TextEditingController meatCtrl = TextEditingController();
   final TextEditingController othersCtrl = TextEditingController();
 
+  bool _isEditing = false;
+
   // ---------------- DROPDOWN VALUES ----------------
   String vegUnit = "Days";
   String fruitUnit = "Days";
   String meatUnit = "Days";
   String otherUnit = "Days";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
 
   // ---------------- LOAD SETTINGS ----------------
   Future<void> _loadSettings() async {
@@ -67,6 +75,9 @@ class _CustomizeNotificationsScreenState
           },
           "updatedAt": Timestamp.now(),
         });
+
+    if (!mounted) return;
+    setState(() => _isEditing = false);
   }
 
   // ---------------- UI ----------------
@@ -152,28 +163,57 @@ class _CustomizeNotificationsScreenState
 
               const SizedBox(height: 40),
 
-              ElevatedButton(
-                onPressed: () async {
-                  await _saveSettings();
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Settings saved!')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 16,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() => _isEditing = true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Edit",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+
+                  const SizedBox(width: 16),
+
+                  ElevatedButton(
+                    onPressed: _isEditing
+                        ? () async {
+                            await _saveSettings();
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Settings saved!')),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "Save Settings",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                ],
               ),
             ],
           ),
@@ -218,6 +258,7 @@ class _CustomizeNotificationsScreenState
                   height: 48,
                   child: TextField(
                     controller: controller,
+                    readOnly: !_isEditing,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
@@ -263,7 +304,7 @@ class _CustomizeNotificationsScreenState
                       DropdownMenuItem(value: "Days", child: Text("Days")),
                       DropdownMenuItem(value: "Months", child: Text("Months")),
                     ],
-                    onChanged: onChanged,
+                    onChanged: _isEditing ? onChanged : null,
                   ),
                 ),
               ),
