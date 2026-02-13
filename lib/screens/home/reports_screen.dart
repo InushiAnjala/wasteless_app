@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart';
+import '../../constants/text_styles.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -45,24 +45,10 @@ class ReportsScreen extends StatelessWidget {
 
                 // ---------------- HEADER ----------------
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.home_outlined, size: 30),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomeScreen()),
-                        );
-                      },
-                    ),
-                    Text(
-                      "Reports",
-                      style: TextStyle(
-                        fontSize:
-                            width *
-                            0.055, // Adjusted font size for better UI consistency
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Center(
+                        child: Text("Reports", style: AppTextStyles.heading),
                       ),
                     ),
                     IconButton(

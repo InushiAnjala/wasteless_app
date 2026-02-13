@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../chef/chef_home_screen.dart';
-import '../home/home_screen.dart';
+import '../home/main_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -44,7 +44,7 @@ class AuthWrapper extends StatelessWidget {
             if (role == 'Chef') {
               return const ChefHomeScreen();
             } else {
-              return const HomeScreen();
+              return const MainScreen();
             }
           },
         );

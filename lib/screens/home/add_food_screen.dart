@@ -5,7 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 
-import 'home_screen.dart';
+import 'main_screen.dart';
+import '../../constants/text_styles.dart';
 
 class AddFoodScreen extends StatefulWidget {
   final String? foodId;
@@ -32,11 +33,14 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   final List<String> sectionList = ["Veges", "Fruits", "Meat", "Others"];
   final List<String> unitList = ["Kg", "L", "Unit"];
 
+  int _currentIndex = 0;
+
   bool get isEdit => widget.foodId != null;
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = isEdit ? 1 : 0;
 
     if (isEdit) {
       final data = widget.foodData!;
@@ -185,25 +189,25 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     Navigator.pop(context);
   }
 
+  void _navigateToTab(int index) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => MainScreen(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFA0F5A0),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 0,
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.black),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-          },
-        ),
         title: Text(
           isEdit ? "Edit Food" : "Add Food",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: AppTextStyles.heading,
         ),
         centerTitle: true,
       ),
@@ -317,6 +321,27 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _navigateToTab,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt),
+            label: 'Food List',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.kitchen), label: 'Kitchen'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Reports',
+          ),
+        ],
       ),
     );
   }

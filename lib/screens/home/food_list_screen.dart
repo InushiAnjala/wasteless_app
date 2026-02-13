@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'home_screen.dart';
 import 'add_food_screen.dart';
+import '../../constants/text_styles.dart';
 
 class FoodListScreen extends StatefulWidget {
   const FoodListScreen({super.key});
@@ -37,33 +37,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
             child: Column(
               children: [
                 // TOP BAR
-                Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.home, size: 30),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HomeScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Center(
-                      child: Text(
-                        "Food List",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                Center(child: Text("Food List", style: AppTextStyles.heading)),
 
                 const SizedBox(height: 15),
 

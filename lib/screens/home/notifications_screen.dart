@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
 import 'customize_notifications_screen.dart';
 import 'alert_screen.dart';
+import '../../constants/text_styles.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -31,33 +31,8 @@ class NotificationsScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 // ---------------- TOP BAR ----------------
-                Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.home, size: 30),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                    const Center(
-                      child: Text(
-                        "Notification",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                Center(
+                  child: Text("Notification", style: AppTextStyles.heading),
                 ),
 
                 const SizedBox(height: 40),

@@ -7,9 +7,12 @@ import 'notifications_screen.dart';
 import 'reports_screen.dart';
 import 'kitchen_needs_screen.dart';
 import '../onboarding/login_signup_screen.dart';
+import '../../constants/text_styles.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onTabSelected});
+
+  final void Function(int index)? onTabSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -57,10 +60,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 // ✅ CENTERED TITLE (UNCHANGED STYLE)
-                const Text(
-                  "Store Manager",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
+                Text("Store Manager", style: AppTextStyles.heading),
 
                 const SizedBox(height: 40),
 
@@ -78,42 +78,22 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 25),
 
                     menuButton("Food List", () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FoodListScreen(),
-                        ),
-                      );
+                      onTabSelected?.call(1);
                     }),
                     const SizedBox(height: 25),
 
                     menuButton("Notifications", () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationsScreen(),
-                        ),
-                      );
+                      onTabSelected?.call(3);
                     }),
                     const SizedBox(height: 25),
 
                     menuButton("Reports", () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ReportsScreen(),
-                        ),
-                      );
+                      onTabSelected?.call(4);
                     }),
                     const SizedBox(height: 25),
 
                     menuButton("Kitchen Needs", () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const KitchenNeedsScreen(),
-                        ),
-                      );
+                      onTabSelected?.call(2);
                     }),
                   ],
                 ),

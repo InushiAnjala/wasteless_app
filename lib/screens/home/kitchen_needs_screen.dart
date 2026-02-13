@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../../constants/text_styles.dart';
 
 class KitchenNeedsScreen extends StatefulWidget {
   const KitchenNeedsScreen({Key? key}) : super(key: key);
@@ -39,34 +39,8 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                 const SizedBox(height: 10),
 
                 // ---------- HEADER ----------
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.home_outlined, size: 30),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomeScreen()),
-                        );
-                      },
-                    ),
-
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          "Kitchen Needs",
-                          style: TextStyle(
-                            fontSize:
-                                width *
-                                0.065, // Adjusted font size for better UI
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 40), // Symmetry
-                  ],
+                Center(
+                  child: Text("Kitchen Needs", style: AppTextStyles.heading),
                 ),
 
                 const SizedBox(height: 25),
