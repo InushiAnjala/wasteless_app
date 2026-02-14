@@ -141,8 +141,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 // Category chips
                 Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
+                  alignment: WrapAlignment.spaceEvenly,
+                  runAlignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
                   children: categories.map(categoryButton).toList(),
                 ),
 
