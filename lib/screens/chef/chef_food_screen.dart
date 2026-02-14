@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'chef_home_screen.dart';
+import 'not_in_stock_screen.dart';
+import 'ai_food_recipes_screen.dart';
 
 // ---------------------------------------
 // FOOD DATA MODEL
@@ -29,6 +31,9 @@ class ChefFoodScreen extends StatefulWidget {
 }
 
 class _ChefFoodScreenState extends State<ChefFoodScreen> {
+  int _currentIndex = 1; // Food List tab
+  String searchText = "";
+
   // ---------------------------------------
   // FOOD DATA LIST
   // ---------------------------------------
@@ -67,11 +72,35 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
   String selectedCategory = "veg";
 
+  void _handleNav(int index) {
+    if (index == _currentIndex) return;
+    Widget target;
+    switch (index) {
+      case 0:
+        target = const ChefHomeScreen();
+        break;
+      case 2:
+        target = const NotInStockScreen();
+        break;
+      case 3:
+        target = const AIFoodRecipesScreen();
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => target),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Filter list based on category
     List<FoodItem> filteredFoods = foods
         .where((item) => item.category.toLowerCase() == selectedCategory)
+        .where((item) => item.name.toLowerCase().contains(searchText))
         .toList();
 
     return Scaffold(
@@ -82,117 +111,171 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
         // Background Gradient
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8F5A2), Color(0xFFEFFFEF)],
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
 
         child: SafeArea(
-          child: Column(
-            children: [
-              // ----------------------------------------------------------
-              // TOP BAR
-              // ----------------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ChefHomeScreen(),
-                          ),
-                        );
-                      },
-                      child: const Icon(Icons.home, size: 32),
-                    ),
-                    const Spacer(),
-                    const Text(
-                      "Food List",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.more_vert, size: 28),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ----------------------------------------------------------
-              // SEARCH BAR
-              // ----------------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(width: 1, color: Colors.black),
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.16),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
                   ),
                   child: Row(
-                    children: const [
-                      Icon(Icons.search),
-                      SizedBox(width: 10),
+                    children: [
+                      const Icon(
+                        Icons.kitchen,
+                        color: Color(0xFF1E9E5A),
+                        size: 26,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Search",
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Food List",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "Browse by category, search, and mark needs.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25C06D),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.22),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.list_alt,
+                          color: Colors.white,
+                          size: 18,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
-              // ----------------------------------------------------------
-              // CATEGORY BUTTONS
-              // ----------------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // Search bar
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: "Search food",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      setState(() => searchText = value.toLowerCase());
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Category chips
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
-                    _categoryButton("Veg", "veg"),
+                    _categoryButton("Veges", "veg"),
                     _categoryButton("Meat", "meat"),
                     _categoryButton("Fruits", "fruits"),
                     _categoryButton("Others", "others"),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-              // ----------------------------------------------------------
-              // FOOD LIST
-              // ----------------------------------------------------------
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: filteredFoods.length,
-                  itemBuilder: (context, index) {
-                    final food = filteredFoods[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: _foodCard(food),
-                    );
-                  },
+                // Food list
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    itemCount: filteredFoods.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final food = filteredFoods[index];
+                      return _foodCard(food);
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _handleNav,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt),
+            label: 'Food List',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_shopping_cart),
+            label: 'Not in stock',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_awesome),
+            label: 'AI Recipes',
+          ),
+        ],
       ),
     );
   }
@@ -212,9 +295,9 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.green, width: isSelected ? 3 : 2),
           color: isSelected ? Colors.green.shade100 : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.green, width: 2),
         ),
         child: Text(
           text,
@@ -229,11 +312,18 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
   // ----------------------------------------------------------
   Widget _foodCard(FoodItem item) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(width: 1),
+        color: Colors.white.withOpacity(0.96),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFE7F1EA)),
       ),
       child: Row(
         children: [
@@ -245,16 +335,28 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                 Text(
                   item.name,
                   style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text(item.expiry, style: const TextStyle(fontSize: 16)),
+                    Text(
+                      item.expiry,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
                     const Spacer(),
-                    Text(item.quantity, style: const TextStyle(fontSize: 16)),
+                    Text(
+                      item.quantity,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -267,10 +369,24 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              border: Border.all(width: 1),
-              borderRadius: BorderRadius.circular(5),
+              color: const Color(0xFF25C06D),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.18),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-            child: const Text("Need", style: TextStyle(fontSize: 16)),
+            child: const Text(
+              "Need",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
