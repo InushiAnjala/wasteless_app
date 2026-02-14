@@ -38,86 +38,143 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA8FBA8), Color(0xFFEFFEF1)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
 
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 8),
-
-                // ---------------- TOP BAR ----------------
-                Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
+                // Header card with back
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.16),
+                        blurRadius: 22,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      InkWell(
                         onTap: () => Navigator.pop(context),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.arrow_back,
+                            size: 26,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25C06D),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.22),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
                         child: const Icon(
-                          Icons.arrow_back,
-                          size: 32,
-                          color: Colors.black,
+                          Icons.auto_awesome,
+                          color: Colors.white,
+                          size: 18,
                         ),
                       ),
-                    ),
-
-                    const Center(
-                      child: Text(
-                        "AI Food Recipes",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "AI Food Recipes",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Pick a category and see ideas.",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 18),
 
-                // ---------------- SEARCH BAR ----------------
+                // Search bar
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.85,
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.black, width: 1.2),
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: const TextField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.search, size: 26),
+                      prefixIcon: Icon(Icons.search),
                       hintText: "Search food items",
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // ---------------- CATEGORY BUTTONS ----------------
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      "Veg",
-                      "Meat",
-                      "Fruits",
-                      "Others",
-                    ].map((c) => _categoryButton(c)).toList(),
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // ---------------- FOOD LIST ----------------
+                // Category chips
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    "Veges",
+                    "Meat",
+                    "Fruits",
+                    "Others",
+                  ].map((c) => _categoryButton(c)).toList(),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Food list
                 Expanded(
                   child: ListView(
                     padding: EdgeInsets.zero,
@@ -145,16 +202,35 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.only(right: 8, bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.green.shade100 : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.green, width: 2),
+          color: isSelected
+              ? const Color(0xFF25C06D).withOpacity(0.14)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF25C06D)
+                : const Color(0xFFCEDFD3),
+            width: 1.4,
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: Colors.green.withOpacity(0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+          ],
         ),
         child: Text(
           category,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? const Color(0xFF1E9E5A) : Colors.black87,
+          ),
         ),
       ),
     );
@@ -177,12 +253,19 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
         },
         child: Container(
           width: double.infinity,
-          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.black, width: 1.2),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(color: const Color(0xFFE7F1EA)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +273,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
               Text(
                 data["name"]!,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -199,10 +282,16 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                 children: [
                   Text(
                     "Expires in ${data["expiry"]}",
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                   const Spacer(),
-                  Text(data["amount"]!, style: const TextStyle(fontSize: 18)),
+                  Text(
+                    data["amount"]!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ],
