@@ -6,133 +6,269 @@ import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 
-class ChefHomeScreen extends StatelessWidget {
+class ChefHomeScreen extends StatefulWidget {
   const ChefHomeScreen({super.key});
+
+  @override
+  State<ChefHomeScreen> createState() => _ChefHomeScreenState();
+}
+
+class _ChefHomeScreenState extends State<ChefHomeScreen> {
+  int _currentIndex = 0;
+
+  void _handleNav(int index) {
+    if (index == _currentIndex) return;
+    Widget target;
+    switch (index) {
+      case 1:
+        target = const ChefFoodScreen();
+        break;
+      case 2:
+        target = const NotInStockScreen();
+        break;
+      case 3:
+        target = const AIFoodRecipesScreen();
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => target),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
-        // 🌿 Gradient Background
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8F5A2), Color(0xFFEFFFEF)],
+            colors: [Color(0xFFB8F8B8), Color(0xFFF2FFF2)],
           ),
         ),
-
         child: SafeArea(
-          child: Column(
-            children: [
-              // 🔴 LOGOUT BUTTON (TOP RIGHT)
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginSignupScreen(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 48),
+                    const Text(
+                      'Chef',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
                       ),
-                      (route) => false,
-                    );
-                  },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.red),
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        if (!context.mounted) return;
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginSignupScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 16),
 
-              /// ✅ CENTERED TITLE (UNCHANGED)
-              const Text(
-                "Chef",
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-              ),
+                // Hero card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.14),
+                        blurRadius: 22,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: const [
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundColor: Color(0xFF25C06D),
+                        child: Icon(
+                          Icons.emoji_food_beverage,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Hello, Chef!',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Quick actions for your kitchen',
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
 
-              const SizedBox(height: 50),
+                const SizedBox(height: 16),
 
-              /// BUTTON 1 – Food List
-              _homeButton(
-                title: "Food List",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChefFoodScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 40),
-
-              /// BUTTON 2 – Not in stocks
-              _homeButton(
-                title: "Not in stocks",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotInStockScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 40),
-
-              /// BUTTON 3 – AI Food Recipes
-              _homeButton(
-                title: "AI Food Recipies",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AIFoodRecipesScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+                // Menu cards
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _homeButton(
+                        title: 'Food List',
+                        subtitle: 'Browse, edit, or search',
+                        icon: Icons.list_alt,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ChefFoodScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _homeButton(
+                        title: 'Not in stocks',
+                        subtitle: 'What needs replenishing',
+                        icon: Icons.remove_shopping_cart,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotInStockScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _homeButton(
+                        title: 'AI Food Recipes',
+                        subtitle: 'Ideas from what you have',
+                        icon: Icons.auto_awesome,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AIFoodRecipesScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _handleNav,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt),
+            label: 'Food List',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.remove_shopping_cart),
+            label: 'Not in stock',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_awesome),
+            label: 'AI Recipes',
+          ),
+        ],
       ),
     );
   }
 
-  /// Reusable button widget
-  Widget _homeButton({required String title, required VoidCallback onTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(30),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 22),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+  Widget _homeButton({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withOpacity(0.12),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
             ),
-          ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE7F8EE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF1E9E5A)),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
