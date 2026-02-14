@@ -200,126 +200,239 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFA0F5A0),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        title: Text(
-          isEdit ? "Edit Food" : "Add Food",
-          style: AppTextStyles.heading,
+      backgroundColor: const Color(0xFFF3FFF6),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF9DE8B4), Color(0xFFF3FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-        centerTitle: true,
-      ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Section"),
-            const SizedBox(height: 6),
-            _dropdown(
-              value: selectedSection,
-              hint: "Select Section",
-              items: sectionList,
-              onChanged: (v) => setState(() => selectedSection = v),
-            ),
-
-            const SizedBox(height: 18),
-
-            const Text("Name"),
-            const SizedBox(height: 6),
-            _input(controller: nameController, hint: "Food name"),
-
-            const SizedBox(height: 18),
-
-            const Text("Expiry date"),
-            const SizedBox(height: 6),
-
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _pickDate(
-                      current: selectedExpiryDate,
-                      firstDate: DateTime.now(),
-                      onPicked: (date) => selectedExpiryDate = date,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 16,
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 18,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header card
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.16),
+                              blurRadius: 22,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF25C06D),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.2),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.restaurant_menu,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    isEdit ? "Edit Food" : "Add Food",
+                                    style: AppTextStyles.heading.copyWith(
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  const Text(
+                                    "Log items faster with scan or manual entry.",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+
+                      const SizedBox(height: 22),
+
+                      const Text(
+                        "Section",
+                        style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      child: Text(
-                        selectedExpiryDate == null
-                            ? "Select expiry date"
-                            : "${selectedExpiryDate!.day}/${selectedExpiryDate!.month}/${selectedExpiryDate!.year}",
+                      const SizedBox(height: 6),
+                      _dropdown(
+                        value: selectedSection,
+                        hint: "Select Section",
+                        items: sectionList,
+                        onChanged: (v) => setState(() => selectedSection = v),
                       ),
-                    ),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        "Name",
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 6),
+                      _input(controller: nameController, hint: "Food name"),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        "Expiry date",
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 6),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _pickDate(
+                                current: selectedExpiryDate,
+                                firstDate: DateTime.now(),
+                                onPicked: (date) => selectedExpiryDate = date,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                  vertical: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.green.withOpacity(0.1),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 18,
+                                      color: Color(0xFF1E9E5A),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        selectedExpiryDate == null
+                                            ? "Select expiry date"
+                                            : "${selectedExpiryDate!.day}/${selectedExpiryDate!.month}/${selectedExpiryDate!.year}",
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          _icon(Icons.camera_alt, _scanTextFromCamera),
+                          const SizedBox(width: 8),
+                          _icon(Icons.mic, () {}),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      const Text(
+                        "Amount",
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 6),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _input(
+                              controller: amountController,
+                              hint: "Amount",
+                              keyboard: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _dropdown(
+                              value: selectedUnit,
+                              hint: "Unit",
+                              items: unitList,
+                              onChanged: (v) =>
+                                  setState(() => selectedUnit = v),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _saveFood,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25C06D),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 44,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            shadowColor: Colors.green.withOpacity(0.25),
+                            elevation: 6,
+                          ),
+                          child: const Text(
+                            "Done",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                _icon(Icons.camera_alt, _scanTextFromCamera),
-                const SizedBox(width: 8),
-                _icon(Icons.mic, () {}),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text("Amount"),
-            const SizedBox(height: 6),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _input(
-                    controller: amountController,
-                    hint: "Amount",
-                    keyboard: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _dropdown(
-                    value: selectedUnit,
-                    hint: "Unit",
-                    items: unitList,
-                    onChanged: (v) => setState(() => selectedUnit = v),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveFood,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.green,
-                  side: const BorderSide(color: Colors.green, width: 2),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Text(
-                  "Done",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -354,14 +467,24 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboard,
         decoration: InputDecoration(
           hintText: hint,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 14,
+          ),
           border: InputBorder.none,
         ),
       ),
@@ -378,7 +501,14 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -400,10 +530,17 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.green, width: 2),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.green.withOpacity(0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: Icon(icon, color: Colors.green, size: 26),
+        child: Icon(icon, color: const Color(0xFF1E9E5A), size: 24),
       ),
     );
   }

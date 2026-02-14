@@ -87,135 +87,206 @@ class _CustomizeNotificationsScreenState
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 45),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA8F5A3), Color(0xFFE7FFE9)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color(0xFFA0F1B5), Color(0xFFEFFAF1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // -------------------- BACK + TITLE ROW --------------------
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      size: 28,
-                      color: Colors.black,
-                    ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header card with back button and context
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: const Text(
-                      "Customize Notifications",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.82),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 22,
+                        offset: const Offset(0, 12),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              buildSection(
-                title: "Veges",
-                controller: vegCtrl,
-                value: vegUnit,
-                onChanged: (v) => setState(() => vegUnit = v!),
-              ),
-
-              const SizedBox(height: 22),
-
-              buildSection(
-                title: "Fruits",
-                controller: fruitsCtrl,
-                value: fruitUnit,
-                onChanged: (v) => setState(() => fruitUnit = v!),
-              ),
-
-              const SizedBox(height: 22),
-
-              buildSection(
-                title: "Meat",
-                controller: meatCtrl,
-                value: meatUnit,
-                onChanged: (v) => setState(() => meatUnit = v!),
-              ),
-
-              const SizedBox(height: 22),
-
-              buildSection(
-                title: "Others",
-                controller: othersCtrl,
-                value: otherUnit,
-                onChanged: (v) => setState(() => otherUnit = v!),
-              ),
-
-              const SizedBox(height: 40),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() => _isEditing = true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE6F7EA),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            size: 22,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Customize Notifications",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "Pick how early you want alerts for each category.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      "Edit",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2ECC71),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.25),
+                              blurRadius: 14,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.notifications_active,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
 
-                  const SizedBox(width: 16),
+                const SizedBox(height: 28),
 
-                  ElevatedButton(
-                    onPressed: _isEditing
-                        ? () async {
-                            await _saveSettings();
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Settings saved!')),
-                            );
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
+                buildSection(
+                  title: "Veges",
+                  controller: vegCtrl,
+                  value: vegUnit,
+                  onChanged: (v) => setState(() => vegUnit = v!),
+                ),
+
+                const SizedBox(height: 18),
+
+                buildSection(
+                  title: "Fruits",
+                  controller: fruitsCtrl,
+                  value: fruitUnit,
+                  onChanged: (v) => setState(() => fruitUnit = v!),
+                ),
+
+                const SizedBox(height: 18),
+
+                buildSection(
+                  title: "Meat",
+                  controller: meatCtrl,
+                  value: meatUnit,
+                  onChanged: (v) => setState(() => meatUnit = v!),
+                ),
+
+                const SizedBox(height: 18),
+
+                buildSection(
+                  title: "Others",
+                  controller: othersCtrl,
+                  value: otherUnit,
+                  onChanged: (v) => setState(() => otherUnit = v!),
+                ),
+
+                const SizedBox(height: 26),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() => _isEditing = true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF25C06D),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      child: const Text(
+                        "Edit",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+
+                    const SizedBox(width: 14),
+
+                    ElevatedButton(
+                      onPressed: _isEditing
+                          ? () async {
+                              await _saveSettings();
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Settings saved!'),
+                                ),
+                              );
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: _isEditing
+                            ? const Color(0xFF1E9E5A)
+                            : const Color(0xFFB9E0C8),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -234,48 +305,81 @@ class _CustomizeNotificationsScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.14),
+            blurRadius: 18,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFE5F4EA)),
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCF6E6),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.timer,
+                  size: 18,
+                  color: Color(0xFF1E9E5A),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           Row(
             children: [
-              // Number field
               Expanded(
                 flex: 2,
                 child: SizedBox(
-                  height: 48,
+                  height: 50,
                   child: TextField(
                     controller: controller,
                     readOnly: !_isEditing,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
+                        horizontal: 14,
+                        vertical: 12,
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: _isEditing
+                          ? Colors.white
+                          : const Color(0xFFF7FBF8),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.black),
-                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: _isEditing
+                              ? const Color(0xFF7CD1A9)
+                              : const Color(0xFFE0EDE5),
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
-                          color: Colors.black,
-                          width: 1.3,
+                          color: Color(0xFF25C06D),
+                          width: 1.4,
                         ),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       hintText: "Number",
                     ),
@@ -283,23 +387,32 @@ class _CustomizeNotificationsScreenState
                 ),
               ),
 
-              const SizedBox(width: 15),
+              const SizedBox(width: 12),
 
-              // Dropdown
               Expanded(
                 flex: 2,
                 child: Container(
-                  height: 48,
+                  height: 50,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
+                    border: Border.all(
+                      color: _isEditing
+                          ? const Color(0xFF7CD1A9)
+                          : const Color(0xFFE0EDE5),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    color: _isEditing ? Colors.white : const Color(0xFFF7FBF8),
                   ),
                   child: DropdownButton<String>(
                     value: value,
                     isExpanded: true,
                     underline: const SizedBox(),
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: _isEditing
+                          ? const Color(0xFF1E9E5A)
+                          : Colors.black45,
+                    ),
                     items: const [
                       DropdownMenuItem(value: "Days", child: Text("Days")),
                       DropdownMenuItem(value: "Months", child: Text("Months")),

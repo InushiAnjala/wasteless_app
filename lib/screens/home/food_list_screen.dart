@@ -26,32 +26,108 @@ class _FoodListScreenState extends State<FoodListScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFA0F5A0), Color(0xFFF2FFF2)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // TOP BAR
-                Center(child: Text("Food List", style: AppTextStyles.heading)),
-
-                const SizedBox(height: 15),
-
-                // SEARCH BAR
+                // Header card
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.black),
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.16),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.kitchen,
+                        color: Color(0xFF1E9E5A),
+                        size: 26,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Food List",
+                              style: AppTextStyles.heading.copyWith(
+                                fontSize: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Keep track by category, search, and edit quickly.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25C06D),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.22),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.list_alt,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                // Search bar
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: TextField(
                     decoration: const InputDecoration(
-                      icon: Icon(Icons.search),
+                      prefixIcon: Icon(Icons.search),
                       hintText: "Search food",
                       border: InputBorder.none,
                     ),
@@ -61,17 +137,18 @@ class _FoodListScreenState extends State<FoodListScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 16),
 
-                // CATEGORY BUTTONS
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Category chips
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
                   children: categories.map(categoryButton).toList(),
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 16),
 
-                // FOOD LIST
+                // Food list
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -86,7 +163,15 @@ class _FoodListScreenState extends State<FoodListScreen> {
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text("No food items found"));
+                        return const Center(
+                          child: Text(
+                            "No food items found",
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 16,
+                            ),
+                          ),
+                        );
                       }
 
                       final docs = snapshot.data!.docs.where((doc) {
@@ -94,8 +179,21 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         return name.contains(searchText);
                       }).toList();
 
-                      return ListView.builder(
+                      if (docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No matches for your search",
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 16,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
                         itemCount: docs.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final doc = docs[index];
                           final data = doc.data() as Map<String, dynamic>;
@@ -122,6 +220,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                             docId: doc.id,
                             data: data,
                             expiry: expiryText,
+                            daysLeft: daysLeft,
                           );
                         },
                       );
@@ -162,59 +261,137 @@ class _FoodListScreenState extends State<FoodListScreen> {
     required String docId,
     required Map<String, dynamic> data,
     required String expiry,
+    required int daysLeft,
   }) {
+    final Color badgeColor;
+    final Color badgeText;
+    if (daysLeft < 0) {
+      badgeColor = const Color(0xFFFFE5E5);
+      badgeText = const Color(0xFFD64242);
+    } else if (daysLeft <= 2) {
+      badgeColor = const Color(0xFFFFF4E3);
+      badgeText = const Color(0xFFCC7A00);
+    } else {
+      badgeColor = const Color(0xFFE7F8EE);
+      badgeText = const Color(0xFF1E9E5A);
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black),
+        color: Colors.white.withOpacity(0.96),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFE7F1EA)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF8F2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.restaurant,
+              color: Color(0xFF1E9E5A),
+              size: 20,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  data["name"],
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        data["name"],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        expiry,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: badgeText,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Text(expiry),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  "Amount: ${data["amount"]} ${data["unit"]}",
+                  style: const TextStyle(color: Colors.black87, fontSize: 14),
+                ),
+
+                if (data.containsKey("section")) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    "Category: ${data["section"]}",
+                    style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  ),
+                ],
               ],
             ),
           ),
 
-          Text(
-            "${data["amount"]} ${data["unit"]}",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+          const SizedBox(width: 8),
 
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.green),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddFoodScreen(foodId: docId, foodData: data),
+          Column(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, color: Color(0xFF1E9E5A)),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          AddFoodScreen(foodId: docId, foodData: data),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: Color(0xFFD64242),
                 ),
-              );
-            },
-          ),
-
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection("foods")
-                  .doc(docId)
-                  .delete();
-            },
+                onPressed: () async {
+                  await FirebaseFirestore.instance
+                      .collection("foods")
+                      .doc(docId)
+                      .delete();
+                },
+              ),
+            ],
           ),
         ],
       ),

@@ -25,25 +25,82 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8F5A2), Color(0xFFEFFFF0)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 10),
-
-                // ---------- HEADER ----------
-                Center(
-                  child: Text("Kitchen Needs", style: AppTextStyles.heading),
+                // Header card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.16),
+                        blurRadius: 22,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25C06D),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.2),
+                              blurRadius: 14,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.kitchen,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Kitchen Needs",
+                              style: AppTextStyles.heading.copyWith(
+                                fontSize: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Quick check of items to buy or consume soon.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 22),
 
                 // ---------- FIRST ITEM ----------
                 _itemCard(
@@ -53,54 +110,77 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                   value: check1,
                   onChanged: (val) => setState(() => check1 = val!),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
 
                 // ---------- EMPTY ITEMS ----------
                 _itemCardEmpty(
                   value: check2,
                   onChanged: (v) => setState(() => check2 = v!),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 12),
                 _itemCardEmpty(
                   value: check3,
                   onChanged: (v) => setState(() => check3 = v!),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 26),
 
                 // ---------- NOT IN STOCK PANEL ----------
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.black, width: 1),
+                    color: Colors.white.withOpacity(0.96),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                    border: Border.all(color: const Color(0xFFE7F1EA)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Not in Stocks",
-                        style: TextStyle(
-                          fontSize:
-                              width * 0.055, // Adjusted font size for better UI
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFDCF6E6),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.remove_shopping_cart,
+                              size: 18,
+                              color: Color(0xFF1E9E5A),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Not in Stocks",
+                            style: TextStyle(
+                              fontSize: width * 0.055,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
 
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 14),
 
                       _stockRow(1, "Name", "Amount"),
-                      const SizedBox(height: 12),
+                      const Divider(height: 18, color: Color(0xFFE6EFE8)),
                       _stockRow(2, "Name", "Amount"),
-                      const SizedBox(height: 12),
+                      const Divider(height: 18, color: Color(0xFFE6EFE8)),
                       _stockRow(3, "Name", "Amount"),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 34),
               ],
             ),
           ),
@@ -126,9 +206,16 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black12),
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE7F1EA)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,11 +235,22 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                       style: const TextStyle(fontSize: 15),
                     ), // Adjusted font size for better UI
                     const Spacer(),
-                    Text(
-                      amount,
-                      style: const TextStyle(
-                        fontSize: 15, // Adjusted font size for better UI
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE7F8EE),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        amount,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E9E5A),
+                        ),
                       ),
                     ),
                   ],
@@ -169,6 +267,8 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           child: Checkbox(
             value: value,
             shape: const CircleBorder(),
+            activeColor: const Color(0xFF1E9E5A),
+            side: const BorderSide(color: Color(0xFF1E9E5A), width: 1.6),
             onChanged: onChanged,
           ),
         ),
@@ -190,9 +290,16 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           child: Container(
             height: 85,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black12),
+              color: Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE7F1EA)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.08),
+                  blurRadius: 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
           ),
         ),
@@ -202,6 +309,8 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           child: Checkbox(
             value: value,
             shape: const CircleBorder(),
+            activeColor: const Color(0xFF1E9E5A),
+            side: const BorderSide(color: Color(0xFF1E9E5A), width: 1.6),
             onChanged: onChanged,
           ),
         ),
