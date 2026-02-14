@@ -182,8 +182,6 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
               children: [
                 Row(
                   children: [
-                    Checkbox(value: value, onChanged: onChanged),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         title,
@@ -198,6 +196,16 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Transform.scale(
+                      scale: 1.1,
+                      child: Checkbox(
+                        value: value,
+                        onChanged: onChanged,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
                       ),
                     ),
                   ],
@@ -294,11 +302,7 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
         return Column(
           children: [
             for (int i = 0; i < pendingDocs.length; i++) ...[
-              _stockRow(
-                i + 1,
-                (pendingDocs[i]['name'] ?? 'Name').toString(),
-                (pendingDocs[i]['amount'] ?? 'Amount').toString(),
-              ),
+              _stockRow(i + 1, pendingDocs[i]),
               if (i != pendingDocs.length - 1)
                 const Divider(height: 18, color: Color(0xFFE6EFE8)),
             ],
@@ -308,19 +312,36 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
     );
   }
 
-  Widget _stockRow(int index, String name, String amount) {
+  Widget _stockRow(int index, DocumentSnapshot doc) {
+    final name = (doc['name'] ?? 'Name').toString();
+    final amount = (doc['amount'] ?? 'Amount').toString();
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "$index. $name",
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          Expanded(
+            child: Text(
+              "$index. $name",
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
           ),
           Text(
             amount,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(width: 8),
+          Transform.scale(
+            scale: 1.1,
+            child: Checkbox(
+              value: false,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              onChanged: (val) async {
+                await doc.reference.update({'status': 'done'});
+              },
+            ),
           ),
         ],
       ),
