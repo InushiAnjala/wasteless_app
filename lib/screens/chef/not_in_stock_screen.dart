@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chef_home_screen.dart';
 import 'chef_food_screen.dart';
 import 'ai_food_recipes_screen.dart';
@@ -23,6 +24,17 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     3,
     (index) => TextEditingController(),
   );
+
+  @override
+  void dispose() {
+    for (final c in nameControllers) {
+      c.dispose();
+    }
+    for (final c in amountControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
 
   void _handleNav(int index) {
     if (index == _currentIndex) return;
@@ -159,6 +171,28 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                       _editableRow(2, 1),
                       const Divider(height: 22, color: Color(0xFFE6EAE7)),
                       _editableRow(3, 2),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25C06D),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: _submitNeeds,
+                          child: const Text(
+                            'Send to Kitchen Needs',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -239,5 +273,57 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _submitNeeds() async {
+    final entries = <Map<String, String>>[];
+
+    for (int i = 0; i < nameControllers.length; i++) {
+      final name = nameControllers[i].text.trim();
+      final amount = amountControllers[i].text.trim();
+      if (name.isEmpty || amount.isEmpty) continue;
+      entries.add({'name': name, 'amount': amount});
+    }
+
+    if (entries.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Add at least one item to send')),
+      );
+      return;
+    }
+
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      final needs = FirebaseFirestore.instance.collection('kitchen_needs');
+
+      for (final item in entries) {
+        final doc = needs.doc();
+        batch.set(doc, {
+          'name': item['name'],
+          'amount': item['amount'],
+          'status': 'pending',
+          'createdAt': DateTime.now(),
+        });
+      }
+
+      await batch.commit();
+
+      for (final c in nameControllers) {
+        c.clear();
+      }
+      for (final c in amountControllers) {
+        c.clear();
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sent to Kitchen Needs')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to send items')));
+    }
   }
 }

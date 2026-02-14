@@ -269,28 +269,37 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('kitchen_needs')
-          .where('status', isEqualTo: 'pending')
           .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData) {
           return const Text(
             'No pending requests',
             style: TextStyle(fontSize: 15, color: Colors.black54),
           );
         }
 
-        final docs = snapshot.data!.docs;
+        final pendingDocs = snapshot.data!.docs.where((doc) {
+          final status = (doc['status'] ?? '').toString().toLowerCase().trim();
+          return status == 'pending';
+        }).toList();
+
+        if (pendingDocs.isEmpty) {
+          return const Text(
+            'No pending requests',
+            style: TextStyle(fontSize: 15, color: Colors.black54),
+          );
+        }
 
         return Column(
           children: [
-            for (int i = 0; i < docs.length; i++) ...[
+            for (int i = 0; i < pendingDocs.length; i++) ...[
               _stockRow(
                 i + 1,
-                (docs[i]['name'] ?? 'Name').toString(),
-                (docs[i]['amount'] ?? 'Amount').toString(),
+                (pendingDocs[i]['name'] ?? 'Name').toString(),
+                (pendingDocs[i]['amount'] ?? 'Amount').toString(),
               ),
-              if (i != docs.length - 1)
+              if (i != pendingDocs.length - 1)
                 const Divider(height: 18, color: Color(0xFFE6EFE8)),
             ],
           ],
