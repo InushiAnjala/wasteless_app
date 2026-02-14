@@ -496,9 +496,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                 final value = controller.text.trim();
                 Navigator.pop(context);
                 if (value.isEmpty) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Requested $value of $itemName')),
-                );
+                _submitNeed(itemName, value);
               },
               child: const Text('Save'),
             ),
@@ -506,5 +504,25 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
         );
       },
     );
+  }
+
+  Future<void> _submitNeed(String itemName, String amount) async {
+    try {
+      await FirebaseFirestore.instance.collection('kitchen_needs').add({
+        'name': itemName,
+        'amount': amount,
+        'createdAt': DateTime.now(),
+        'status': 'pending',
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Requested $amount of $itemName')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save request')));
+    }
   }
 }

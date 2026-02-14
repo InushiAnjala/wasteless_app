@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../constants/text_styles.dart';
 
 class KitchenNeedsScreen extends StatefulWidget {
@@ -9,11 +10,6 @@ class KitchenNeedsScreen extends StatefulWidget {
 }
 
 class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
-  // Checkbox states
-  bool check1 = false;
-  bool check2 = false;
-  bool check3 = false;
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -36,150 +32,11 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Header card
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.16),
-                        blurRadius: 22,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF25C06D),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.2),
-                              blurRadius: 14,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.kitchen,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Kitchen Needs",
-                              style: AppTextStyles.heading.copyWith(
-                                fontSize: 24,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              "Quick check of items to buy or consume soon.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+                _header(),
                 const SizedBox(height: 22),
-
-                // ---------- FIRST ITEM ----------
-                _itemCard(
-                  title: "Carrot",
-                  subtitle: "Expires in 2 days",
-                  amount: "5kg",
-                  value: check1,
-                  onChanged: (val) => setState(() => check1 = val!),
-                ),
-                const SizedBox(height: 16),
-
-                // ---------- EMPTY ITEMS ----------
-                _itemCardEmpty(
-                  value: check2,
-                  onChanged: (v) => setState(() => check2 = v!),
-                ),
-                const SizedBox(height: 12),
-                _itemCardEmpty(
-                  value: check3,
-                  onChanged: (v) => setState(() => check3 = v!),
-                ),
-
+                _needsList(width),
                 const SizedBox(height: 26),
-
-                // ---------- NOT IN STOCK PANEL ----------
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.96),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    border: Border.all(color: const Color(0xFFE7F1EA)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFDCF6E6),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.remove_shopping_cart,
-                              size: 18,
-                              color: Color(0xFF1E9E5A),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            "Not in Stocks",
-                            style: TextStyle(
-                              fontSize: width * 0.055,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      _stockRow(1, "Name", "Amount"),
-                      const Divider(height: 18, color: Color(0xFFE6EFE8)),
-                      _stockRow(2, "Name", "Amount"),
-                      const Divider(height: 18, color: Color(0xFFE6EFE8)),
-                      _stockRow(3, "Name", "Amount"),
-                    ],
-                  ),
-                ),
-
+                _notInStockPanel(width),
                 const SizedBox(height: 34),
               ],
             ),
@@ -189,9 +46,112 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
     );
   }
 
-  // ===========================================
-  //              ITEM CARD (FILLED)
-  // ===========================================
+  Widget _header() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.16),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF25C06D),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.2),
+                  blurRadius: 14,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.kitchen, color: Colors.white, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Kitchen Needs",
+                  style: AppTextStyles.heading.copyWith(fontSize: 24),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Quick check of items to buy or consume soon.",
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _needsList(double width) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('kitchen_needs')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'Unable to load needs',
+              style: TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No requests yet',
+              style: TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          );
+        }
+
+        final docs = snapshot.data!.docs;
+
+        return Column(
+          children: [
+            for (final doc in docs) ...[
+              _itemCard(
+                title: (doc['name'] ?? 'Unknown').toString(),
+                subtitle: (doc['status'] ?? 'pending').toString(),
+                amount: (doc['amount'] ?? '-').toString(),
+                value: (doc['status'] ?? 'pending') == 'done',
+                onChanged: (val) async {
+                  final newStatus = val == true ? 'done' : 'pending';
+                  await doc.reference.update({'status': newStatus});
+                  if (!mounted) return;
+                  setState(() {});
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ],
+        );
+      },
+    );
+  }
 
   Widget _itemCard({
     required String title,
@@ -220,137 +180,141 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18, // Adjusted font size for better UI
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: 15),
-                    ), // Adjusted font size for better UI
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE7F8EE),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    Checkbox(value: value, onChanged: onChanged),
+                    const SizedBox(width: 8),
+                    Expanded(
                       child: Text(
-                        amount,
+                        title,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E9E5A),
                         ),
+                      ),
+                    ),
+                    Text(
+                      amount,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        Transform.scale(
-          scale: 1.4,
-          child: Checkbox(
-            value: value,
-            shape: const CircleBorder(),
-            activeColor: const Color(0xFF1E9E5A),
-            side: const BorderSide(color: Color(0xFF1E9E5A), width: 1.6),
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ===========================================
-  //              ITEM CARD (EMPTY)
-  // ===========================================
-
-  Widget _itemCardEmpty({
-    required bool value,
-    required Function(bool?) onChanged,
-  }) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 85,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE7F1EA)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.08),
-                  blurRadius: 14,
-                  offset: const Offset(0, 8),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Transform.scale(
-          scale: 1.4,
-          child: Checkbox(
-            value: value,
-            shape: const CircleBorder(),
-            activeColor: const Color(0xFF1E9E5A),
-            side: const BorderSide(color: Color(0xFF1E9E5A), width: 1.6),
-            onChanged: onChanged,
-          ),
-        ),
       ],
     );
   }
 
-  // ===========================================
-  //                STOCK ROW
-  // ===========================================
+  Widget _notInStockPanel(double width) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.96),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFE7F1EA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCF6E6),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.remove_shopping_cart,
+                  size: 18,
+                  color: Color(0xFF1E9E5A),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Not in Stocks",
+                style: TextStyle(
+                  fontSize: width * 0.055,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _stockRows(),
+        ],
+      ),
+    );
+  }
+
+  Widget _stockRows() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('kitchen_needs')
+          .where('status', isEqualTo: 'pending')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Text(
+            'No pending requests',
+            style: TextStyle(fontSize: 15, color: Colors.black54),
+          );
+        }
+
+        final docs = snapshot.data!.docs;
+
+        return Column(
+          children: [
+            for (int i = 0; i < docs.length; i++) ...[
+              _stockRow(
+                i + 1,
+                (docs[i]['name'] ?? 'Name').toString(),
+                (docs[i]['amount'] ?? 'Amount').toString(),
+              ),
+              if (i != docs.length - 1)
+                const Divider(height: 18, color: Color(0xFFE6EFE8)),
+            ],
+          ],
+        );
+      },
+    );
+  }
 
   Widget _stockRow(int index, String name, String amount) {
-    return Row(
-      children: [
-        Text(
-          "$index.",
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ), // Adjusted font size for better UI
-        ),
-        const SizedBox(width: 20),
-        Text(
-          name,
-          style: const TextStyle(
-            fontSize: 15, // Adjusted font size for better UI
-            color: Colors.black38,
-            fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "$index. $name",
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
-        ),
-        const Spacer(),
-        Text(
-          amount,
-          style: const TextStyle(
-            fontSize: 15, // Adjusted font size for better UI
-            color: Colors.black38,
-            fontWeight: FontWeight.w500,
+          Text(
+            amount,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
