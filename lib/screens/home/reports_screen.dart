@@ -36,32 +36,53 @@ class ReportsScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8F5A2), Color(0xFFEFFFF0)],
+            colors: [Color(0xFFB7F5C7), Color(0xFFEFFDF3)],
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Column(
               children: [
-                const SizedBox(height: 10),
-
                 // ---------------- HEADER ----------------
-                Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text("Reports", style: AppTextStyles.heading),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 6),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.download_outlined, size: 30),
-                      onPressed: () {},
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.bar_chart_rounded,
+                        color: Colors.green,
+                        size: 26,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        "Reports",
+                        style: AppTextStyles.heading.copyWith(fontSize: 24),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.download_outlined, size: 26),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 35),
+                const SizedBox(height: 24),
 
                 // ---------------- STATS + TREND ----------------
                 Expanded(
@@ -123,20 +144,30 @@ class ReportsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Wrap(
-                                  spacing: 20,
-                                  runSpacing: 20,
+                                  spacing: 16,
+                                  runSpacing: 16,
                                   alignment: WrapAlignment.center,
                                   children: [
-                                    _statsCard("Total items", "$total", width),
+                                    _statsCard(
+                                      "Total items",
+                                      "$total",
+                                      width,
+                                      color: Colors.green.shade600,
+                                      icon: Icons.inventory_2_rounded,
+                                    ),
                                     _statsCard(
                                       "Expiring soon",
                                       "$expiringSoon",
                                       width,
+                                      color: Colors.orange.shade600,
+                                      icon: Icons.timer_outlined,
                                     ),
                                     _statsCard(
                                       "Expired",
                                       "$expired",
                                       width,
+                                      color: Colors.red.shade600,
+                                      icon: Icons.warning_amber_rounded,
                                       onTap: () =>
                                           _showExpiredSheet(context, docs),
                                     ),
@@ -144,6 +175,8 @@ class ReportsScreen extends StatelessWidget {
                                       "Low Stock",
                                       "$lowStock",
                                       width,
+                                      color: Colors.blueGrey.shade700,
+                                      icon: Icons.water_drop_outlined,
                                       onTap: () =>
                                           _showLowStockSheet(context, docs),
                                     ),
@@ -152,12 +185,9 @@ class ReportsScreen extends StatelessWidget {
 
                                 const SizedBox(height: 40),
 
-                                Text(
-                                  "Stock Trend Over Time",
-                                  style: TextStyle(
-                                    fontSize: width * 0.055,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                _sectionHeader(
+                                  label: "Stock Trend Over Time",
+                                  icon: Icons.show_chart_rounded,
                                 ),
 
                                 const SizedBox(height: 16),
@@ -166,12 +196,9 @@ class ReportsScreen extends StatelessWidget {
 
                                 const SizedBox(height: 32),
 
-                                Text(
-                                  "Expiry Status Breakdown",
-                                  style: TextStyle(
-                                    fontSize: width * 0.055,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                _sectionHeader(
+                                  label: "Expiry Status Breakdown",
+                                  icon: Icons.pie_chart_rounded,
                                 ),
 
                                 const SizedBox(height: 16),
@@ -207,33 +234,92 @@ class ReportsScreen extends StatelessWidget {
     String value,
     double width, {
     VoidCallback? onTap,
+    Color? color,
+    IconData? icon,
   }) {
+    final bg = (color ?? Colors.green).withOpacity(0.12);
+    final fg = color ?? Colors.green;
     return InkWell(
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(18),
       onTap: onTap,
       child: Container(
-        width: width * 0.40,
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        width: width * 0.42,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(width: 1, color: Colors.black),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, 6),
             ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+          ],
+          border: Border.all(color: fg.withOpacity(0.35), width: 1),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+              child: Icon(icon ?? Icons.bar_chart_rounded, color: fg),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: fg,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _sectionHeader({required String label, required IconData icon}) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.green.shade700, size: 18),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+      ],
     );
   }
 
@@ -659,8 +745,14 @@ class _TrendChart extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black12),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
       height: 220,
       child: LineChart(
@@ -760,7 +852,7 @@ class _ExpiryPie extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 220,
+          height: 240,
           child: PieChart(
             PieChartData(
               sectionsSpace: 4,
