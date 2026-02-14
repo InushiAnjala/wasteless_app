@@ -64,109 +64,119 @@ class ReportsScreen extends StatelessWidget {
                 const SizedBox(height: 35),
 
                 // ---------------- STATS + TREND ----------------
-                Builder(
-                  builder: (context) {
-                    final user = FirebaseAuth.instance.currentUser;
-                    if (user == null) {
-                      return const Text("Please sign in to view reports");
-                    }
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user == null) {
+                        return const Text("Please sign in to view reports");
+                      }
 
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection("foods")
-                          .where("userId", isEqualTo: user.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text("Failed to load reports");
-                        }
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection("foods")
+                            .where("userId", isEqualTo: user.uid)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text("Failed to load reports");
+                          }
 
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
 
-                        final docs = snapshot.data?.docs ?? [];
-                        final now = DateTime.now();
+                          final docs = snapshot.data?.docs ?? [];
+                          final now = DateTime.now();
 
-                        int total = docs.length;
-                        int expiringSoon = 0;
-                        int expired = 0;
-                        int lowStock = 0;
+                          int total = docs.length;
+                          int expiringSoon = 0;
+                          int expired = 0;
+                          int lowStock = 0;
 
-                        for (final doc in docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final expiry = _getExpiryDate(data);
-                          if (expiry != null) {
-                            final daysLeft = expiry.difference(now).inDays;
-                            if (daysLeft < 0) {
-                              expired++;
-                            } else if (daysLeft <= _expiringSoonDays) {
-                              expiringSoon++;
+                          for (final doc in docs) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final expiry = _getExpiryDate(data);
+                            if (expiry != null) {
+                              final daysLeft = expiry.difference(now).inDays;
+                              if (daysLeft < 0) {
+                                expired++;
+                              } else if (daysLeft <= _expiringSoonDays) {
+                                expiringSoon++;
+                              }
+                            }
+
+                            final amount = _getAmount(data);
+                            if (amount <= _lowStockThreshold) {
+                              lowStock++;
                             }
                           }
 
-                          final amount = _getAmount(data);
-                          if (amount <= _lowStockThreshold) {
-                            lowStock++;
-                          }
-                        }
+                          final trendPoints = _monthlyTrendPoints(docs);
 
-                        final trendPoints = _monthlyTrendPoints(docs);
-
-                        return Column(
-                          children: [
-                            Wrap(
-                              spacing: 20,
-                              runSpacing: 20,
-                              alignment: WrapAlignment.center,
+                          return SingleChildScrollView(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _statsCard("Total items", "$total", width),
-                                _statsCard(
-                                  "Expiring soon",
-                                  "$expiringSoon",
-                                  width,
+                                Wrap(
+                                  spacing: 20,
+                                  runSpacing: 20,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    _statsCard("Total items", "$total", width),
+                                    _statsCard(
+                                      "Expiring soon",
+                                      "$expiringSoon",
+                                      width,
+                                    ),
+                                    _statsCard("Expired", "$expired", width),
+                                    _statsCard("Low Stock", "$lowStock", width),
+                                  ],
                                 ),
-                                _statsCard("Expired", "$expired", width),
-                                _statsCard("Low Stock", "$lowStock", width),
+
+                                const SizedBox(height: 40),
+
+                                Text(
+                                  "Stock Trend Over Time",
+                                  style: TextStyle(
+                                    fontSize: width * 0.055,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                _TrendChart(points: trendPoints),
+
+                                const SizedBox(height: 32),
+
+                                Text(
+                                  "Expiry Status Breakdown",
+                                  style: TextStyle(
+                                    fontSize: width * 0.055,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                _ExpiryPie(
+                                  expired: expired.toDouble(),
+                                  expiringSoon: expiringSoon.toDouble(),
+                                  fresh: (total - expired - expiringSoon)
+                                      .clamp(0, total)
+                                      .toDouble(),
+                                ),
                               ],
                             ),
-
-                            const SizedBox(height: 40),
-
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "Stock Trend Over Time",
-                                style: TextStyle(
-                                  fontSize: width * 0.055,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            _TrendChart(points: trendPoints),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Expiry Status Breakdown",
-                    style: TextStyle(
-                      fontSize: width * 0.055,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
@@ -349,6 +359,111 @@ class _TrendChart extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ExpiryPie extends StatelessWidget {
+  const _ExpiryPie({
+    required this.expired,
+    required this.expiringSoon,
+    required this.fresh,
+  });
+
+  final double expired;
+  final double expiringSoon;
+  final double fresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = expired + expiringSoon + fresh;
+    if (total <= 0) {
+      return const Text('No data yet');
+    }
+
+    final sections = [
+      _slice('Expired', expired, Colors.red.shade500),
+      _slice('Expiring soon', expiringSoon, Colors.orange.shade600),
+      _slice('Fresh', fresh, Colors.green.shade600),
+    ].where((s) => s.value > 0).toList();
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 220,
+          child: PieChart(
+            PieChartData(
+              sectionsSpace: 4,
+              centerSpaceRadius: 50,
+              sections: [
+                for (final s in sections)
+                  PieChartSectionData(
+                    color: s.color,
+                    value: s.value,
+                    title: '${((s.value / total) * 100).round()}%',
+                    radius: 64,
+                    titleStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 14,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            for (final s in sections)
+              _LegendDot(label: s.label, color: s.color),
+          ],
+        ),
+      ],
+    );
+  }
+
+  _PieSlice _slice(String label, double value, Color color) {
+    return _PieSlice(label: label, value: value, color: color);
+  }
+}
+
+class _PieSlice {
+  const _PieSlice({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+  final String label;
+  final double value;
+  final Color color;
+}
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+      ],
     );
   }
 }
