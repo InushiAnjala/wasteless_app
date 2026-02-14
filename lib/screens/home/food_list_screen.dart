@@ -192,9 +192,13 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         } else if (expiryField is DateTime) {
                           expiry = expiryField;
                         }
-                        if (expiry == null) return true;
-                        final today = DateTime(now.year, now.month, now.day);
-                        return !expiry.isBefore(today);
+                        if (expiry != null) {
+                          final today = DateTime(now.year, now.month, now.day);
+                          if (expiry.isBefore(today)) return false;
+                        }
+
+                        final amount = _parseAmount(data["amount"]);
+                        return amount > 0;
                       }).toList();
 
                       if (filtered.isEmpty) {
@@ -406,5 +410,11 @@ class _FoodListScreenState extends State<FoodListScreen> {
         ],
       ),
     );
+  }
+
+  double _parseAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
   }
 }

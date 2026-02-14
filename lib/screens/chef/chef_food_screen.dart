@@ -239,7 +239,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           return name.contains(searchText);
         }).toList();
 
-        // Filter out expired items (shown elsewhere) and sort by expiry
+        // Filter out expired items (shown elsewhere), zero stock, and sort by expiry
         final now = DateTime.now();
         final filtered = docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>?;
@@ -247,9 +247,13 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           DateTime? expiry;
           if (expiryField is Timestamp) expiry = expiryField.toDate();
           if (expiryField is DateTime) expiry = expiryField;
-          if (expiry == null) return true; // keep if no expiry
-          final today = DateTime(now.year, now.month, now.day);
-          return !expiry.isBefore(today);
+          if (expiry != null) {
+            final today = DateTime(now.year, now.month, now.day);
+            if (expiry.isBefore(today)) return false;
+          }
+
+          final amount = _parseAmount(data?["amount"]);
+          return amount > 0;
         }).toList();
 
         filtered.sort((a, b) {
