@@ -179,7 +179,23 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         return name.contains(searchText);
                       }).toList();
 
-                      if (docs.isEmpty) {
+                      // Filter out expired items (already covered in reports)
+                      final now = DateTime.now();
+                      final filtered = docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final expiryField = data["expiryDate"];
+                        DateTime? expiry;
+                        if (expiryField is Timestamp) {
+                          expiry = expiryField.toDate();
+                        } else if (expiryField is DateTime) {
+                          expiry = expiryField;
+                        }
+                        if (expiry == null) return true;
+                        final today = DateTime(now.year, now.month, now.day);
+                        return !expiry.isBefore(today);
+                      }).toList();
+
+                      if (filtered.isEmpty) {
                         return const Center(
                           child: Text(
                             "No matches for your search",
@@ -192,10 +208,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
                       }
 
                       return ListView.separated(
-                        itemCount: docs.length,
+                        itemCount: filtered.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          final doc = docs[index];
+                          final doc = filtered[index];
                           final data = doc.data() as Map<String, dynamic>;
 
                           final DateTime expiry =
@@ -351,14 +367,6 @@ class _FoodListScreenState extends State<FoodListScreen> {
                   "Amount: ${data["amount"]} ${data["unit"]}",
                   style: const TextStyle(color: Colors.black87, fontSize: 14),
                 ),
-
-                if (data.containsKey("section")) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    "Category: ${data["section"]}",
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                ],
               ],
             ),
           ),

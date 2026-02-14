@@ -6,6 +6,7 @@ import '../onboarding/login_signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../chef/chef_home_screen.dart';
 import '../home/home_screen.dart';
+import '../home/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -68,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const MainScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {

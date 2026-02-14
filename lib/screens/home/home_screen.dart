@@ -54,9 +54,9 @@ class HomeScreen extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
+    return Material(
+      color: Colors.transparent,
+      child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
