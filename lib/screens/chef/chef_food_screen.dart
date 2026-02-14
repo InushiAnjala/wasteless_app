@@ -286,11 +286,10 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
             final data = doc.data() as Map<String, dynamic>?;
 
             final String name = (data?["name"] ?? "Unnamed").toString();
-            final String amountValue = (data?["amount"] ?? "").toString();
+            final dynamic amountField = data?["amount"];
+            final double currentAmount = _parseAmount(amountField);
             final String unit = (data?["unit"] ?? "").toString();
-            final String amountLabel = amountValue.isNotEmpty
-                ? "Amount: $amountValue $unit"
-                : "Amount: -";
+            final String amountLabel = _formatAmount(amountField, unit);
             final String category = (data?["section"] ?? "").toString();
 
             final dynamic expiryField = data?["expiryDate"];
@@ -325,6 +324,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
               category: category,
               expiryLabel: expiryText,
               daysLeft: daysLeft,
+              onNeed: () => _showNeedDialog(name, doc.id, unit),
             );
           },
         );
@@ -338,6 +338,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     required String category,
     required String expiryLabel,
     required int daysLeft,
+    required VoidCallback onNeed,
   }) {
     final Color badgeColor;
     final Color badgeText;
@@ -441,7 +442,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
           // Need button placeholder (keeps UI parity with manager view)
           GestureDetector(
-            onTap: () => _showNeedDialog(name),
+            onTap: onNeed,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
@@ -470,7 +471,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     );
   }
 
-  void _showNeedDialog(String itemName) {
+  void _showNeedDialog(String itemName, String foodId, String unit) {
     final controller = TextEditingController();
 
     showDialog(
@@ -495,8 +496,19 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
               onPressed: () {
                 final value = controller.text.trim();
                 Navigator.pop(context);
-                if (value.isEmpty) return;
-                _submitNeed(itemName, value);
+                final parsed = double.tryParse(value);
+                if (parsed == null || parsed <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Enter a valid amount')),
+                  );
+                  return;
+                }
+                _submitNeed(
+                  itemName: itemName,
+                  requestedAmount: parsed,
+                  foodId: foodId,
+                  unit: unit,
+                );
               },
               child: const Text('Save'),
             ),
@@ -506,23 +518,71 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     );
   }
 
-  Future<void> _submitNeed(String itemName, String amount) async {
+  Future<void> _submitNeed({
+    required String itemName,
+    required double requestedAmount,
+    required String foodId,
+    required String unit,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final needsRef = firestore.collection('kitchen_needs').doc();
+    final foodRef = firestore.collection('foods').doc(foodId);
+
     try {
-      await FirebaseFirestore.instance.collection('kitchen_needs').add({
-        'name': itemName,
-        'amount': amount,
-        'createdAt': DateTime.now(),
-        'status': 'pending',
+      await firestore.runTransaction((transaction) async {
+        final foodSnap = await transaction.get(foodRef);
+        if (!foodSnap.exists) {
+          throw Exception('Food item no longer exists');
+        }
+
+        final foodData = foodSnap.data() as Map<String, dynamic>?;
+        final currentAmount = _parseAmount(foodData?['amount']);
+        final newAmount = (currentAmount - requestedAmount).clamp(
+          0,
+          double.infinity,
+        );
+
+        transaction.update(foodRef, {'amount': newAmount});
+        transaction.set(needsRef, {
+          'name': itemName,
+          'amount': '$requestedAmount $unit'.trim(),
+          'createdAt': DateTime.now(),
+          'status': 'pending',
+        });
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Requested $amount of $itemName')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Requested $requestedAmount $unit of $itemName'),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to save request')));
     }
+  }
+
+  double _parseAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  String _formatAmount(dynamic value, String unit) {
+    final numeric = _parseAmount(value);
+    if (numeric > 0) {
+      final display = numeric % 1 == 0
+          ? numeric.toInt().toString()
+          : numeric.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+      return 'Amount: $display ${unit.trim()}'.trim();
+    }
+
+    final raw = value?.toString().trim();
+    if (raw != null && raw.isNotEmpty) {
+      return 'Amount: $raw ${unit.trim()}'.trim();
+    }
+    return 'Amount: -';
   }
 }
