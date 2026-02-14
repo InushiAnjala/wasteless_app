@@ -133,8 +133,20 @@ class ReportsScreen extends StatelessWidget {
                                       "$expiringSoon",
                                       width,
                                     ),
-                                    _statsCard("Expired", "$expired", width),
-                                    _statsCard("Low Stock", "$lowStock", width),
+                                    _statsCard(
+                                      "Expired",
+                                      "$expired",
+                                      width,
+                                      onTap: () =>
+                                          _showExpiredSheet(context, docs),
+                                    ),
+                                    _statsCard(
+                                      "Low Stock",
+                                      "$lowStock",
+                                      width,
+                                      onTap: () =>
+                                          _showLowStockSheet(context, docs),
+                                    ),
                                   ],
                                 ),
 
@@ -190,34 +202,37 @@ class ReportsScreen extends StatelessWidget {
   // --------------------------------------------------------
   //                    REUSABLE CARD
   // --------------------------------------------------------
-  Widget _statsCard(String title, String value, double width) {
-    return Container(
-      width: width * 0.40,
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(width: 1, color: Colors.black),
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ), // Adjusted font size for better UI consistency
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ), // Adjusted font size for better UI consistency
-          ),
-        ],
+  Widget _statsCard(
+    String title,
+    String value,
+    double width, {
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(15),
+      onTap: onTap,
+      child: Container(
+        width: width * 0.40,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(width: 1, color: Colors.black),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -259,12 +274,367 @@ class ReportsScreen extends StatelessWidget {
 
   String _monthKey(DateTime dt) =>
       '${dt.year}-${dt.month.toString().padLeft(2, '0')}';
+
+  Future<void> _showExpiredSheet(
+    BuildContext context,
+    List<QueryDocumentSnapshot> docs,
+  ) async {
+    final now = DateTime.now();
+    final Map<DateTime, List<_ExpiredItem>> grouped = {};
+
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final expiry = _getExpiryDate(data);
+      if (expiry == null || !expiry.isBefore(now)) continue;
+      final key = DateTime(expiry.year, expiry.month, 1);
+      grouped.putIfAbsent(key, () => []);
+      grouped[key]!.add(
+        _ExpiredItem(
+          name: (data['name'] as String?) ?? 'Item',
+          amount: _getAmount(data),
+          unit: (data['unit'] as String?) ?? '',
+          expiry: expiry,
+        ),
+      );
+    }
+
+    final keys = grouped.keys.toList()
+      ..sort((a, b) => b.compareTo(a)); // latest first
+
+    if (!context.mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) {
+        if (keys.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'No expired items yet',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Items that have passed their expiry date will appear here.',
+                ),
+              ],
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: DraggableScrollableSheet(
+              expand: false,
+              maxChildSize: 0.9,
+              minChildSize: 0.4,
+              initialChildSize: 0.7,
+              builder: (_, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: keys.length,
+                  itemBuilder: (_, index) {
+                    final key = keys[index];
+                    final items = grouped[key]!;
+                    items.sort((a, b) => a.expiry.compareTo(b.expiry));
+
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == keys.length - 1 ? 0 : 16,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat('MMMM yyyy').format(key),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            ...items.map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Expired on ${DateFormat('dd MMM').format(item.expiry)}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${item.amount.toStringAsFixed(0)} ${item.unit}',
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showLowStockSheet(
+    BuildContext context,
+    List<QueryDocumentSnapshot> docs,
+  ) async {
+    final Map<String, List<_LowStockItem>> grouped = {
+      'Veges': [],
+      'Fruits': [],
+      'Meat': [],
+      'Others': [],
+    };
+
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final amount = _getAmount(data);
+      if (amount > _lowStockThreshold) continue;
+      final section = (data['section'] as String?) ?? 'Others';
+      grouped.putIfAbsent(section, () => []);
+      final expiry = _getExpiryDate(data);
+
+      grouped[section]!.add(
+        _LowStockItem(
+          name: (data['name'] as String?) ?? 'Item',
+          amount: amount,
+          unit: (data['unit'] as String?) ?? '',
+          expiry: expiry,
+        ),
+      );
+    }
+
+    final sections = grouped.entries.where((e) => e.value.isNotEmpty).toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    if (!context.mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (ctx) {
+        if (sections.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'No low-stock items',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 8),
+                Text('Items below the low-stock threshold will appear here.'),
+              ],
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            ),
+            child: DraggableScrollableSheet(
+              expand: false,
+              maxChildSize: 0.9,
+              minChildSize: 0.4,
+              initialChildSize: 0.7,
+              builder: (_, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: sections.length,
+                  itemBuilder: (_, index) {
+                    final entry = sections[index];
+                    final items = entry.value;
+
+                    items.sort((a, b) {
+                      // Sort by expiry soonest first; nulls last.
+                      if (a.expiry == null && b.expiry == null) return 0;
+                      if (a.expiry == null) return 1;
+                      if (b.expiry == null) return -1;
+                      return a.expiry!.compareTo(b.expiry!);
+                    });
+
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == sections.length - 1 ? 0 : 16,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.key,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            ...items.map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          if (item.expiry != null) ...[
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Expiry: ${DateFormat('dd MMM').format(item.expiry!)}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade700,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade50,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        '${item.amount.toStringAsFixed(0)} ${item.unit}',
+                                        style: TextStyle(
+                                          color: Colors.orange.shade800,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _TrendPoint {
   const _TrendPoint({required this.label, required this.value});
   final String label;
   final double value;
+}
+
+class _ExpiredItem {
+  const _ExpiredItem({
+    required this.name,
+    required this.amount,
+    required this.unit,
+    required this.expiry,
+  });
+
+  final String name;
+  final double amount;
+  final String unit;
+  final DateTime expiry;
+}
+
+class _LowStockItem {
+  const _LowStockItem({
+    required this.name,
+    required this.amount,
+    required this.unit,
+    this.expiry,
+  });
+
+  final String name;
+  final double amount;
+  final String unit;
+  final DateTime? expiry;
 }
 
 class _TrendChart extends StatelessWidget {
