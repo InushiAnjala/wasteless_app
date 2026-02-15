@@ -145,14 +145,48 @@ class RecipeScreen extends StatelessWidget {
                               horizontal: 18,
                               vertical: 6,
                             ),
-                            child: const Text(
-                              "Here could be the generated recipe steps and ingredients."
-                              " Customize this copy once actual data is wired.",
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.black87,
-                                height: 1.5,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'AI-generated ingredients',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                _bullet('1 tbsp olive oil'),
+                                _bullet('2 cloves garlic, minced'),
+                                _bullet('1 cup chopped onions'),
+                                _bullet('Main: $recipeName (as needed)'),
+                                _bullet('Salt & pepper to taste'),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'AI-generated steps',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                _step(
+                                  1,
+                                  'Heat oil in a pan, sauté onions and garlic until fragrant.',
+                                ),
+                                _step(
+                                  2,
+                                  'Add $recipeName, cook until tender and lightly browned.',
+                                ),
+                                _step(
+                                  3,
+                                  'Season with salt, pepper, and your favorite herbs.',
+                                ),
+                                _step(
+                                  4,
+                                  'Serve warm; pair with salad or bread to minimize waste.',
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -212,4 +246,55 @@ class RecipeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _bullet(String text) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '• ',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _step(int number, String text) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$number.',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.black87,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
