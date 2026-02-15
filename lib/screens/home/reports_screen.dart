@@ -124,16 +124,17 @@ class ReportsScreen extends StatelessWidget {
                           for (final doc in docs) {
                             final data = doc.data() as Map<String, dynamic>;
                             final expiry = _getExpiryDate(data);
+                            final amount = _getAmount(data);
                             if (expiry != null) {
                               final daysLeft = expiry.difference(now).inDays;
                               if (daysLeft < 0) {
-                                expired++;
+                                if (amount > 0)
+                                  expired++; // count only if remaining
                               } else if (daysLeft <= _expiringSoonDays) {
                                 expiringSoon++;
                               }
                             }
 
-                            final amount = _getAmount(data);
                             final effectiveAmount =
                                 (expiry != null && expiry.isBefore(now))
                                 ? 0.0
@@ -387,12 +388,14 @@ class ReportsScreen extends StatelessWidget {
       final data = doc.data() as Map<String, dynamic>;
       final expiry = _getExpiryDate(data);
       if (expiry == null || !expiry.isBefore(now)) continue;
+      final amount = _getAmount(data);
+      if (amount <= 0) continue; // Skip items consumed before expiry
       final key = DateTime(expiry.year, expiry.month, 1);
       grouped.putIfAbsent(key, () => []);
       grouped[key]!.add(
         _ExpiredItem(
           name: (data['name'] as String?) ?? 'Item',
-          amount: _getAmount(data),
+          amount: amount,
           unit: (data['unit'] as String?) ?? '',
           expiry: expiry,
         ),

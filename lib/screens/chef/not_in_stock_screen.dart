@@ -13,17 +13,20 @@ class NotInStockScreen extends StatefulWidget {
 
 class _NotInStockScreenState extends State<NotInStockScreen> {
   int _currentIndex = 2; // Not in stock tab
+  static const int _maxRows = 25;
 
-  // Controllers for three rows
-  final List<TextEditingController> nameControllers = List.generate(
-    3,
-    (index) => TextEditingController(),
-  );
+  // Controllers for dynamic rows
+  final List<TextEditingController> nameControllers = [];
+  final List<TextEditingController> amountControllers = [];
 
-  final List<TextEditingController> amountControllers = List.generate(
-    3,
-    (index) => TextEditingController(),
-  );
+  @override
+  void initState() {
+    super.initState();
+    // Start with three rows by default
+    for (int i = 0; i < 3; i++) {
+      _addRow(initial: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -166,12 +169,23 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                   ),
                   child: Column(
                     children: [
-                      _editableRow(1, 0),
-                      const Divider(height: 22, color: Color(0xFFE6EAE7)),
-                      _editableRow(2, 1),
-                      const Divider(height: 22, color: Color(0xFFE6EAE7)),
-                      _editableRow(3, 2),
+                      ..._rowList(),
                       const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: nameControllers.length >= _maxRows
+                              ? null
+                              : () => _addRow(),
+                          icon: const Icon(Icons.add),
+                          label: Text(
+                            nameControllers.length >= _maxRows
+                                ? 'Maximum items reached'
+                                : 'Add another item',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -224,6 +238,17 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     );
   }
 
+  List<Widget> _rowList() {
+    final widgets = <Widget>[];
+    for (int i = 0; i < nameControllers.length; i++) {
+      if (i > 0) {
+        widgets.add(const Divider(height: 22, color: Color(0xFFE6EAE7)));
+      }
+      widgets.add(_editableRow(i + 1, i));
+    }
+    return widgets;
+  }
+
   // ROW UI — Name + Amount
   Widget _editableRow(int number, int index) {
     return Row(
@@ -273,6 +298,14 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
         ),
       ],
     );
+  }
+
+  void _addRow({bool initial = false}) {
+    if (!initial && nameControllers.length >= _maxRows) return;
+    setState(() {
+      nameControllers.add(TextEditingController());
+      amountControllers.add(TextEditingController());
+    });
   }
 
   Future<void> _submitNeeds() async {
