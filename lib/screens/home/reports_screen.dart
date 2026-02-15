@@ -116,7 +116,10 @@ class ReportsScreen extends StatelessWidget {
                           int total = docs.length;
                           int expiringSoon = 0;
                           int expired = 0;
-                          int lowStock = 0;
+
+                          // Track best (highest effective) amount per item name
+                          // to keep low-stock count aligned with the sheet.
+                          final Map<String, double> bestAmountByName = {};
 
                           for (final doc in docs) {
                             final data = doc.data() as Map<String, dynamic>;
@@ -131,10 +134,22 @@ class ReportsScreen extends StatelessWidget {
                             }
 
                             final amount = _getAmount(data);
-                            if (amount <= _lowStockThreshold) {
-                              lowStock++;
+                            final effectiveAmount =
+                                (expiry != null && expiry.isBefore(now))
+                                ? 0.0
+                                : amount;
+
+                            final rawName = (data['name'] as String?) ?? 'Item';
+                            final key = rawName.trim().toLowerCase();
+                            final current = bestAmountByName[key];
+                            if (current == null || effectiveAmount > current) {
+                              bestAmountByName[key] = effectiveAmount;
                             }
                           }
+
+                          final lowStock = bestAmountByName.values
+                              .where((v) => v <= _lowStockThreshold)
+                              .length;
 
                           final trendPoints = _monthlyTrendPoints(docs);
 
@@ -522,6 +537,37 @@ class ReportsScreen extends StatelessWidget {
     BuildContext context,
     List<QueryDocumentSnapshot> docs,
   ) async {
+    final now = DateTime.now();
+
+    // Deduplicate by item name (case-insensitive, across sections) keeping the
+    // highest amount so stale low entries elsewhere do not keep an item flagged.
+    final Map<String, _LowStockItem> bestByName = {};
+
+    for (final doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final amount = _getAmount(data);
+      final expiry = _getExpiryDate(data);
+
+      // Expired items count as zero to force them into low stock.
+      final effectiveAmount = (expiry != null && expiry.isBefore(now))
+          ? 0.0
+          : amount;
+
+      final section = (data['section'] as String?) ?? 'Others';
+      final rawName = (data['name'] as String?) ?? 'Item';
+      final nameKey = rawName.trim().toLowerCase();
+      final current = bestByName[nameKey];
+      if (current == null || effectiveAmount > current.amount) {
+        bestByName[nameKey] = _LowStockItem(
+          name: rawName,
+          amount: effectiveAmount,
+          unit: (data['unit'] as String?) ?? '',
+          section: section,
+          expiry: expiry,
+        );
+      }
+    }
+
     final Map<String, List<_LowStockItem>> grouped = {
       'Veges': [],
       'Fruits': [],
@@ -529,22 +575,11 @@ class ReportsScreen extends StatelessWidget {
       'Others': [],
     };
 
-    for (final doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final amount = _getAmount(data);
-      if (amount > _lowStockThreshold) continue;
-      final section = (data['section'] as String?) ?? 'Others';
+    for (final item in bestByName.values) {
+      if (item.amount > _lowStockThreshold) continue;
+      final section = item.section;
       grouped.putIfAbsent(section, () => []);
-      final expiry = _getExpiryDate(data);
-
-      grouped[section]!.add(
-        _LowStockItem(
-          name: (data['name'] as String?) ?? 'Item',
-          amount: amount,
-          unit: (data['unit'] as String?) ?? '',
-          expiry: expiry,
-        ),
-      );
+      grouped[section]!.add(item);
     }
 
     final sections = grouped.entries.where((e) => e.value.isNotEmpty).toList()
@@ -640,16 +675,6 @@ class ReportsScreen extends StatelessWidget {
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
-                                          if (item.expiry != null) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Expiry: ${DateFormat('dd MMM').format(item.expiry!)}',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade700,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
                                         ],
                                       ),
                                     ),
@@ -714,12 +739,14 @@ class _LowStockItem {
     required this.name,
     required this.amount,
     required this.unit,
+    required this.section,
     this.expiry,
   });
 
   final String name;
   final double amount;
   final String unit;
+  final String section;
   final DateTime? expiry;
 }
 
