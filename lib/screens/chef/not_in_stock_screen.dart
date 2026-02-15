@@ -14,6 +14,9 @@ class NotInStockScreen extends StatefulWidget {
 class _NotInStockScreenState extends State<NotInStockScreen> {
   int _currentIndex = 2; // Not in stock tab
   static const int _maxRows = 25;
+  static List<String> _draftNames = [];
+  static List<String> _draftAmounts = [];
+  bool _clearDraftOnDispose = false;
 
   // Controllers for dynamic rows
   final List<TextEditingController> nameControllers = [];
@@ -22,14 +25,24 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
   @override
   void initState() {
     super.initState();
-    // Start with three rows by default
-    for (int i = 0; i < 3; i++) {
-      _addRow(initial: true);
+    // Start with draft rows if present, otherwise three rows.
+    final initialCount = _draftNames.isNotEmpty ? _draftNames.length : 3;
+    for (int i = 0; i < initialCount; i++) {
+      final name = i < _draftNames.length ? _draftNames[i] : '';
+      final amount = i < _draftAmounts.length ? _draftAmounts[i] : '';
+      _addRow(initial: true, name: name, amount: amount);
     }
   }
 
   @override
   void dispose() {
+    if (_clearDraftOnDispose) {
+      _draftNames = [];
+      _draftAmounts = [];
+    } else {
+      _draftNames = [for (final c in nameControllers) c.text];
+      _draftAmounts = [for (final c in amountControllers) c.text];
+    }
     for (final c in nameControllers) {
       c.dispose();
     }
@@ -272,6 +285,7 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
               contentPadding: EdgeInsets.symmetric(vertical: 6),
             ),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
 
@@ -294,18 +308,25 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
             ),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             keyboardType: TextInputType.number,
+            onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
       ],
     );
   }
 
-  void _addRow({bool initial = false}) {
+  void _addRow({bool initial = false, String name = '', String amount = ''}) {
     if (!initial && nameControllers.length >= _maxRows) return;
-    setState(() {
-      nameControllers.add(TextEditingController());
-      amountControllers.add(TextEditingController());
-    });
+    void add() {
+      nameControllers.add(TextEditingController(text: name));
+      amountControllers.add(TextEditingController(text: amount));
+    }
+
+    if (initial) {
+      add();
+    } else {
+      setState(add);
+    }
   }
 
   Future<void> _submitNeeds() async {
@@ -348,6 +369,9 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
         c.clear();
       }
 
+      _draftNames = [];
+      _draftAmounts = [];
+      _clearDraftOnDispose = true;
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
