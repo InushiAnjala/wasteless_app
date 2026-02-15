@@ -147,17 +147,39 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
               ),
             ),
             for (final doc in docs) ...[
-              _itemCard(
-                title: (doc['name'] ?? 'Unknown').toString(),
-                subtitle: (doc['status'] ?? 'pending').toString(),
-                amount: (doc['amount'] ?? '-').toString(),
-                value: (doc['status'] ?? 'pending') == 'done',
-                onChanged: (val) async {
-                  final newStatus = val == true ? 'done' : 'pending';
-                  await doc.reference.update({'status': newStatus});
+              Dismissible(
+                key: Key(doc.id),
+                direction: DismissDirection.startToEnd,
+                background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.redAccent),
+                ),
+                onDismissed: (_) async {
+                  await doc.reference.delete();
                   if (!mounted) return;
-                  setState(() {});
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removed ${(doc['name'] ?? 'item')}'),
+                    ),
+                  );
                 },
+                child: _itemCard(
+                  title: (doc['name'] ?? 'Unknown').toString(),
+                  subtitle: (doc['status'] ?? 'pending').toString(),
+                  amount: (doc['amount'] ?? '-').toString(),
+                  value: (doc['status'] ?? 'pending') == 'done',
+                  onChanged: (val) async {
+                    final newStatus = val == true ? 'done' : 'pending';
+                    await doc.reference.update({'status': newStatus});
+                    if (!mounted) return;
+                    setState(() {});
+                  },
+                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -320,7 +342,7 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
               child: TextButton.icon(
                 onPressed: () => _clearPendingNeeds(pendingDocs),
                 icon: const Icon(Icons.delete_sweep_outlined),
-                label: const Text('Clear pending'),
+                label: const Text('Clear all'),
               ),
             ),
             for (int i = 0; i < pendingDocs.length; i++) ...[
