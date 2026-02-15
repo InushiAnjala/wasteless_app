@@ -713,7 +713,9 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           'name': itemName,
           'amount': '$requestedAmount $unit'.trim(),
           'createdAt': DateTime.now(),
-          'status': 'pending',
+          // Mark as requested so it appears in the upper section (not the
+          // pending/not-in-stock list) on the manager reports page.
+          'status': 'requested',
         });
       });
       if (!mounted) return;
