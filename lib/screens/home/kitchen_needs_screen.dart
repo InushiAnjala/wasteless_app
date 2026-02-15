@@ -10,6 +10,8 @@ class KitchenNeedsScreen extends StatefulWidget {
 }
 
 class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
+  final Set<String> _checkedPending = {};
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -128,10 +130,22 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           );
         }
 
-        final docs = snapshot.data!.docs;
+        // Show only items that are not pending (e.g., done or other states)
+        final docs = snapshot.data!.docs.where((doc) {
+          final status = (doc['status'] ?? '').toString().toLowerCase().trim();
+          return status.isNotEmpty && status != 'pending';
+        }).toList();
 
         return Column(
           children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => _clearAllNeeds(docs),
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Clear all'),
+              ),
+            ),
             for (final doc in docs) ...[
               _itemCard(
                 title: (doc['name'] ?? 'Unknown').toString(),
@@ -301,6 +315,14 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
 
         return Column(
           children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => _clearPendingNeeds(pendingDocs),
+                icon: const Icon(Icons.delete_sweep_outlined),
+                label: const Text('Clear pending'),
+              ),
+            ),
             for (int i = 0; i < pendingDocs.length; i++) ...[
               _stockRow(i + 1, pendingDocs[i]),
               if (i != pendingDocs.length - 1)
@@ -335,16 +357,50 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           Transform.scale(
             scale: 1.1,
             child: Checkbox(
-              value: false,
+              value: _checkedPending.contains(doc.id),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               visualDensity: VisualDensity.compact,
               onChanged: (val) async {
-                await doc.reference.update({'status': 'done'});
+                setState(() {
+                  if (val == true) {
+                    _checkedPending.add(doc.id);
+                  } else {
+                    _checkedPending.remove(doc.id);
+                  }
+                });
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _clearAllNeeds(List<QueryDocumentSnapshot> docs) async {
+    if (docs.isEmpty) return;
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Cleared all kitchen needs')));
+  }
+
+  Future<void> _clearPendingNeeds(
+    List<QueryDocumentSnapshot> pendingDocs,
+  ) async {
+    if (pendingDocs.isEmpty) return;
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in pendingDocs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cleared pending not-in-stock items')),
     );
   }
 }

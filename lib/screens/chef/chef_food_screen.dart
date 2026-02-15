@@ -697,6 +697,12 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
         final foodData = foodSnap.data() as Map<String, dynamic>?;
         final currentAmount = _parseAmount(foodData?['amount']);
+        if (requestedAmount > currentAmount) {
+          throw Exception(
+            'Only ${_formatNumber(currentAmount)} $unit available. '
+            'You requested ${_formatNumber(requestedAmount)} $unit. Please request less.',
+          );
+        }
         final newAmount = (currentAmount - requestedAmount).clamp(
           0,
           double.infinity,
@@ -718,16 +724,60 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save request')));
+      final raw = e.toString();
+      final cleaned = raw.startsWith('Exception: ')
+          ? raw.replaceFirst('Exception: ', '')
+          : raw;
+      final msg = cleaned.trim().isNotEmpty
+          ? cleaned
+          : 'Failed to save request. Please try again.';
+      _showErrorDialog(msg);
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.error_outline, color: Color(0xFFD64242)),
+              SizedBox(width: 8),
+              Text('Request blocked'),
+            ],
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 15, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   double _parseAmount(dynamic value) {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
+  }
+
+  String _formatNumber(double value) {
+    return value % 1 == 0
+        ? value.toInt().toString()
+        : value
+              .toStringAsFixed(2)
+              .replaceAll(RegExp(r'\.0+$'), '')
+              .replaceAll(RegExp(r'0+$'), '');
   }
 
   String _formatAmount(dynamic value, String unit) {
