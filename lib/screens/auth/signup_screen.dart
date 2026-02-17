@@ -21,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // Dropdown
   String? selectedRole;
-  final List<String> roles = ["Store Manager", "Chef"];
+  final List<String> roles = ["Store Manager", "Chef", "Admin"];
 
   bool _agreedToTerms = false;
 

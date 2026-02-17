@@ -7,6 +7,7 @@ import 'forgot_password_screen.dart';
 import '../chef/chef_home_screen.dart';
 import '../home/home_screen.dart';
 import '../home/main_screen.dart';
+import '../admin/admin_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -66,6 +67,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const ChefHomeScreen()),
+        );
+      } else if (role == "Admin") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminHomeScreen()),
         );
       } else {
         Navigator.pushReplacement(
