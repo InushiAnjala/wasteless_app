@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../chef/chef_home_screen.dart';
 import '../home/main_screen.dart';
-import '../onboarding/login_signup_screen.dart';
+import '../onboarding/splash_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -23,7 +23,7 @@ class AuthWrapper extends StatelessWidget {
 
         // Not logged in
         if (!snapshot.hasData || snapshot.data == null) {
-          return const LoginSignupScreen();
+          return const SplashScreen();
         }
 
         // Logged in → check role
