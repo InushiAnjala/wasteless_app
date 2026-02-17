@@ -159,17 +159,23 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
 
                 const SizedBox(height: 16),
 
-                // Category chips
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 12,
+                // Category chips (single row)
+                Row(
                   children: [
                     "Veges",
                     "Meat",
                     "Fruits",
                     "Others",
-                  ].map((c) => _categoryButton(c)).toList(),
+                  ]
+                      .map(
+                        (c) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: _categoryButton(c),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
 
                 const SizedBox(height: 16),
@@ -202,30 +208,16 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(right: 8, bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF25C06D).withOpacity(0.14)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFF25C06D)
-                : const Color(0xFFCEDFD3),
-            width: 1.4,
-          ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: Colors.green.withOpacity(0.12),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-          ],
+          color: isSelected ? Colors.green.shade100 : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.green, width: 2),
         ),
         child: Text(
           category,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,

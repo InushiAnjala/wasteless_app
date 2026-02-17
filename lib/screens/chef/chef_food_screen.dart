@@ -174,12 +174,17 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
   }
 
   Widget _categoryChips() {
-    return Wrap(
-      alignment: WrapAlignment.spaceEvenly,
-      runAlignment: WrapAlignment.center,
-      spacing: 12,
-      runSpacing: 12,
-      children: categories.map(_categoryButton).toList(),
+    return Row(
+      children: categories
+          .map(
+            (c) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: _categoryButton(c),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -188,7 +193,8 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return GestureDetector(
       onTap: () => setState(() => selectedCategory = text),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? Colors.green.shade100 : Colors.white,
           borderRadius: BorderRadius.circular(25),
@@ -196,7 +202,8 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );

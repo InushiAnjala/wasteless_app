@@ -139,13 +139,18 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
                 const SizedBox(height: 16),
 
-                // Category chips
-                Wrap(
-                  alignment: WrapAlignment.spaceEvenly,
-                  runAlignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: categories.map(categoryButton).toList(),
+                // Category chips in a single fixed row
+                Row(
+                  children: categories
+                      .map(
+                        (category) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: categoryButton(category),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
 
                 const SizedBox(height: 16),
@@ -265,7 +270,8 @@ class _FoodListScreenState extends State<FoodListScreen> {
         setState(() => selectedCategory = category);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? Colors.green.shade100 : Colors.white,
           borderRadius: BorderRadius.circular(25),
@@ -273,7 +279,8 @@ class _FoodListScreenState extends State<FoodListScreen> {
         ),
         child: Text(
           category,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );
