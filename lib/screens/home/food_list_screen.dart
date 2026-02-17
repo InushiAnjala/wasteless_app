@@ -6,7 +6,9 @@ import 'add_food_screen.dart';
 import '../../constants/text_styles.dart';
 
 class FoodListScreen extends StatefulWidget {
-  const FoodListScreen({super.key});
+  const FoodListScreen({super.key, this.adminMode = false});
+
+  final bool adminMode;
 
   @override
   State<FoodListScreen> createState() => _FoodListScreenState();
@@ -16,7 +18,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
   String selectedCategory = "Veges";
   String searchText = "";
 
-  final List<String> categories = ["Veges", "Meat", "Fruits", "Others"];
+  List<String> get categories => ["Veges", "Meat", "Fruits", "Others"];
 
   @override
   Widget build(BuildContext context) {
@@ -158,12 +160,18 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 // Food list
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection("foods")
-                        .where("userId", isEqualTo: uid)
-                        .where("section", isEqualTo: selectedCategory)
-                        .orderBy("expiryDate")
-                        .snapshots(),
+                    stream: (() {
+                      Query<Map<String, dynamic>> query = FirebaseFirestore
+                          .instance
+                          .collection("foods");
+                      if (!widget.adminMode) {
+                        query = query
+                            .where("section", isEqualTo: selectedCategory)
+                            .where("userId", isEqualTo: uid);
+                      }
+                      // For adminMode, show all food items (no filters)
+                      return query.orderBy("expiryDate").snapshots();
+                    })(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -181,8 +189,23 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         );
                       }
 
-                      final docs = snapshot.data!.docs.where((doc) {
-                        final name = (doc["name"] as String).toLowerCase();
+                      List<QueryDocumentSnapshot<Object?>> docs =
+                          snapshot.data!.docs;
+                      // For adminMode, filter by selectedCategory in Dart
+                      if (widget.adminMode) {
+                        final cat = selectedCategory.toLowerCase();
+                        docs = docs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final section = (data['section'] ?? '')
+                              .toString()
+                              .toLowerCase();
+                          return section == cat;
+                        }).toList();
+                      }
+                      // Filter by search text
+                      docs = docs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final name = (data["name"] as String).toLowerCase();
                         return name.contains(searchText);
                       }).toList();
 
@@ -201,7 +224,6 @@ class _FoodListScreenState extends State<FoodListScreen> {
                           final today = DateTime(now.year, now.month, now.day);
                           if (expiry.isBefore(today)) return false;
                         }
-
                         final amount = _parseAmount(data["amount"]);
                         return amount > 0;
                       }).toList();

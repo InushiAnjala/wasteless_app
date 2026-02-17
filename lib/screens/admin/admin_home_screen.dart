@@ -201,7 +201,7 @@ class _AdminManagerPortal extends StatelessWidget {
       },
       child: Stack(
         children: [
-          const MainScreen(),
+          const MainScreen(adminMode: true),
           Positioned(
             top: 12,
             left: 12,

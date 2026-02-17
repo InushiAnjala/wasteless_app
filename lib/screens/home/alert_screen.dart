@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AlertScreen extends StatefulWidget {
-  const AlertScreen({Key? key}) : super(key: key);
+  final bool adminMode;
+  const AlertScreen({Key? key, this.adminMode = false}) : super(key: key);
 
   @override
   State<AlertScreen> createState() => _AlertScreenState();
@@ -14,7 +15,6 @@ class _AlertScreenState extends State<AlertScreen> {
   String? _prefsError;
   Map<String, _NotificationRule> _rules = {};
   bool _usingFallbackRules = false;
-
   @override
   void initState() {
     super.initState();
@@ -150,11 +150,15 @@ class _AlertScreenState extends State<AlertScreen> {
                       ],
                     ),
                     child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('foods')
-                          .where('userId', isEqualTo: uid)
-                          // Avoid Firestore composite index requirement by sorting client-side.
-                          .snapshots(),
+                      stream: (() {
+                        Query<Map<String, dynamic>> query = FirebaseFirestore
+                            .instance
+                            .collection('foods');
+                        if (!widget.adminMode) {
+                          query = query.where('userId', isEqualTo: uid);
+                        }
+                        return query.snapshots();
+                      })(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
                           final message = snapshot.error.toString();

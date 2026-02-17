@@ -7,7 +7,9 @@ import 'package:intl/intl.dart';
 import '../../constants/text_styles.dart';
 
 class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
+  const ReportsScreen({super.key, this.adminMode = false});
+
+  final bool adminMode;
 
   static const int _expiringSoonDays = 3;
   static const double _lowStockThreshold = 2.0;
@@ -94,10 +96,15 @@ class ReportsScreen extends StatelessWidget {
                       }
 
                       return StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection("foods")
-                            .where("userId", isEqualTo: user.uid)
-                            .snapshots(),
+                        stream: (() {
+                          Query<Map<String, dynamic>> query = FirebaseFirestore
+                              .instance
+                              .collection("foods");
+                          if (!adminMode) {
+                            query = query.where("userId", isEqualTo: user.uid);
+                          }
+                          return query.snapshots();
+                        })(),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return const Text("Failed to load reports");

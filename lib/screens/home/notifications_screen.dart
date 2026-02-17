@@ -4,7 +4,8 @@ import 'alert_screen.dart';
 import '../../constants/text_styles.dart';
 
 class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({super.key});
+  final bool adminMode;
+  const NotificationsScreen({super.key, this.adminMode = false});
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +103,7 @@ class NotificationsScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AlertScreen(),
+                        builder: (context) => AlertScreen(adminMode: adminMode),
                       ),
                     );
                   },

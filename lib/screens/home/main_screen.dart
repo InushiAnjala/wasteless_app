@@ -6,9 +6,10 @@ import 'reports_screen.dart';
 import 'notifications_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key, this.initialIndex = 0});
+  const MainScreen({super.key, this.initialIndex = 0, this.adminMode = false});
 
   final int initialIndex;
+  final bool adminMode;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -25,10 +26,10 @@ class _MainScreenState extends State<MainScreen> {
     _currentIndex = widget.initialIndex;
     _screens = [
       HomeScreen(onTabSelected: _onTabSelected),
-      const FoodListScreen(),
+      FoodListScreen(adminMode: widget.adminMode),
       const KitchenNeedsScreen(),
-      const NotificationsScreen(),
-      const ReportsScreen(),
+      NotificationsScreen(adminMode: widget.adminMode),
+      ReportsScreen(adminMode: widget.adminMode),
     ];
   }
 
