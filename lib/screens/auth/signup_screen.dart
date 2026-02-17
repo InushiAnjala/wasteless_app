@@ -23,6 +23,8 @@ class _SignupScreenState extends State<SignupScreen> {
   String? selectedRole;
   final List<String> roles = ["Store Manager", "Chef"];
 
+  bool _agreedToTerms = false;
+
   @override
   void dispose() {
     nameController.dispose();
@@ -185,7 +187,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   // Terms (UI only)
                   Row(
                     children: [
-                      Checkbox(value: true, onChanged: (v) {}),
+                      Checkbox(
+                        value: _agreedToTerms,
+                        onChanged: (v) => setState(
+                          () => _agreedToTerms = v ?? false,
+                        ),
+                      ),
                       const Text("I agree to the terms and conditions"),
                     ],
                   ),
@@ -200,10 +207,13 @@ class _SignupScreenState extends State<SignupScreen> {
                             emailController.text.isEmpty ||
                             passwordController.text.isEmpty ||
                             confirmPasswordController.text.isEmpty ||
-                            selectedRole == null) {
+                            selectedRole == null ||
+                            !_agreedToTerms) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text("Please fill all required fields"),
+                              content: Text(
+                                "Please fill all required fields and accept terms",
+                              ),
                             ),
                           );
                           return;
