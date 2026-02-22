@@ -1,12 +1,67 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
-class RecipeScreen extends StatelessWidget {
-  final String recipeName; // <-- Added this
+class RecipeScreen extends StatefulWidget {
+  final String recipeText;
+  const RecipeScreen({super.key, required this.recipeText});
 
-  const RecipeScreen({super.key, required this.recipeName}); // <-- Added this
+  @override
+  State<RecipeScreen> createState() => _RecipeScreenState();
+}
+
+class _RecipeScreenState extends State<RecipeScreen> {
+  final List<Map<String, String>> conversation = [];
+  final TextEditingController _questionController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    conversation.add({"role": "assistant", "content": widget.recipeText});
+  }
+
+  @override
+  void dispose() {
+    _questionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> sendUserQuestion() async {
+    final userQuestion = _questionController.text.trim();
+    if (userQuestion.isEmpty) return;
+    setState(() => _isLoading = true);
+    try {
+      conversation.add({"role": "user", "content": userQuestion});
+      final callable = FirebaseFunctions.instance.httpsCallable(
+        'generateRecipe',
+      );
+      final result = await callable.call({
+        "prompt": userQuestion,
+        "conversation": conversation,
+      });
+      final aiReply = result.data['reply'] as String;
+      conversation.add({"role": "assistant", "content": aiReply});
+      _questionController.clear();
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return; // Add check
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to get AI reply: $e')));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Extract the latest assistant message for display
+    final String recipeContent =
+        conversation.firstWhere(
+          (msg) => msg["role"] == "assistant",
+          orElse: () => {"content": ""},
+        )["content"] ??
+        "";
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -32,11 +87,11 @@ class RecipeScreen extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.16),
+                        color: Colors.green.withValues(alpha: 0.16),
                         blurRadius: 22,
                         offset: const Offset(0, 10),
                       ),
@@ -64,7 +119,7 @@ class RecipeScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.22),
+                              color: Colors.green.withValues(alpha: 0.22),
                               blurRadius: 16,
                               offset: const Offset(0, 8),
                             ),
@@ -113,7 +168,7 @@ class RecipeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.12),
+                          color: Colors.green.withValues(alpha: 0.12),
                           blurRadius: 18,
                           offset: const Offset(0, 10),
                         ),
@@ -128,7 +183,7 @@ class RecipeScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 18),
                           child: Text(
-                            recipeName,
+                            "AI Recipe",
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
@@ -145,48 +200,12 @@ class RecipeScreen extends StatelessWidget {
                               horizontal: 18,
                               vertical: 6,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'AI-generated ingredients',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                _bullet('1 tbsp olive oil'),
-                                _bullet('2 cloves garlic, minced'),
-                                _bullet('1 cup chopped onions'),
-                                _bullet('Main: $recipeName (as needed)'),
-                                _bullet('Salt & pepper to taste'),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'AI-generated steps',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                _step(
-                                  1,
-                                  'Heat oil in a pan, sauté onions and garlic until fragrant.',
-                                ),
-                                _step(
-                                  2,
-                                  'Add $recipeName, cook until tender and lightly browned.',
-                                ),
-                                _step(
-                                  3,
-                                  'Season with salt, pepper, and your favorite herbs.',
-                                ),
-                                _step(
-                                  4,
-                                  'Serve warm; pair with salad or bread to minimize waste.',
-                                ),
-                              ],
+                            child: Text(
+                              recipeContent,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
                         ),
@@ -207,27 +226,47 @@ class RecipeScreen extends StatelessWidget {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green.withOpacity(0.08),
+                                  color: Colors.green.withValues(alpha: 0.08),
                                   blurRadius: 12,
                                   offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.search,
                                   size: 20,
                                   color: Colors.black54,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: TextField(
-                                    decoration: InputDecoration(
+                                    controller: _questionController,
+                                    enabled: !_isLoading,
+                                    decoration: const InputDecoration(
                                       hintText: "Search inside recipe...",
                                       border: InputBorder.none,
                                     ),
+                                    onSubmitted: (_) => sendUserQuestion(),
                                   ),
+                                ),
+                                IconButton(
+                                  icon: _isLoading
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.send,
+                                          color: Color(0xFF25C06D),
+                                        ),
+                                  onPressed: _isLoading
+                                      ? null
+                                      : sendUserQuestion,
                                 ),
                               ],
                             ),
@@ -248,53 +287,6 @@ class RecipeScreen extends StatelessWidget {
   }
 }
 
-Widget _bullet(String text) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '• ',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        ),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.black87,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+// Unused widget declarations removed
 
-Widget _step(int number, String text) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$number.',
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Colors.black87,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+// Unused widget declarations removed

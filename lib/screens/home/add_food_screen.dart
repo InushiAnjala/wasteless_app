@@ -186,6 +186,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       });
     }
 
+    if (!mounted) return; // Add check
     Navigator.pop(context);
   }
 

@@ -253,6 +253,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 'createdAt': FieldValue.serverTimestamp(),
                               });
 
+                          if (!context.mounted) return; // Add check
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Signup successful")),
                           );
@@ -265,6 +267,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             (route) => false,
                           );
                         } on FirebaseAuthException catch (e) {
+                          if (!context.mounted) return; // Add check
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(e.message ?? "Signup failed"),

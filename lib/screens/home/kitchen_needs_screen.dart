@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../constants/text_styles.dart';
 
 class KitchenNeedsScreen extends StatefulWidget {
-  const KitchenNeedsScreen({Key? key}) : super(key: key);
+  const KitchenNeedsScreen({super.key});
 
   @override
   State<KitchenNeedsScreen> createState() => _KitchenNeedsScreenState();
@@ -52,11 +52,11 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.16),
+            color: Colors.green.withValues(alpha: 0.16),
             blurRadius: 22,
             offset: const Offset(0, 12),
           ),
@@ -71,7 +71,7 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 14,
                   offset: const Offset(0, 8),
                 ),
@@ -161,7 +161,7 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
                 ),
                 onDismissed: (_) async {
                   await doc.reference.delete();
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Removed ${(doc['name'] ?? 'item')}'),
@@ -202,12 +202,12 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
+              color: Colors.white.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: const Color(0xFFE7F1EA)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.12),
+                  color: Colors.green.withValues(alpha: 0.12),
                   blurRadius: 16,
                   offset: const Offset(0, 10),
                 ),
@@ -264,11 +264,11 @@ class _KitchenNeedsScreenState extends State<KitchenNeedsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.96),
+        color: Colors.white.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.12),
+            color: Colors.green.withValues(alpha: 0.12),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),

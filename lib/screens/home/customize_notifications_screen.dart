@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomizeNotificationsScreen extends StatefulWidget {
-  const CustomizeNotificationsScreen({Key? key}) : super(key: key);
+  const CustomizeNotificationsScreen({super.key});
 
   @override
   State<CustomizeNotificationsScreen> createState() =>
@@ -107,11 +107,11 @@ class _CustomizeNotificationsScreenState
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.82),
+                    color: Colors.white.withValues(alpha: 0.82),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
+                        color: Colors.green.withValues(alpha: 0.12),
                         blurRadius: 22,
                         offset: const Offset(0, 12),
                       ),
@@ -165,7 +165,7 @@ class _CustomizeNotificationsScreenState
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.25),
+                              color: Colors.green.withValues(alpha: 0.25),
                               blurRadius: 14,
                               offset: const Offset(0, 6),
                             ),
@@ -253,7 +253,7 @@ class _CustomizeNotificationsScreenState
                       onPressed: _isEditing
                           ? () async {
                               await _saveSettings();
-                              if (!mounted) return;
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Settings saved!'),
@@ -305,11 +305,11 @@ class _CustomizeNotificationsScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.14),
+            color: Colors.green.withValues(alpha: 0.14),
             blurRadius: 18,
             offset: const Offset(0, 12),
           ),

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../onboarding/login_signup_screen.dart';
 import 'forgot_password_screen.dart';
 import '../chef/chef_home_screen.dart';
-import '../home/home_screen.dart';
 import '../home/main_screen.dart';
 import '../admin/admin_home_screen.dart';
 
@@ -52,6 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
           .collection('users')
           .doc(uid)
           .get();
+
+      if (!mounted) return; // Add check
 
       if (!userDoc.exists) {
         ScaffoldMessenger.of(
