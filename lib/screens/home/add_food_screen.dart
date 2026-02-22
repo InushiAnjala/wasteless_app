@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,8 +23,47 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   final TextEditingController amountController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  final TextRecognizer _textRecognizer = TextRecognizer();
+  final TextRecognizer _textRecognizer = TextRecognizer(
+    script: TextRecognitionScript.latin,
+  );
   final BarcodeScanner _barcodeScanner = BarcodeScanner();
+
+  static final RegExp _expiryRegex = RegExp(
+    r'(EXP|Expiry|EXPIRY|Best\s*Before|BBE|Use\s*By|EXD)?\s*[:\-]?\s*'
+    r'(\b\d{1,2}[\/\-\.\s:]\d{1,2}[\/\-\.\s:]\d{2,4}\b' // 12/05/2026 or 12 : 05 : 26
+    r'|\b\d{4}[\/\-\.\s:]\d{1,2}[\/\-\.\s:]\d{1,2}\b' // 2026-05-12
+    r'|\b\d{1,2}[\/\-\.\s:][A-Za-z]{3,9}[\/\-\.\s:]\d{2,4}\b' // 12 Aug 2026
+    r'|\b[A-Za-z]{3,9}[\/\-\.\s:]\d{1,2}[\/\-\.\s:]\d{2,4}\b' // Aug 12 2026
+    r'|\b\d{1,2}[\/\-\.\s:]\d{4}\b)', // 05/2026 or 05:2026
+    caseSensitive: false,
+  );
+
+  static const Map<String, int> _monthLookup = {
+    'jan': 1,
+    'january': 1,
+    'feb': 2,
+    'february': 2,
+    'mar': 3,
+    'march': 3,
+    'apr': 4,
+    'april': 4,
+    'may': 5,
+    'jun': 6,
+    'june': 6,
+    'jul': 7,
+    'july': 7,
+    'aug': 8,
+    'august': 8,
+    'sep': 9,
+    'sept': 9,
+    'september': 9,
+    'oct': 10,
+    'october': 10,
+    'nov': 11,
+    'november': 11,
+    'dec': 12,
+    'december': 12,
+  };
 
   String? selectedSection;
   String? selectedUnit;
@@ -78,17 +117,97 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     }
   }
 
-  DateTime? _parseDateFromText(String text) {
-    final match = RegExp(
-      r'(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})',
-    ).firstMatch(text);
-    if (match == null) return null;
-    final day = int.tryParse(match.group(1) ?? "");
-    final month = int.tryParse(match.group(2) ?? "");
-    var year = int.tryParse(match.group(3) ?? "");
-    if (day == null || month == null || year == null) return null;
-    if (year < 100) year += 2000;
-    return DateTime(year, month, day);
+  int? _parseMonth(String part) {
+    final numeric = int.tryParse(part);
+    if (numeric != null) return numeric;
+    final lower = part.toLowerCase();
+    return _monthLookup[lower];
+  }
+
+  int? _parseYear(String part) {
+    final parsed = int.tryParse(part);
+    if (parsed == null) return null;
+    if (parsed < 100) return parsed + 2000;
+    return parsed;
+  }
+
+  DateTime? _buildDate(int? year, int? month, int? day) {
+    if (year == null || month == null || day == null) return null;
+    if (month < 1 || month > 12) return null;
+    final candidate = DateTime(year, month, day);
+    return (candidate.year == year &&
+            candidate.month == month &&
+            candidate.day == day)
+        ? candidate
+        : null;
+  }
+
+  DateTime? _parseExpiryString(String rawDate) {
+    final cleaned = rawDate.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final parts = cleaned
+      .split(RegExp(r'[\/\-\.\s:]'))
+      .where((p) => p.isNotEmpty)
+      .toList();
+
+    if (parts.length < 2 || parts.length > 3) return null;
+
+    int? day;
+    int? month;
+    int? year;
+
+    if (parts.length == 3) {
+      // Try D-M-Y
+      day = int.tryParse(parts[0]);
+      month = _parseMonth(parts[1]);
+      year = _parseYear(parts[2]);
+
+      var candidate = _buildDate(year, month, day);
+      if (candidate != null) return candidate;
+
+      // Try M-D-Y
+      month = _parseMonth(parts[0]);
+      day = int.tryParse(parts[1]);
+      year = _parseYear(parts[2]);
+      candidate = _buildDate(year, month, day);
+      if (candidate != null) return candidate;
+
+      // Try Y-M-D
+      year = _parseYear(parts[0]);
+      month = _parseMonth(parts[1]);
+      day = int.tryParse(parts[2]);
+      candidate = _buildDate(year, month, day);
+      if (candidate != null) return candidate;
+    } else {
+      // Month + Year (assume day 1)
+      month = _parseMonth(parts[0]);
+      year = _parseYear(parts[1]);
+      return _buildDate(year, month, 1);
+    }
+
+    return null;
+  }
+
+  DateTime? _extractExpiryDate(String text) {
+    final normalized = text.replaceAll('\n', ' ');
+
+    for (final match in _expiryRegex.allMatches(normalized)) {
+      // If the matched date has a preceding MFD, skip it.
+      // But because the regex doesn't capture MFD, we can check the text 
+      // immediately before the match index.
+      int startIndex = match.start;
+      int checkStart = (startIndex - 10) < 0 ? 0 : startIndex - 10;
+      String precedingText = normalized.substring(checkStart, startIndex).toUpperCase();
+      
+      if (precedingText.contains('MFD') || precedingText.contains('MANUFACTURED')) {
+        continue; // Skip this date
+      }
+
+      final rawDate = match.group(2);
+      if (rawDate == null) continue;
+      final parsed = _parseExpiryString(rawDate);
+      if (parsed != null) return parsed;
+    }
+    return null;
   }
 
   Future<void> _scanTextFromCamera() async {
@@ -98,52 +217,21 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
       final inputImage = InputImage.fromFilePath(image.path);
       final recognizedText = await _textRecognizer.processImage(inputImage);
-
-      final lines = recognizedText.text
-          .split('\n')
-          .map((line) => line.trim())
-          .where((line) => line.isNotEmpty)
-          .toList();
-
-      if (lines.isEmpty) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("No text detected")));
-        return;
-      }
-
-      DateTime? parsedExpDate;
-
-      for (var i = 0; i < lines.length; i++) {
-        final line = lines[i];
-        final lower = line.toLowerCase();
-
-        if (lower.contains("exp") || lower.contains("expiry")) {
-          parsedExpDate =
-              _parseDateFromText(line) ??
-              (i + 1 < lines.length ? _parseDateFromText(lines[i + 1]) : null);
-        }
-      }
+      
+      final parsedExpDate = _extractExpiryDate(recognizedText.text);
 
       if (!mounted) return;
-      bool updated = false;
-      setState(() {
-        if (parsedExpDate != null) {
-          selectedExpiryDate = parsedExpDate;
-          updated = true;
-        }
-      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            updated
-                ? "Expiry date captured."
-                : "Scan captured, but no expiry date was found.",
-          ),
-        ),
-      );
+      if (parsedExpDate != null) {
+        setState(() => selectedExpiryDate = parsedExpDate);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Expiry date captured.")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No expiry date detected. Try again.")),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -229,11 +317,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                           vertical: 14,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.16),
+                              color: Colors.green.withValues(alpha: 0.16),
                               blurRadius: 22,
                               offset: const Offset(0, 10),
                             ),
@@ -248,7 +336,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.green.withOpacity(0.2),
+                                    color: Colors.green.withValues(alpha: 0.2),
                                     blurRadius: 14,
                                     offset: const Offset(0, 8),
                                   ),
@@ -336,7 +424,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.green.withOpacity(0.1),
+                                      color: Colors.green.withValues(alpha: 0.1),
                                       blurRadius: 14,
                                       offset: const Offset(0, 8),
                                     ),
@@ -415,7 +503,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18),
                             ),
-                            shadowColor: Colors.green.withOpacity(0.25),
+                            shadowColor: Colors.green.withValues(alpha: 0.25),
                             elevation: 6,
                           ),
                           child: const Text(
@@ -476,7 +564,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.14),
+                  color: Colors.black.withValues(alpha: 0.14),
                   blurRadius: 18,
                   offset: const Offset(0, 12),
                 ),
@@ -507,7 +595,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.16),
+                          color: Colors.white.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -533,7 +621,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                             Text(
                               'Speak clearly and follow the date order below to avoid mistakes.',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.78),
+                                color: Colors.white.withValues(alpha: 0.78),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -611,7 +699,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       elevation: 0,
-                      shadowColor: Colors.red.withOpacity(0.26),
+                      shadowColor: Colors.red.withValues(alpha: 0.26),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -652,7 +740,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 16,
                   offset: const Offset(0, 10),
                 ),
@@ -771,7 +859,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.08),
+            color: Colors.green.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 8),
           ),
@@ -805,7 +893,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.08),
+            color: Colors.green.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 8),
           ),
@@ -835,7 +923,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.green.withOpacity(0.12),
+              color: Colors.green.withValues(alpha: 0.12),
               blurRadius: 14,
               offset: const Offset(0, 8),
             ),
