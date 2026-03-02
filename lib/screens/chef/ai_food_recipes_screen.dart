@@ -86,7 +86,7 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
   void _openRecipe(String name) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => RecipeScreen(recipeName: name)),
+      MaterialPageRoute(builder: (_) => RecipeScreen(recipeText: name)),
     );
     setState(() {
       _showSuggestions = false;

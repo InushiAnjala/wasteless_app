@@ -252,7 +252,7 @@ class _RecipeList extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RecipeScreen(recipeName: recipes[index]),
+              builder: (context) => RecipeScreen(recipeText: recipes[index]),
             ),
           );
         },
