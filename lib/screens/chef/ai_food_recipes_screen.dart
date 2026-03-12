@@ -203,83 +203,87 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                 const SizedBox(height: 18),
 
                 // Search bar
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.search, color: Colors.black87),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              decoration: const InputDecoration(
-                                hintText: "Search for food recipes",
-                                border: InputBorder.none,
-                              ),
-                              style: const TextStyle(fontSize: 16),
-                              textInputAction: TextInputAction.search,
-                              onSubmitted: (_) => _submitSearch(),
-                              onChanged: _onQueryChanged,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: _submitSearch,
-                            icon: const Icon(Icons.arrow_forward),
-                            color: const Color(0xFF25C06D),
-                          ),
-                        ],
-                      ),
-                      if (_showSuggestions) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          constraints: const BoxConstraints(maxHeight: 220),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE0E9E3)),
-                          ),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            itemCount: _filtered.length,
-                            separatorBuilder: (_, __) => const Divider(
-                              height: 1,
-                              color: Color(0xFFE7F1EA),
-                            ),
-                            itemBuilder: (_, index) {
-                              final suggestion = _filtered[index];
-                              return ListTile(
-                                dense: true,
-                                title: Text(
-                                  suggestion,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                onTap: () => _openRecipe(suggestion),
-                              );
-                            },
-                          ),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.12),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
                         ),
                       ],
-                    ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.search, color: Colors.black87),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: const InputDecoration(
+                                  hintText: "Search for food recipes",
+                                  border: InputBorder.none,
+                                ),
+                                style: const TextStyle(fontSize: 16),
+                                textInputAction: TextInputAction.search,
+                                onSubmitted: (_) => _submitSearch(),
+                                onChanged: _onQueryChanged,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _submitSearch,
+                              icon: const Icon(Icons.arrow_forward),
+                              color: const Color(0xFF25C06D),
+                            ),
+                          ],
+                        ),
+                        if (_showSuggestions) ...[
+                          const SizedBox(height: 10),
+                          Flexible(
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 220),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFE0E9E3)),
+                              ),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                itemCount: _filtered.length,
+                                separatorBuilder: (_, __) => const Divider(
+                                  height: 1,
+                                  color: Color(0xFFE7F1EA),
+                                ),
+                                itemBuilder: (_, index) {
+                                  final suggestion = _filtered[index];
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(
+                                      suggestion,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    onTap: () => _openRecipe(suggestion),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
 

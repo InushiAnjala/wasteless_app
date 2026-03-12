@@ -1,5 +1,5 @@
-﻿import 'package:flutter/material.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/material.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class RecipeScreen extends StatefulWidget {
   final String recipeText;
@@ -10,14 +10,49 @@ class RecipeScreen extends StatefulWidget {
 }
 
 class _RecipeScreenState extends State<RecipeScreen> {
-  final List<Map<String, String>> conversation = [];
+  // TODO: Add your Gemini API key here
+  static const String apiKey = "AIzaSyDCNY1jlSMYFaXmHdpabTms4w6ga0ef8lY";
+  final List<Content> conversation = [];
+  late final GenerativeModel model;
+  late final ChatSession chat;
   final TextEditingController _questionController = TextEditingController();
-  bool _isLoading = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    conversation.add({"role": "assistant", "content": widget.recipeText});
+    model = GenerativeModel(
+      model: 'gemini-2.5-flash',
+      apiKey: apiKey,
+      systemInstruction: Content.system(
+        "You are a professional chef. You provide clear, well-structured, and easy to follow food recipes using readily available ingredients. Format your responses in Markdown.",
+      ),
+    );
+    chat = model.startChat(history: conversation);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialRecipe();
+    });
+  }
+
+  Future<void> _fetchInitialRecipe() async {
+    final prompt =
+        "Please provide a detailed food recipe for ${widget.recipeText}. Make it well-structured and easy to follow.";
+
+    try {
+      if (apiKey == "YOUR_API_KEY_HERE") {
+        throw Exception("You must replace YOUR_API_KEY_HERE with your actual Gemini API key in recipe_screen.dart");
+      }
+      final response = await chat.sendMessage(Content.text(prompt));
+      conversation.add(Content.model([TextPart(response.text ?? "")]));
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate recipe: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -31,25 +66,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
     if (userQuestion.isEmpty) return;
     setState(() => _isLoading = true);
     try {
-      conversation.add({"role": "user", "content": userQuestion});
-      final callable = FirebaseFunctions.instance.httpsCallable(
-        'generateRecipe',
-      );
-      final result = await callable.call({
-        "prompt": userQuestion,
-        "conversation": conversation,
-      });
-      final aiReply = result.data['reply'] as String;
-      conversation.add({"role": "assistant", "content": aiReply});
+      final response = await chat.sendMessage(Content.text(userQuestion));
+      conversation.add(Content.model([TextPart(response.text ?? "")]));
       _questionController.clear();
-      setState(() {});
+      if (mounted) setState(() {});
     } catch (e) {
-      if (!mounted) return; // Add check
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to get AI reply: $e')));
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -57,11 +84,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
   Widget build(BuildContext context) {
     // Extract the latest assistant message for display
     final String recipeContent =
-        conversation.firstWhere(
-          (msg) => msg["role"] == "assistant",
-          orElse: () => {"content": ""},
-        )["content"] ??
-        "";
+        conversation.isEmpty
+            ? ""
+            : conversation.last.parts.whereType<TextPart>().map((p) => p.text).join('\n');
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
@@ -195,19 +220,25 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
                         // Recipe content area
                         Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 6,
-                            ),
-                            child: Text(
-                              recipeContent,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
+                          child: _isLoading && conversation.length <= 1
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF25C06D),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 6,
+                                  ),
+                                  child: Text(
+                                    recipeContent,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
                         ),
 
                         const SizedBox(height: 8),
