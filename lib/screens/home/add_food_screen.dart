@@ -1,9 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter/services.dart'; // For HapticFeedback
 
 import 'main_screen.dart';
 import '../../constants/text_styles.dart';
@@ -27,6 +29,10 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     script: TextRecognitionScript.latin,
   );
   final BarcodeScanner _barcodeScanner = BarcodeScanner();
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _lastWords = "";
 
   static final RegExp _expiryRegex = RegExp(
     r'(EXP|Expiry|EXPIRY|Best\s*Before|BBE|Use\s*By|EXD)?\s*[:\-]?\s*'
@@ -79,6 +85,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
     _currentIndex = isEdit ? 1 : 0;
 
     if (isEdit) {
@@ -97,6 +104,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     amountController.dispose();
     _textRecognizer.close();
     _barcodeScanner.close();
+    _stopListening();
     super.dispose();
   }
 
@@ -208,6 +216,85 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       if (parsed != null) return parsed;
     }
     return null;
+  }
+
+  // ---------------- VOICE CAPTURE LOGIC ----------------
+  Future<void> _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (val) {
+        if (val == 'done' || val == 'notListening') {
+          setState(() => _isListening = false);
+        }
+      },
+      onError: (val) => setState(() => _isListening = false),
+    );
+
+    if (available) {
+      setState(() => _isListening = true);
+      HapticFeedback.heavyImpact();
+
+      // Show a snackbar or small overlay telling them we are listening
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Listening... Speak your expiry date (Day Month Year)"),
+          duration: Duration(seconds: 5),
+        ),
+      );
+
+      await _speech.listen(
+        onResult: (val) {
+          setState(() {
+            _lastWords = val.recognizedWords;
+            if (val.finalResult) {
+              _isListening = false;
+              _processVoiceInput(_lastWords);
+            }
+          });
+        },
+      );
+    } else {
+      setState(() => _isListening = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Speech recognition not available.")),
+        );
+      }
+    }
+  }
+
+  void _stopListening() async {
+    await _speech.stop();
+    setState(() => _isListening = false);
+  }
+
+  void _processVoiceInput(String text) {
+    if (text.isEmpty) return;
+
+    // Clean text: "12th of August 2026" -> "12 August 2026"
+    String cleaned = text
+        .toLowerCase()
+        .replaceAll(RegExp(r'\b(of|the|at|on|in)\b'), '')
+        .replaceAll(RegExp(r'(st|nd|rd|th)\b'), '')
+        .trim();
+
+    final parsed = _parseExpiryString(cleaned);
+
+    if (parsed != null) {
+      setState(() => selectedExpiryDate = parsed);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Captured date: ${parsed.day}/${parsed.month}/${parsed.year}"),
+          backgroundColor: const Color(0xFF1E9E5A),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Couldn't understand '$text'. Try '12 August 2026'"),
+          action: SnackBarAction(label: "Retry", onPressed: _startListening),
+        ),
+      );
+    }
   }
 
   Future<void> _scanTextFromCamera() async {
@@ -704,7 +791,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _showVoicePreferenceDialog();
+                      _startListening();
                     },
                     child: const Text(
                       'Start listening',
@@ -836,7 +923,10 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           ),
           elevation: 2,
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pop(context);
+          _startListening();
+        },
         child: Text(
           label,
           style: const TextStyle(

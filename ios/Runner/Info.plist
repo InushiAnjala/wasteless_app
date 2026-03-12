@@ -47,5 +47,9 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app uses the camera to scan labels for OCR.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app uses speech recognition to capture expiry dates from voice.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone to listen for expiry dates.</string>
 </dict>
 </plist>
