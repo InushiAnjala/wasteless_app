@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'ai_screen.dart';
 
 class AIRecipeDetailScreen extends StatefulWidget {
@@ -9,26 +10,8 @@ class AIRecipeDetailScreen extends StatefulWidget {
 }
 
 class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
-  String selectedCategory = "Veg";
-
-  final Map<String, List<Map<String, String>>> foodData = {
-    "Veg": [
-      {"name": "Carrot", "expiry": "2 days", "amount": "5kg"},
-      {"name": "Potato", "expiry": "5 days", "amount": "10kg"},
-    ],
-    "Meat": [
-      {"name": "Chicken", "expiry": "1 day", "amount": "3kg"},
-      {"name": "Fish", "expiry": "2 days", "amount": "4kg"},
-    ],
-    "Fruits": [
-      {"name": "Apple", "expiry": "3 days", "amount": "6kg"},
-      {"name": "Banana", "expiry": "1 day", "amount": "12kg"},
-    ],
-    "Others": [
-      {"name": "Rice", "expiry": "20 days", "amount": "25kg"},
-      {"name": "Milk Powder", "expiry": "10 days", "amount": "8kg"},
-    ],
-  };
+  String selectedCategory = "Veges";
+  String searchText = "";
 
   @override
   Widget build(BuildContext context) {
@@ -147,13 +130,14 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                       ),
                     ],
                   ),
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.search),
                       hintText: "Search food items",
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
+                    onChanged: (value) => setState(() => searchText = value.toLowerCase()),
                   ),
                 ),
 
@@ -182,12 +166,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
 
                 // Food list
                 Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: foodData[selectedCategory]!
-                        .map((item) => _foodCard(item))
-                        .toList(),
-                  ),
+                  child: _foodList(),
                 ),
               ],
             ),
@@ -228,8 +207,143 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
     );
   }
 
+  // ---------------- FOOD LIST QUERY AND FILTERING ----------------
+  Widget _foodList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("foods")
+          .where("section", isEqualTo: selectedCategory)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final msg = snapshot.error?.toString() ?? "Unable to load foods";
+          return Center(
+            child: Text(
+              msg,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF25C06D)),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              "No food items found",
+              style: TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          );
+        }
+
+        final docs = snapshot.data!.docs.where((doc) {
+          final map = doc.data() as Map<String, dynamic>?;
+          final name = (map?["name"] ?? "").toString().toLowerCase();
+          return name.contains(searchText);
+        }).toList();
+
+        final now = DateTime.now();
+        final filtered = docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>?;
+          final expiryField = data?["expiryDate"];
+          DateTime? expiry;
+          if (expiryField is Timestamp) expiry = expiryField.toDate();
+          if (expiryField is DateTime) expiry = expiryField;
+          if (expiry != null) {
+            final today = DateTime(now.year, now.month, now.day);
+            if (expiry.isBefore(today)) return false;
+          }
+
+          final amount = _parseAmount(data?["amount"]);
+          return amount > 0;
+        }).toList();
+
+        filtered.sort((a, b) {
+          DateTime? ea;
+          DateTime? eb;
+          final da = a.data() as Map<String, dynamic>?;
+          final db = b.data() as Map<String, dynamic>?;
+          final ra = da?["expiryDate"];
+          final rb = db?["expiryDate"];
+          if (ra is Timestamp) ea = ra.toDate();
+          if (ra is DateTime) ea = ra;
+          if (rb is Timestamp) eb = rb.toDate();
+          if (rb is DateTime) eb = rb;
+          if (ea == null && eb == null) return 0;
+          if (ea == null) return 1;
+          if (eb == null) return -1;
+          return ea.compareTo(eb);
+        });
+
+        if (filtered.isEmpty) {
+          return const Center(
+            child: Text(
+              "No matches for your search",
+              style: TextStyle(color: Colors.black54, fontSize: 16),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: filtered.length,
+          itemBuilder: (context, index) {
+            final doc = filtered[index];
+            final data = doc.data() as Map<String, dynamic>?;
+
+            final String name = (data?["name"] ?? "Unnamed").toString();
+            final dynamic amountField = data?["amount"];
+            final String unit = (data?["unit"] ?? "").toString();
+            final String amountLabel = _formatAmount(amountField, unit);
+
+            final dynamic expiryField = data?["expiryDate"];
+            DateTime? expiry;
+            if (expiryField is Timestamp) {
+              expiry = expiryField.toDate();
+            } else if (expiryField is DateTime) {
+              expiry = expiryField;
+            }
+
+            int daysLeft;
+            String expiryText;
+            if (expiry == null) {
+              daysLeft = 9999;
+              expiryText = "No expiry set";
+            } else {
+              daysLeft = expiry.difference(DateTime.now()).inDays;
+              if (daysLeft == 0) {
+                expiryText = "Expires today";
+              } else if (daysLeft == 1) {
+                expiryText = "Expires tomorrow";
+              } else if (daysLeft < 0) {
+                expiryText = "Expired";
+              } else {
+                expiryText = "Expires in $daysLeft days";
+              }
+            }
+
+            return _foodCard(
+              name: name,
+              amount: amountLabel,
+              expiryLabel: expiryText,
+            );
+          },
+        );
+      },
+    );
+  }
+
   // ---------------- FOOD CARD WIDGET ----------------
-  Widget _foodCard(Map<String, String> data) {
+  Widget _foodCard({
+    required String name,
+    required String amount,
+    required String expiryLabel,
+  }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -238,8 +352,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AIScreen(foodName: data["name"] ?? "Unknown"),
+              builder: (context) => AIScreen(foodName: name),
             ),
           );
         },
@@ -263,7 +376,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                data["name"]!,
+                name,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -273,12 +386,12 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
               Row(
                 children: [
                   Text(
-                    "Expires in ${data["expiry"]}",
+                    expiryLabel,
                     style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                   const Spacer(),
                   Text(
-                    data["amount"]!,
+                    amount,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -291,5 +404,22 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
         ),
       ),
     );
+  }
+
+  double _parseAmount(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  String _formatAmount(dynamic value, String unit) {
+    final numeric = _parseAmount(value);
+    if (numeric > 0) {
+      final display = numeric % 1 == 0
+          ? numeric.toInt().toString()
+          : numeric.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+      return 'Amount: $display ${unit.trim()}'.trim();
+    }
+    return '';
   }
 }
