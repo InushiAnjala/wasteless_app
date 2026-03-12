@@ -123,10 +123,31 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _SearchCard extends StatelessWidget {
+class _SearchCard extends StatefulWidget {
   final String foodName;
 
   const _SearchCard({required this.foodName});
+
+  @override
+  State<_SearchCard> createState() => _SearchCardState();
+}
+
+class _SearchCardState extends State<_SearchCard> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submitSearch(String query) {
+    if (query.trim().isEmpty) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RecipeScreen(recipeText: query.trim())),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +174,8 @@ class _SearchCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
+                  controller: _controller,
+                  onSubmitted: _submitSearch,
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
@@ -161,20 +184,23 @@ class _SearchCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF72C472),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'Find',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+              GestureDetector(
+                onTap: () => _submitSearch(_controller.text),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF72C472),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Find',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -185,10 +211,22 @@ class _SearchCard extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _Chip(text: '$foodName soup'),
-              _Chip(text: '$foodName salad'),
-              _Chip(text: '$foodName fry'),
-              _Chip(text: 'More $foodName ideas'),
+              _Chip(
+                text: '${widget.foodName} soup',
+                onTap: () => _submitSearch('${widget.foodName} soup'),
+              ),
+              _Chip(
+                text: '${widget.foodName} salad',
+                onTap: () => _submitSearch('${widget.foodName} salad'),
+              ),
+              _Chip(
+                text: '${widget.foodName} fry',
+                onTap: () => _submitSearch('${widget.foodName} fry'),
+              ),
+              _Chip(
+                text: 'More ${widget.foodName} ideas',
+                onTap: () => _submitSearch('More ${widget.foodName} ideas'),
+              ),
             ],
           ),
         ],
@@ -330,18 +368,22 @@ class _RecipeCard extends StatelessWidget {
 
 class _Chip extends StatelessWidget {
   final String text;
+  final VoidCallback onTap;
 
-  const _Chip({required this.text});
+  const _Chip({required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE9FFE9),
-        borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE9FFE9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
     );
   }
 }
