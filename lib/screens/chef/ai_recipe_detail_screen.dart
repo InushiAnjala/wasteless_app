@@ -12,6 +12,27 @@ class AIRecipeDetailScreen extends StatefulWidget {
 class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
   String selectedCategory = "Veges";
   String searchText = "";
+  // Track selected food items
+  final Set<String> _selectedFoods = {};
+  void _toggleFoodSelection(String name) {
+    setState(() {
+      if (_selectedFoods.contains(name)) {
+        _selectedFoods.remove(name);
+      } else {
+        _selectedFoods.add(name);
+      }
+    });
+  }
+
+  void _generateMultiFoodRecipe() {
+    if (_selectedFoods.length < 2) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AIScreen(foodName: _selectedFoods.join(", ")),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +158,8 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                       border: InputBorder.none,
                     ),
                     style: const TextStyle(fontSize: 16),
-                    onChanged: (value) => setState(() => searchText = value.toLowerCase()),
+                    onChanged: (value) =>
+                        setState(() => searchText = value.toLowerCase()),
                   ),
                 ),
 
@@ -145,12 +167,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
 
                 // Category chips (single row)
                 Row(
-                  children: [
-                    "Veges",
-                    "Meat",
-                    "Fruits",
-                    "Others",
-                  ]
+                  children: ["Veges", "Meat", "Fruits", "Others"]
                       .map(
                         (c) => Expanded(
                           child: Padding(
@@ -165,9 +182,32 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                 const SizedBox(height: 16),
 
                 // Food list
-                Expanded(
-                  child: _foodList(),
-                ),
+                Expanded(child: _foodList()),
+
+                // Multi-select generate button
+                if (_selectedFoods.length > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF25C06D),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: _generateMultiFoodRecipe,
+                      icon: const Icon(Icons.auto_awesome),
+                      label: Text(
+                        "Generate recipe with ${_selectedFoods.length} items",
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -331,6 +371,17 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
               name: name,
               amount: amountLabel,
               expiryLabel: expiryText,
+              isSelected: _selectedFoods.contains(name),
+              onSelect: () => _toggleFoodSelection(name),
+              onTap: () {
+                // Single-tap: go to single-item recipe
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AIScreen(foodName: name),
+                  ),
+                );
+              },
             );
           },
         );
@@ -343,25 +394,21 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
     required String name,
     required String amount,
     required String expiryLabel,
+    bool isSelected = false,
+    VoidCallback? onSelect,
+    VoidCallback? onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AIScreen(foodName: name),
-            ),
-          );
-        },
+        onTap: onTap,
         child: Container(
           width: double.infinity,
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isSelected ? Colors.green.shade50 : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -370,34 +417,60 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                 offset: const Offset(0, 10),
               ),
             ],
-            border: Border.all(color: const Color(0xFFE7F1EA)),
+            border: Border.all(
+              color: isSelected ? Colors.green : const Color(0xFFE7F1EA),
+              width: isSelected ? 2 : 1,
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+              GestureDetector(
+                onTap: () {
+                  if (onSelect != null) onSelect();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(
+                    isSelected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: isSelected ? Colors.green : Colors.grey,
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    expiryLabel,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  const Spacer(),
-                  Text(
-                    amount,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          expiryLabel,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          amount,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
