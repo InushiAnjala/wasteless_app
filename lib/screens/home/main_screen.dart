@@ -6,10 +6,11 @@ import 'reports_screen.dart';
 import 'notifications_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key, this.initialIndex = 0, this.adminMode = false});
+  const MainScreen({super.key, this.initialIndex = 0, this.adminMode = false, this.onTabChanged});
 
   final int initialIndex;
   final bool adminMode;
+  final ValueChanged<int>? onTabChanged;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -36,6 +37,9 @@ class _MainScreenState extends State<MainScreen> {
   void _onTabSelected(int index) {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
+    if (widget.onTabChanged != null) {
+      widget.onTabChanged!(index);
+    }
   }
   @override
   Widget build(BuildContext context) {

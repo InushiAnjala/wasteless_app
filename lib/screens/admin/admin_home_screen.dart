@@ -223,8 +223,15 @@ class AdminHomeScreen extends StatelessWidget {
 
 /// Keeps manager portal navigation on a separate route so the system back
 /// button returns to the admin hub instead of exiting the app.
-class _AdminManagerPortal extends StatelessWidget {
+class _AdminManagerPortal extends StatefulWidget {
   const _AdminManagerPortal();
+
+  @override
+  State<_AdminManagerPortal> createState() => _AdminManagerPortalState();
+}
+
+class _AdminManagerPortalState extends State<_AdminManagerPortal> {
+  int _currentTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -233,25 +240,24 @@ class _AdminManagerPortal extends StatelessWidget {
         Navigator.pop(context);
         return false;
       },
-      child: Stack(
-        children: [
-          const MainScreen(adminMode: true),
-          Positioned(
-            top: 12,
-            left: 12,
-            child: SafeArea(
-              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
-            ),
-          ),
-        ],
+      child: MainScreen(
+        adminMode: true,
+        onTabChanged: (index) => setState(() => _currentTabIndex = index),
       ),
     );
   }
 }
 
 /// Chef portal wrapper for the same back behavior.
-class _AdminChefPortal extends StatelessWidget {
+class _AdminChefPortal extends StatefulWidget {
   const _AdminChefPortal();
+
+  @override
+  State<_AdminChefPortal> createState() => _AdminChefPortalState();
+}
+
+class _AdminChefPortalState extends State<_AdminChefPortal> {
+  int _currentTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -260,17 +266,9 @@ class _AdminChefPortal extends StatelessWidget {
         Navigator.pop(context);
         return false;
       },
-      child: Stack(
-        children: [
-          const ChefMainScreen(adminMode: true),
-          Positioned(
-            top: 12,
-            left: 12,
-            child: SafeArea(
-              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
-            ),
-          ),
-        ],
+      child: ChefMainScreen(
+        adminMode: true,
+        onTabChanged: (index) => setState(() => _currentTabIndex = index),
       ),
     );
   }

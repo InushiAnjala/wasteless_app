@@ -7,6 +7,7 @@ import 'ai_food_recipes_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 import '../home/notifications_screen.dart';
 import '../../constants/colors.dart';
+import '../../widgets/back_button.dart';
 
 class ChefHomeScreen extends StatefulWidget {
   final bool adminMode;
@@ -46,25 +47,31 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
               sliver: SliverToBoxAdapter(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'WasteLess Chef',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.darkText,
+                    if (widget.adminMode)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                      ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.adminMode ? 'Chef Portal' : 'WasteLess Chef',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.darkText,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Kitchen Management',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.lightText,
+                          Text(
+                            'Kitchen Management',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.lightText,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     if (!widget.adminMode)
                       IconButton.filledTonal(
@@ -116,7 +123,7 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Welcome back, Chef!',
+                        widget.adminMode ? 'Welcome back, Admin!' : 'Welcome back, Chef!',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -220,8 +227,9 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _menuButton({
     required ThemeData theme,
@@ -282,7 +290,6 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
             const Icon(Icons.chevron_right_rounded, color: Colors.black26),
           ],
         ),
-      ),
       ),
     );
   }

@@ -34,19 +34,20 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           ),
         ),
         child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _header(),
-              const SizedBox(height: 18),
-              _searchBar(),
-              const SizedBox(height: 16),
-              _categoryChips(),
-              const SizedBox(height: 16),
-              Expanded(child: _foodList()),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _header(),
+                const SizedBox(height: 18),
+                _searchBar(),
+                const SizedBox(height: 16),
+                _categoryChips(),
+                const SizedBox(height: 16),
+                Expanded(child: _foodList()),
+              ],
+            ),
           ),
         ),
       ),
@@ -69,11 +70,6 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
       ),
       child: Row(
         children: [
-          if (widget.adminMode)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
-            ),
           const Icon(Icons.kitchen, color: Color(0xFF1E9E5A), size: 26),
           const SizedBox(width: 12),
           Expanded(
@@ -769,4 +765,3 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return 'Amount: -';
   }
 }
-

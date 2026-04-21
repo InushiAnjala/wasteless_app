@@ -27,31 +27,12 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
   @override
   void initState() {
     super.initState();
-    // Start with draft rows if present, otherwise three rows.
-    final initialCount = _draftNames.isNotEmpty ? _draftNames.length : 3;
-    for (int i = 0; i < initialCount; i++) {
-      final name = i < _draftNames.length ? _draftNames[i] : '';
-      final amount = i < _draftAmounts.length ? _draftAmounts[i] : '';
-      _addRow(initial: true, name: name, amount: amount);
+    // Initialize with 3 rows if empty
+    if (nameControllers.isEmpty) {
+      for (int i = 0; i < 3; i++) {
+        _addRow(initial: true);
+      }
     }
-  }
-
-  @override
-  void dispose() {
-    if (_clearDraftOnDispose) {
-      _draftNames = [];
-      _draftAmounts = [];
-    } else {
-      _draftNames = [for (final c in nameControllers) c.text];
-      _draftAmounts = [for (final c in amountControllers) c.text];
-    }
-    for (final c in nameControllers) {
-      c.dispose();
-    }
-    for (final c in amountControllers) {
-      c.dispose();
-    }
-    super.dispose();
   }
 
   @override
@@ -68,146 +49,140 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
           ),
         ),
         child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header card
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.16),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (widget.adminMode)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.16),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
                       ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF25C06D),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.green.withOpacity(0.22),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25C06D),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.22),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.remove_shopping_cart,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Not in stock",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "Track what needs replenishing and quantities.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                // Entry card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.12),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                    border: Border.all(color: const Color(0xFFE7F1EA)),
+                  ),
+                  child: Column(
+                    children: [
+                      ..._rowList(),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: nameControllers.length >= _maxRows
+                              ? null
+                              : () => _addRow(),
+                          icon: const Icon(Icons.add),
+                          label: Text(
+                            nameControllers.length >= _maxRows
+                                ? 'Maximum items reached'
+                                : 'Add another item',
+                            style: const TextStyle(fontSize: 16),
                           ),
-                        ],
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.remove_shopping_cart,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Not in stock",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25C06D),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          SizedBox(height: 6),
-                          Text(
-                            "Track what needs replenishing and quantities.",
+                          onPressed: _submitNeeds,
+                          child: const Text(
+                            'Send to Kitchen Needs',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // Entry card
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 18,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.12),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                  border: Border.all(color: const Color(0xFFE7F1EA)),
-                ),
-                child: Column(
-                  children: [
-                    ..._rowList(),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: nameControllers.length >= _maxRows
-                            ? null
-                            : () => _addRow(),
-                        icon: const Icon(Icons.add),
-                        label: Text(
-                          nameControllers.length >= _maxRows
-                              ? 'Maximum items reached'
-                              : 'Add another item',
-                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF25C06D),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        onPressed: _submitNeeds,
-                        child: const Text(
-                          'Send to Kitchen Needs',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

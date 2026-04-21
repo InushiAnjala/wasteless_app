@@ -131,11 +131,6 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                 ),
                 child: Row(
                   children: [
-                    if (widget.adminMode)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
-                      ),
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(

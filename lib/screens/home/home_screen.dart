@@ -79,26 +79,32 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                 sliver: SliverToBoxAdapter(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            adminMode ? 'Admin Portal' : 'Store Manager',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkText,
+                      if (adminMode)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                        ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              adminMode ? 'Manager Portal' : 'Store Manager',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkText,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Welcome back to WasteLess',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.lightText,
+                            Text(
+                              'Welcome back to WasteLess',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.lightText,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       if (!adminMode)
                         Container(

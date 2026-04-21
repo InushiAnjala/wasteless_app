@@ -6,10 +6,11 @@ import 'ai_food_recipes_screen.dart';
 import '../home/notifications_screen.dart';
 
 class ChefMainScreen extends StatefulWidget {
-  const ChefMainScreen({super.key, this.initialIndex = 0, this.adminMode = false});
+  const ChefMainScreen({super.key, this.initialIndex = 0, this.adminMode = false, this.onTabChanged});
 
   final int initialIndex;
   final bool adminMode;
+  final ValueChanged<int>? onTabChanged;
 
   @override
   State<ChefMainScreen> createState() => _ChefMainScreenState();
@@ -35,6 +36,9 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
   void _onTabSelected(int index) {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
+    if (widget.onTabChanged != null) {
+      widget.onTabChanged!(index);
+    }
   }
 
   @override
