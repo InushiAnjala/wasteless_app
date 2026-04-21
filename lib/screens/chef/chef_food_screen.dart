@@ -21,17 +21,19 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Column(
@@ -767,3 +769,4 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return 'Amount: -';
   }
 }
+

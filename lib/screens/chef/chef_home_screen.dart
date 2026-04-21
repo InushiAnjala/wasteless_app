@@ -23,19 +23,21 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.background,
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primary.withOpacity(0.1),
-            colorScheme.background,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.background,
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
@@ -280,6 +282,7 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
             const Icon(Icons.chevron_right_rounded, color: Colors.black26),
           ],
         ),
+      ),
       ),
     );
   }

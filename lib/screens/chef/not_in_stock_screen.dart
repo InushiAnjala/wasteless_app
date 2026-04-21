@@ -7,14 +7,14 @@ import '../../widgets/back_button.dart';
 
 class NotInStockScreen extends StatefulWidget {
   final bool adminMode;
-  const NotInStockScreen({super.key, this.adminMode = false});
+  final void Function(int index)? onTabSelected;
+  const NotInStockScreen({super.key, this.adminMode = false, this.onTabSelected});
 
   @override
   State<NotInStockScreen> createState() => _NotInStockScreenState();
 }
 
 class _NotInStockScreenState extends State<NotInStockScreen> {
-  int _currentIndex = 2; // Not in stock tab
   static const int _maxRows = 25;
   static List<String> _draftNames = [];
   static List<String> _draftAmounts = [];
@@ -54,41 +54,20 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     super.dispose();
   }
 
-  void _handleNav(int index) {
-    if (index == _currentIndex) return;
-    Widget target;
-    switch (index) {
-      case 0:
-        target = ChefHomeScreen(adminMode: widget.adminMode);
-        break;
-      case 1:
-        target = ChefFoodScreen(adminMode: widget.adminMode);
-        break;
-      case 3:
-        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => target),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Column(
@@ -368,3 +347,4 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     }
   }
 }
+
