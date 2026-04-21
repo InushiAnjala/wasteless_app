@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -22,194 +23,170 @@ class _FoodListScreenState extends State<FoodListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
+      backgroundColor: colorScheme.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header card
+                // Header
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(18),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.16),
+                        color: Colors.black.withOpacity(0.04),
                         blurRadius: 24,
-                        offset: const Offset(0, 12),
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.kitchen,
-                        color: Color(0xFF1E9E5A),
-                        size: 26,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.kitchen_rounded, color: colorScheme.primary, size: 28),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Food List",
-                              style: AppTextStyles.heading.copyWith(
-                                fontSize: 24,
+                              "Food Inventory",
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.darkText,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              "Keep track by category, search, and edit quickly.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
+                            Text(
+                              "Manage your kitchen stock",
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.lightText,
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF25C06D),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.22),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.list_alt,
-                          color: Colors.white,
-                          size: 18,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 24),
 
                 // Search bar
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
-                      hintText: "Search food",
-                      border: InputBorder.none,
+                TextField(
+                  style: theme.textTheme.bodyMedium,
+                  decoration: InputDecoration(
+                    hintText: "Search food items...",
+                    prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
                     ),
-                    onChanged: (value) {
-                      setState(() => searchText = value.toLowerCase());
-                    },
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() => searchText = value.toLowerCase());
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Categories
+                SizedBox(
+                  height: 44,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) => _categoryChip(theme, categories[index]),
                   ),
                 ),
 
-                const SizedBox(height: 16),
-
-                // Category chips in a single fixed row
-                Row(
-                  children: categories
-                      .map(
-                        (category) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: categoryButton(category),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Food list
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: (() {
-                      Query<Map<String, dynamic>> query = FirebaseFirestore
-                          .instance
-                          .collection("foods");
+                      Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection("foods");
                       if (!widget.adminMode) {
                         query = query
                             .where("section", isEqualTo: selectedCategory)
                             .where("userId", isEqualTo: uid);
                       }
-                      // For adminMode, show all food items (no filters)
-                      return query.orderBy("expiryDate").snapshots();
+                      return query.snapshots();
                     })(),
                     builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)));
+                      }
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(
-                          child: Text(
-                            "No food items found",
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 16,
-                            ),
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[300]),
+                              const SizedBox(height: 16),
+                              Text("No food items found", style: TextStyle(color: Colors.grey[400])),
+                            ],
                           ),
                         );
                       }
 
-                      List<QueryDocumentSnapshot<Object?>> docs =
-                          snapshot.data!.docs;
-                      // For adminMode, filter by selectedCategory in Dart
+                      List<QueryDocumentSnapshot<Object?>> docs = snapshot.data!.docs;
                       if (widget.adminMode) {
                         final cat = selectedCategory.toLowerCase();
                         docs = docs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
-                          final section = (data['section'] ?? '')
-                              .toString()
-                              .toLowerCase();
+                          final section = (data['section'] ?? '').toString().toLowerCase();
                           return section == cat;
                         }).toList();
                       }
-                      // Filter by search text
                       docs = docs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         final name = (data["name"] as String).toLowerCase();
                         return name.contains(searchText);
                       }).toList();
 
-                      // Filter out expired items (already covered in reports)
                       final now = DateTime.now();
                       final filtered = docs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
@@ -228,49 +205,34 @@ class _FoodListScreenState extends State<FoodListScreen> {
                         return amount > 0;
                       }).toList();
 
+                      // Sort in memory to avoid Firestore index requirement
+                      filtered.sort((a, b) {
+                        final da = a.data() as Map<String, dynamic>;
+                        final db = b.data() as Map<String, dynamic>;
+                        final ea = (da['expiryDate'] as Timestamp?)?.toDate();
+                        final eb = (db['expiryDate'] as Timestamp?)?.toDate();
+                        if (ea == null && eb == null) return 0;
+                        if (ea == null) return 1;
+                        if (eb == null) return -1;
+                        return ea.compareTo(eb);
+                      });
+
                       if (filtered.isEmpty) {
-                        return const Center(
-                          child: Text(
-                            "No matches for your search",
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 16,
-                            ),
-                          ),
-                        );
+                        return Center(child: Text("No matches for search", style: TextStyle(color: Colors.grey[400])));
                       }
 
                       return ListView.separated(
+                        physics: const BouncingScrollPhysics(),
                         itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final doc = filtered[index];
                           final data = doc.data() as Map<String, dynamic>;
+                          final DateTime expiry = (data["expiryDate"] as Timestamp).toDate();
+                          final int daysLeft = expiry.difference(DateTime.now()).inDays;
 
-                          final DateTime expiry =
-                              (data["expiryDate"] as Timestamp).toDate();
-
-                          final int daysLeft = expiry
-                              .difference(DateTime.now())
-                              .inDays;
-
-                          String expiryText;
-                          if (daysLeft == 0) {
-                            expiryText = "Expires today";
-                          } else if (daysLeft == 1) {
-                            expiryText = "Expires tomorrow";
-                          } else if (daysLeft < 0) {
-                            expiryText = "Expired";
-                          } else {
-                            expiryText = "Expires in $daysLeft days";
-                          }
-
-                          return buildFoodBox(
-                            docId: doc.id,
-                            data: data,
-                            expiry: expiryText,
-                            daysLeft: daysLeft,
-                          );
+                          String expiryText = daysLeft == 0 ? "Today" : daysLeft == 1 ? "Tomorrow" : "$daysLeft days";
+                          return _foodCard(theme, doc.id, data, expiryText, daysLeft);
                         },
                       );
                     },
@@ -284,155 +246,88 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  Widget categoryButton(String category) {
+  Widget _categoryChip(ThemeData theme, String category) {
     final bool active = selectedCategory == category;
-
-    return InkWell(
-      onTap: () {
-        setState(() => selectedCategory = category);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    return GestureDetector(
+      onTap: () => setState(() => selectedCategory = category),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? Colors.green.shade100 : Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: Colors.green, width: 2),
+          color: active ? theme.colorScheme.primary : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: active
+              ? [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
+              : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Text(
           category,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: active ? Colors.white : AppColors.darkText,
+          ),
         ),
       ),
     );
   }
 
-  Widget buildFoodBox({
-    required String docId,
-    required Map<String, dynamic> data,
-    required String expiry,
-    required int daysLeft,
-  }) {
-    final Color badgeColor;
-    final Color badgeText;
-    if (daysLeft < 0) {
-      badgeColor = const Color(0xFFFFE5E5);
-      badgeText = const Color(0xFFD64242);
-    } else if (daysLeft <= 2) {
-      badgeColor = const Color(0xFFFFF4E3);
-      badgeText = const Color(0xFFCC7A00);
-    } else {
-      badgeColor = const Color(0xFFE7F8EE);
-      badgeText = const Color(0xFF1E9E5A);
-    }
+  Widget _foodCard(ThemeData theme, String docId, Map<String, dynamic> data, String expiry, int daysLeft) {
+    final Color badgeColor = daysLeft <= 2 ? Colors.orangeAccent : theme.colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.96),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.12),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: const Color(0xFFE7F1EA)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF8F2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.restaurant,
-              color: Color(0xFF1E9E5A),
-              size: 20,
-            ),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: badgeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+            child: Icon(Icons.restaurant_rounded, color: badgeColor, size: 24),
           ),
-
-          const SizedBox(width: 12),
-
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        data["name"],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: badgeColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        expiry,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: badgeText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
                 Text(
-                  "Amount: ${data["amount"]} ${data["unit"]}",
-                  style: const TextStyle(color: Colors.black87, fontSize: 14),
+                  data["name"],
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text("${data["amount"]} ${data["unit"]}", style: theme.textTheme.bodySmall),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: badgeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                  child: Text(
+                    "Expires in $expiry",
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: badgeColor),
+                  ),
                 ),
               ],
             ),
           ),
-
-          const SizedBox(width: 8),
-
           Column(
             children: [
               IconButton(
-                icon: const Icon(Icons.edit, color: Color(0xFF1E9E5A)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          AddFoodScreen(foodId: docId, foodData: data),
-                    ),
-                  );
-                },
+                icon: const Icon(Icons.edit_rounded, color: Colors.blueAccent, size: 20),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddFoodScreen(foodId: docId, foodData: data))),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Color(0xFFD64242),
-                ),
-                onPressed: () async {
-                  await FirebaseFirestore.instance
-                      .collection("foods")
-                      .doc(docId)
-                      .delete();
-                },
+                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                onPressed: () async => await FirebaseFirestore.instance.collection("foods").doc(docId).delete(),
               ),
             ],
           ),

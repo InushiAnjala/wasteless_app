@@ -5,9 +5,11 @@ import 'not_in_stock_screen.dart';
 import 'ai_recipe_detail_screen.dart';
 import 'ai_screen.dart';
 import 'recipe_screen.dart';
+import '../../widgets/back_button.dart';
 
 class AIFoodRecipesScreen extends StatefulWidget {
-  const AIFoodRecipesScreen({super.key});
+  final bool adminMode;
+  const AIFoodRecipesScreen({super.key, this.adminMode = false});
 
   @override
   State<AIFoodRecipesScreen> createState() => _AIFoodRecipesScreenState();
@@ -47,13 +49,13 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
     Widget target;
     switch (index) {
       case 0:
-        target = const ChefHomeScreen();
+        target = ChefHomeScreen(adminMode: widget.adminMode);
         break;
       case 1:
-        target = const ChefFoodScreen();
+        target = ChefFoodScreen(adminMode: widget.adminMode);
         break;
       case 2:
-        target = const NotInStockScreen();
+        target = NotInStockScreen(adminMode: widget.adminMode);
         break;
       default:
         return;
@@ -154,6 +156,11 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                   ),
                   child: Row(
                     children: [
+                      if (widget.adminMode)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                        ),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(

@@ -25,9 +25,9 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _screens = [
-      HomeScreen(onTabSelected: _onTabSelected),
+      HomeScreen(onTabSelected: _onTabSelected, adminMode: widget.adminMode),
       FoodListScreen(adminMode: widget.adminMode),
-      const KitchenNeedsScreen(),
+      KitchenNeedsScreen(adminMode: widget.adminMode),
       NotificationsScreen(adminMode: widget.adminMode),
       ReportsScreen(adminMode: widget.adminMode),
     ];
@@ -37,31 +37,69 @@ class _MainScreenState extends State<MainScreen> {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
   }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabSelected,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Food List',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.kitchen), label: 'Kitchen'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Reports',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: _onTabSelected,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: Colors.black38,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontSize: 12),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.home_rounded),
+              ),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.list_alt_rounded),
+              ),
+              label: 'Food List',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.kitchen_rounded),
+              ),
+              label: 'Kitchen',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.notifications_rounded),
+              ),
+              label: 'Alerts',
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.bar_chart_rounded),
+              ),
+              label: 'Reports',
+            ),
+          ],
+        ),
       ),
     );
   }

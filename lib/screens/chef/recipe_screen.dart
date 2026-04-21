@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../../constants/colors.dart';
 
 class RecipeScreen extends StatefulWidget {
   final String recipeText;
@@ -82,230 +83,155 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     // Extract the latest assistant message for display
     final String recipeContent =
         conversation.isEmpty
             ? ""
             : conversation.last.parts.whereType<TextPart>().map((p) => p.text).join('\n');
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+            colors: [
+              colorScheme.primary.withOpacity(0.15),
+              colorScheme.background,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header card with back
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withValues(alpha: 0.16),
-                        blurRadius: 22,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context),
-                        borderRadius: BorderRadius.circular(12),
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.arrow_back,
-                            size: 24,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF25C06D),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withValues(alpha: 0.22),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "AI Food Recipes",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "Generated ideas from your items",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Header
+                _Header(onBack: () => Navigator.pop(context)),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 24),
 
                 // Main card
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withValues(alpha: 0.12),
-                          blurRadius: 18,
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
                       ],
-                      border: Border.all(color: const Color(0xFFE7F1EA)),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 18),
-                        // Title row
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          child: Text(
-                            "AI Recipe",
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // Recipe content area
-                        Expanded(
-                          child: _isLoading && conversation.length <= 1
-                              ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Color(0xFF25C06D),
-                                  ),
-                                )
-                              : SingleChildScrollView(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 6,
-                                  ),
-                                  child: Text(
-                                    recipeContent,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Search inside recipe bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            height: 46,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: const Color(0xFFE0E9E3),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green.withValues(alpha: 0.08),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
+                              color: colorScheme.primary.withOpacity(0.05),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.black.withOpacity(0.05),
                                 ),
-                              ],
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.search,
-                                  size: 20,
-                                  color: Colors.black54,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _questionController,
-                                    enabled: !_isLoading,
-                                    decoration: const InputDecoration(
-                                      hintText: "Search inside recipe...",
-                                      border: InputBorder.none,
-                                    ),
-                                    onSubmitted: (_) => sendUserQuestion(),
+                                Icon(Icons.menu_book_rounded, color: colorScheme.primary),
+                                const SizedBox(width: 12),
+                                Text(
+                                  "Recipe Instructions",
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                IconButton(
-                                  icon: _isLoading
-                                      ? const SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : const Icon(
-                                          Icons.send,
-                                          color: Color(0xFF25C06D),
-                                        ),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : sendUserQuestion,
                                 ),
                               ],
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 18),
-                      ],
+                          // Recipe content area
+                          Expanded(
+                            child: _isLoading && conversation.length <= 1
+                                ? Center(
+                                    child: CircularProgressIndicator(
+                                      color: colorScheme.primary,
+                                    ),
+                                  )
+                                : SingleChildScrollView(
+                                    padding: const EdgeInsets.all(24),
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Text(
+                                      recipeContent,
+                                      style: theme.textTheme.bodyLarge?.copyWith(
+                                        height: 1.6,
+                                        color: AppColors.darkText,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // Q&A bar
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Colors.black.withOpacity(0.05),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _questionController,
+                                      enabled: !_isLoading,
+                                      decoration: InputDecoration(
+                                        hintText: "Ask about this recipe...",
+                                        border: InputBorder.none,
+                                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                                          color: Colors.black38,
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                      ),
+                                      onSubmitted: (_) => sendUserQuestion(),
+                                    ),
+                                  ),
+                                  _isLoading
+                                      ? SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: colorScheme.primary,
+                                          ),
+                                        )
+                                      : IconButton(
+                                          icon: const Icon(Icons.send_rounded),
+                                          color: colorScheme.primary,
+                                          onPressed: sendUserQuestion,
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -314,6 +240,49 @@ class _RecipeScreenState extends State<RecipeScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final VoidCallback onBack;
+
+  const _Header({required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        IconButton.filledTonal(
+          onPressed: onBack,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Chef AI Assistant',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Professional cooking advice',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.lightText,
+                ),
+              ),
+            ],
+          ),
+        ),
+        CircleAvatar(
+          backgroundColor: theme.colorScheme.primary,
+          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+        ),
+      ],
     );
   }
 }

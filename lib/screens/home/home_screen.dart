@@ -8,160 +8,203 @@ import 'reports_screen.dart';
 import 'kitchen_needs_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 import '../../constants/text_styles.dart';
+import '../../constants/colors.dart';
+import '../../widgets/back_button.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.onTabSelected});
-
+  const HomeScreen({super.key, this.onTabSelected, this.adminMode = false});
+  final bool adminMode;
   final void Function(int index)? onTabSelected;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final items = [
       (
-        title: 'Add food',
+        title: 'Add Food',
         subtitle: 'Log items and scan quickly',
-        icon: Icons.add_circle_outline,
+        icon: Icons.add_rounded,
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddFoodScreen()),
+            MaterialPageRoute(builder: (context) => AddFoodScreen(adminMode: adminMode)),
           );
         },
       ),
       (
         title: 'Food List',
         subtitle: 'Browse, edit, or search',
-        icon: Icons.list_alt,
+        icon: Icons.view_list_rounded,
         onTap: () => onTabSelected?.call(1),
+      ),
+      (
+        title: 'Kitchen Needs',
+        subtitle: 'What to buy next',
+        icon: Icons.shopping_basket_rounded,
+        onTap: () => onTabSelected?.call(2),
       ),
       (
         title: 'Notifications',
         subtitle: 'See alerts and preferences',
-        icon: Icons.notifications_active_outlined,
+        icon: Icons.notifications_rounded,
         onTap: () => onTabSelected?.call(3),
       ),
       (
         title: 'Reports',
         subtitle: 'Track waste and trends',
-        icon: Icons.bar_chart_outlined,
+        icon: Icons.analytics_rounded,
         onTap: () => onTabSelected?.call(4),
-      ),
-      (
-        title: 'Kitchen Needs',
-        subtitle: 'What to buy next',
-        icon: Icons.shopping_bag_outlined,
-        onTap: () => onTabSelected?.call(2),
       ),
     ];
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        decoration: const BoxDecoration(
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFB8F8B8), Color(0xFFF2FFF2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary.withOpacity(0.15),
+              colorScheme.background,
+            ],
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            child: Column(
-              children: [
-                // Top row with logout
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 48),
-                    Text('Store Manager', style: AppTextStyles.heading),
-                    IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.red),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        if (!context.mounted) return;
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginSignupScreen(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Hero card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.92),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.14),
-                        blurRadius: 22,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: const [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Color(0xFF25C06D),
-                        child: Icon(Icons.store, color: Colors.white, size: 22),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Hello!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'What do you want to manage today?',
-                        style: TextStyle(color: Colors.black54),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Menu cards without scrolling
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      for (final item in items)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: menuButton(
-                            item.title,
-                            item.subtitle,
-                            item.icon,
-                            item.onTap,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            adminMode ? 'Admin Portal' : 'Store Manager',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                          Text(
+                            'Welcome back to WasteLess',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.lightText,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (!adminMode)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              if (!context.mounted) return;
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginSignupScreen(),
+                                ),
+                                (route) => false,
+                              );
+                            },
                           ),
                         ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Manage Your Kitchen',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Track, reduce waste, and save money every day.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.white24,
+                          child: Icon(Icons.eco_rounded, color: Colors.white, size: 32),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = items[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: menuButton(
+                          context,
+                          item.title,
+                          item.subtitle,
+                          item.icon,
+                          item.onTap,
+                        ),
+                      );
+                    },
+                    childCount: items.length,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -169,62 +212,63 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget menuButton(
+    BuildContext context,
     String title,
     String subtitle,
     IconData icon,
     VoidCallback onTap,
   ) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.12),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE7F8EE),
-                borderRadius: BorderRadius.circular(12),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.black.withOpacity(0.05)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(icon, color: colorScheme.primary),
               ),
-              child: Icon(icon, color: const Color(0xFF1E9E5A)),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.lightText,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Icon(Icons.chevron_right_rounded, color: AppColors.lightText.withOpacity(0.3)),
+            ],
+          ),
         ),
       ),
     );

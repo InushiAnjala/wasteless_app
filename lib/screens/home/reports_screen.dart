@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../constants/colors.dart';
 import 'package:intl/intl.dart';
 
 import '../../constants/text_styles.dart';
@@ -30,55 +31,76 @@ class ReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: colorScheme.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFB7F5C7), Color(0xFFEFFDF3)],
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               children: [
-                // ---------------- HEADER ----------------
+                // Header
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: const [
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 6),
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.bar_chart_rounded,
-                        color: Colors.green,
-                        size: 26,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.analytics_rounded, color: colorScheme.primary, size: 28),
                       ),
-                      const SizedBox(width: 10),
-                      Text(
-                        "Reports",
-                        style: AppTextStyles.heading.copyWith(fontSize: 24),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Analytics",
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.darkText,
+                              ),
+                            ),
+                            Text(
+                              adminMode ? "Global System Statistics" : "Insights & Statistics",
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.lightText,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.download_outlined, size: 26),
+                      IconButton.filledTonal(
                         onPressed: () {},
+                        icon: const Icon(Icons.file_download_rounded),
                       ),
                     ],
                   ),

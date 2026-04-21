@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../constants/colors.dart';
+import '../../widgets/back_button.dart';
 import 'chef_home_screen.dart';
 import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 
 class ChefFoodScreen extends StatefulWidget {
-  const ChefFoodScreen({super.key});
+  final bool adminMode;
+  const ChefFoodScreen({super.key, this.adminMode = false});
 
   @override
   State<ChefFoodScreen> createState() => _ChefFoodScreenState();
@@ -22,13 +25,13 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     Widget target;
     switch (index) {
       case 0:
-        target = const ChefHomeScreen();
+        target = ChefHomeScreen(adminMode: widget.adminMode);
         break;
       case 2:
-        target = const NotInStockScreen();
+        target = NotInStockScreen(adminMode: widget.adminMode);
         break;
       case 3:
-        target = const AIFoodRecipesScreen();
+        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
         break;
       default:
         return;
@@ -110,6 +113,11 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
       ),
       child: Row(
         children: [
+          if (widget.adminMode)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+            ),
           const Icon(Icons.kitchen, color: Color(0xFF1E9E5A), size: 26),
           const SizedBox(width: 12),
           Expanded(

@@ -5,9 +5,11 @@ import 'chef_food_screen.dart';
 import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 import '../onboarding/login_signup_screen.dart';
+import '../../constants/colors.dart';
 
 class ChefHomeScreen extends StatefulWidget {
-  const ChefHomeScreen({super.key});
+  final bool adminMode;
+  const ChefHomeScreen({super.key, this.adminMode = false});
 
   @override
   State<ChefHomeScreen> createState() => _ChefHomeScreenState();
@@ -21,13 +23,13 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
     Widget target;
     switch (index) {
       case 1:
-        target = const ChefFoodScreen();
+        target = ChefFoodScreen(adminMode: widget.adminMode);
         break;
       case 2:
-        target = const NotInStockScreen();
+        target = NotInStockScreen(adminMode: widget.adminMode);
         break;
       case 3:
-        target = const AIFoodRecipesScreen();
+        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
         break;
       default:
         return;
@@ -41,199 +43,227 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFB8F8B8), Color(0xFFF2FFF2)],
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 48),
-                    const Text(
-                      'Chef',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.red),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        if (!context.mounted) return;
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginSignupScreen(),
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // Header
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'WasteLess Chef',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.darkText,
+                            ),
                           ),
-                          (route) => false,
+                          Text(
+                            'Kitchen Management',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.lightText,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (!widget.adminMode)
+                        IconButton.filledTonal(
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            if (!context.mounted) return;
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginSignupScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Hero Card
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [colorScheme.primary, const Color(0xFF1B8E34)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.white24,
+                          child: Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 30),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Welcome back, Chef!',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Ready to cook something amazing today?',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+              // Menu Options
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _menuButton(
+                      theme: theme,
+                      title: 'Kitchen Inventory',
+                      subtitle: 'Browse & manage current food items',
+                      icon: Icons.inventory_2_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChefFoodScreen(adminMode: widget.adminMode)),
                         );
                       },
                     ),
-                  ],
+                    const SizedBox(height: 16),
+                    _menuButton(
+                      theme: theme,
+                      title: 'Out of Stock',
+                      subtitle: 'Items that need urgent restock',
+                      icon: Icons.warning_amber_rounded,
+                      iconColor: Colors.orange,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => NotInStockScreen(adminMode: widget.adminMode)),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _menuButton(
+                      theme: theme,
+                      title: 'AI Chef Assistant',
+                      subtitle: 'Generate recipes from your items',
+                      icon: Icons.auto_awesome_rounded,
+                      iconColor: Colors.deepPurpleAccent,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                  ]),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Hero card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.92),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.14),
-                        blurRadius: 22,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: const [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Color(0xFF25C06D),
-                        child: Icon(
-                          Icons.emoji_food_beverage,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Hello, Chef!',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Quick actions for your kitchen',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Menu cards
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      _homeButton(
-                        title: 'Food List',
-                        subtitle: 'Browse, edit, or search',
-                        icon: Icons.list_alt,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ChefFoodScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _homeButton(
-                        title: 'Not in stocks',
-                        subtitle: 'What needs replenishing',
-                        icon: Icons.remove_shopping_cart,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const NotInStockScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _homeButton(
-                        title: 'AI Food Recipes',
-                        subtitle: 'Ideas from what you have',
-                        icon: Icons.auto_awesome,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AIFoodRecipesScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNav,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Food List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_shopping_cart),
-            label: 'Not in stock',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
-            label: 'AI Recipes',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: _handleNav,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: Colors.black38,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontSize: 12),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Dashboard'),
+            BottomNavigationBarItem(icon: Icon(Icons.inventory_rounded), label: 'Inventory'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Restock'),
+            BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_rounded), label: 'AI Chef'),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _homeButton({
+  Widget _menuButton({
+    required ThemeData theme,
     required String title,
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.green.withOpacity(0.12),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -242,32 +272,34 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFE7F8EE),
-                borderRadius: BorderRadius.circular(12),
+                color: (iconColor ?? theme.colorScheme.primary).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: const Color(0xFF1E9E5A)),
+              child: Icon(icon, color: iconColor ?? theme.colorScheme.primary, size: 28),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.lightText,
+                    ),
                   ),
                 ],
               ),
             ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.black26),
           ],
         ),
       ),

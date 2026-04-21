@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chef_home_screen.dart';
 import 'chef_food_screen.dart';
 import 'ai_food_recipes_screen.dart';
+import '../../widgets/back_button.dart';
 
 class NotInStockScreen extends StatefulWidget {
-  const NotInStockScreen({super.key});
+  final bool adminMode;
+  const NotInStockScreen({super.key, this.adminMode = false});
 
   @override
   State<NotInStockScreen> createState() => _NotInStockScreenState();
@@ -57,13 +59,13 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     Widget target;
     switch (index) {
       case 0:
-        target = const ChefHomeScreen();
+        target = ChefHomeScreen(adminMode: widget.adminMode);
         break;
       case 1:
-        target = const ChefFoodScreen();
+        target = ChefFoodScreen(adminMode: widget.adminMode);
         break;
       case 3:
-        target = const AIFoodRecipesScreen();
+        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
         break;
       default:
         return;
@@ -114,6 +116,11 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if (widget.adminMode)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                        ),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(

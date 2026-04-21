@@ -1,37 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../home/main_screen.dart';
 import '../chef/chef_home_screen.dart';
+import '../onboarding/login_signup_screen.dart';
+import '../../constants/colors.dart';
+import '../../widgets/back_button.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.background,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _header(),
-                const SizedBox(height: 20),
+                _header(context, theme),
+                const SizedBox(height: 32),
                 _card(
                   context,
+                  theme: theme,
                   title: 'Store Manager Portal',
                   subtitle: 'View and manage all store data',
-                  icon: Icons.store,
-                  color: const Color(0xFF25C06D),
+                  icon: Icons.store_rounded,
+                  color: colorScheme.primary,
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -39,12 +49,13 @@ class AdminHomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 _card(
                   context,
-                  title: 'Chef Portal',
-                  subtitle: 'Access all chef features',
-                  icon: Icons.restaurant,
+                  theme: theme,
+                  title: 'Chef Assistant Portal',
+                  subtitle: 'Access all cooking & recipe features',
+                  icon: Icons.restaurant_menu_rounded,
                   color: const Color(0xFF1E9E5A),
                   onTap: () => Navigator.push(
                     context,
@@ -54,12 +65,24 @@ class AdminHomeScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                const Center(
-                  child: Text(
-                    'Admin can access both portals',
-                    style: TextStyle(color: Colors.black54),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Admin Elevated Access',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -68,51 +91,65 @@ class AdminHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _header() {
+  Widget _header(BuildContext context, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.16),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 24,
-            offset: const Offset(0, 12),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF25C06D),
+              color: theme.colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.22),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
+            ),
+            child: Icon(Icons.admin_panel_settings_rounded,
+                color: theme.colorScheme.primary, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Admin Hub',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                Text(
+                  'Central System Control',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.lightText,
+                  ),
                 ),
               ],
             ),
-            child: const Icon(Icons.security, color: Colors.white, size: 20),
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Admin Hub',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'Choose which portal to enter',
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-            ],
+          IconButton.filledTonal(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginSignupScreen(),
+                ),
+                (route) => false,
+              );
+            },
+            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
           ),
         ],
       ),
@@ -121,66 +158,63 @@ class AdminHomeScreen extends StatelessWidget {
 
   Widget _card(
     BuildContext context, {
+    required ThemeData theme,
     required String title,
     required String subtitle,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.green.withOpacity(0.14),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(18),
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
+              child: Icon(icon, color: color, size: 26),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.lightText,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: Colors.black54),
-            ],
-          ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.black12, size: 16),
+          ],
         ),
       ),
     );
@@ -206,14 +240,7 @@ class _AdminManagerPortal extends StatelessWidget {
             top: 12,
             left: 12,
             child: SafeArea(
-              child: Material(
-                color: Colors.white.withOpacity(0.9),
-                shape: const CircleBorder(),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
+              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
             ),
           ),
         ],
@@ -235,19 +262,12 @@ class _AdminChefPortal extends StatelessWidget {
       },
       child: Stack(
         children: [
-          const ChefHomeScreen(),
+          const ChefHomeScreen(adminMode: true),
           Positioned(
             top: 12,
             left: 12,
             child: SafeArea(
-              child: Material(
-                color: Colors.white.withOpacity(0.9),
-                shape: const CircleBorder(),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
+              child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
             ),
           ),
         ],

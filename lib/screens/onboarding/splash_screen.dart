@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'login_signup_screen.dart';
+import '../../constants/colors.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFC8FEC8), Color(0xFFEFFFF3)],
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -21,78 +27,73 @@ class SplashScreen extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Center(
                     child: Container(
                       width: double.infinity,
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 80, // match login box height with margins
-                      ),
-                      margin: const EdgeInsets.symmetric(horizontal: 26, vertical: 40),
-                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 26),
+                      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(45),
-                        border: Border.all(color: const Color(0xFF2DAA43), width: 3),
+                        borderRadius: BorderRadius.circular(32),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withOpacity(0.12),
-                            blurRadius: 22,
-                            offset: const Offset(0, 12),
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(height: size.height * 0.02),
+                          const SizedBox(height: 20),
 
-                          /// ⭐ BIG LOGO (responsive height)
-                          Image.asset(
-                            "assets/logo.png",
-                            height: size.height * 0.30,
-                            fit: BoxFit.contain,
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          /// ⭐ Headline
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 22),
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: const TextSpan(
-                                style: TextStyle(
-                                  fontSize: 21,
-                                  height: 1.45,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black87,
-                                ),
-                                children: [
-                                  TextSpan(text: "Welcome to "),
-                                  TextSpan(
-                                    text: "WasteLess!",
-                                    style: TextStyle(fontWeight: FontWeight.w900),
-                                  ),
-                                  TextSpan(
-                                    text: "\nSave food. Save money.",
-                                  ),
-                                ],
-                              ),
+                          /// ⭐ Premium Logo Container
+                          Container(
+                            height: size.height * 0.28,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.05),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Image.asset(
+                              "assets/logo.png",
+                              fit: BoxFit.contain,
                             ),
                           ),
 
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 40),
 
-                          const SizedBox(height: 28),
+                          /// ⭐ Headline
+                          Text(
+                            "Welcome to WasteLess",
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Save food. Save money. Save the planet.",
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.lightText,
+                              height: 1.5,
+                            ),
+                          ),
+
+                          const SizedBox(height: 48),
 
                           /// ⭐ GET STARTED BUTTON
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: GestureDetector(
-                              onTap: () {
+                          SizedBox(
+                            width: double.infinity,
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -100,46 +101,31 @@ class SplashScreen extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                decoration: BoxDecoration(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
-                                  gradient: const LinearGradient(
-                                    colors: [Color(0xFF2DAA43), Color(0xFF1C8E34)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.green.withOpacity(0.20),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 10),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "GET STARTED",
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
                                     ),
-                                  ],
-                                ),
-                                child: const Center(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "GET STARTED",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Icon(Icons.arrow_forward_ios,
-                                          color: Colors.white, size: 16),
-                                    ],
                                   ),
-                                ),
+                                  const SizedBox(width: 12),
+                                  const Icon(Icons.arrow_forward_rounded, size: 20),
+                                ],
                               ),
                             ),
                           ),
 
-                          SizedBox(height: size.height * 0.03),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),

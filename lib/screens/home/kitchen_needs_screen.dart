@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../constants/text_styles.dart';
 
 class KitchenNeedsScreen extends StatefulWidget {
-  const KitchenNeedsScreen({super.key});
+  final bool adminMode;
+  const KitchenNeedsScreen({super.key, this.adminMode = false});
 
   @override
   State<KitchenNeedsScreen> createState() => _KitchenNeedsScreenState();

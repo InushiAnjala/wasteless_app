@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../onboarding/login_signup_screen.dart';
+import '../../constants/colors.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -38,30 +39,47 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xffD4F8D3),
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            width: width * 0.90,
-            margin: const EdgeInsets.symmetric(vertical: 12),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(40),
-              border: Border.all(color: Colors.green, width: 2),
-            ),
+      backgroundColor: colorScheme.background,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 🔙 BACK BUTTON
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, size: 30),
+              physics: const BouncingScrollPhysics(),
+              child: Container(
+                width: width * 0.92,
+                margin: const EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🔙 BACK BUTTON
+                    IconButton.filledTonal(
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
@@ -70,228 +88,147 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         );
                       },
+                      icon: const Icon(Icons.arrow_back_rounded),
                     ),
-                  ),
 
-                  const SizedBox(height: 5),
+                    const SizedBox(height: 24),
 
-                  const Center(
-                    child: Text(
-                      "Sign Up Here",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Text(
+                      "Create Account",
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  const Center(
-                    child: Text(
-                      "Personal Information",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                    const SizedBox(height: 8),
+                    Text(
+                      "Join the waste-less revolution",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.lightText,
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
-                  // Name
-                  const Text("Name"),
-                  const SizedBox(height: 6),
-                  customTextField(
-                    controller: nameController,
-                    hint: "Enter Name",
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Role
-                  const Text("Role"),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade400),
+                    // Inputs Section
+                    _sectionTitle(theme, "Account Details"),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: nameController,
+                      label: "Full Name",
+                      hint: "Enter your name",
+                      icon: Icons.person_outline_rounded,
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedRole,
-                        hint: const Text("Select role"),
-                        items: roles
-                            .map(
-                              (role) => DropdownMenuItem(
-                                value: role,
-                                child: Text(role),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedRole = value;
-                          });
-                        },
-                      ),
+                    const SizedBox(height: 16),
+                    _customDropdown(theme),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: nicController,
+                      label: "NIC Number",
+                      hint: "Enter NIC",
+                      icon: Icons.badge_outlined,
                     ),
-                  ),
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: contactController,
+                      label: "Contact",
+                      hint: "Enter phone number",
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                    ),
 
-                  // NIC
-                  const Text("NIC"),
-                  const SizedBox(height: 6),
-                  customTextField(controller: nicController, hint: "Enter NIC"),
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 24),
+                    _sectionTitle(theme, "Security"),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: emailController,
+                      label: "Email Address",
+                      hint: "Enter your email",
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: passwordController,
+                      label: "Password",
+                      hint: "Create a password",
+                      icon: Icons.lock_outline_rounded,
+                      obscure: true,
+                    ),
+                    const SizedBox(height: 16),
+                    _customTextField(
+                      theme: theme,
+                      controller: confirmPasswordController,
+                      label: "Confirm Password",
+                      hint: "Repeat password",
+                      icon: Icons.lock_clock_outlined,
+                      obscure: true,
+                    ),
 
-                  // Contact
-                  const Text("Contact Number"),
-                  const SizedBox(height: 6),
-                  customTextField(
-                    controller: contactController,
-                    hint: "Enter Number",
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                  // Email
-                  const Text("Email"),
-                  const SizedBox(height: 6),
-                  customTextField(
-                    controller: emailController,
-                    hint: "Enter Email",
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Password
-                  const Text("Password"),
-                  const SizedBox(height: 6),
-                  customTextField(
-                    controller: passwordController,
-                    hint: "Enter Password",
-                    obscure: true,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Confirm Password
-                  const Text("Confirm Password"),
-                  const SizedBox(height: 6),
-                  customTextField(
-                    controller: confirmPasswordController,
-                    hint: "Re-enter Password",
-                    obscure: true,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Terms (UI only)
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _agreedToTerms,
-                        onChanged: (v) => setState(
-                          () => _agreedToTerms = v ?? false,
-                        ),
-                      ),
-                      const Text("I agree to the terms and conditions"),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // 🔥 SIGNUP BUTTON (FIREBASE CONNECTED)
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (nameController.text.isEmpty ||
-                            emailController.text.isEmpty ||
-                            passwordController.text.isEmpty ||
-                            confirmPasswordController.text.isEmpty ||
-                            selectedRole == null ||
-                            !_agreedToTerms) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Please fill all required fields and accept terms",
+                    // Terms
+                    InkWell(
+                      onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _agreedToTerms,
+                                activeColor: colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                onChanged: (v) => setState(
+                                  () => _agreedToTerms = v ?? false,
+                                ),
                               ),
                             ),
-                          );
-                          return;
-                        }
-
-                        if (passwordController.text !=
-                            confirmPasswordController.text) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Passwords do not match"),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "I agree to the Terms & Conditions",
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.lightText,
+                                ),
+                              ),
                             ),
-                          );
-                          return;
-                        }
-
-                        try {
-                          // 1️⃣ Create user in Firebase Auth
-                          UserCredential userCredential = await FirebaseAuth
-                              .instance
-                              .createUserWithEmailAndPassword(
-                                email: emailController.text.trim(),
-                                password: passwordController.text.trim(),
-                              );
-
-                          String uid = userCredential.user!.uid;
-
-                          // 2️⃣ Save user data in Firestore
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(uid)
-                              .set({
-                                'name': nameController.text.trim(),
-                                'role': selectedRole,
-                                'nic': nicController.text.trim(),
-                                'contact': contactController.text.trim(),
-                                'email': emailController.text.trim(),
-                                'createdAt': FieldValue.serverTimestamp(),
-                              });
-
-                          if (!context.mounted) return; // Add check
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Signup successful")),
-                          );
-
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginSignupScreen(),
-                            ),
-                            (route) => false,
-                          );
-                        } on FirebaseAuthException catch (e) {
-                          if (!context.mounted) return; // Add check
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.message ?? "Signup failed"),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          ],
                         ),
                       ),
-                      child: const Text("Signup"),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 32),
+
+                    // SIGNUP BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _handleSignup,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),
@@ -300,23 +237,155 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Reusable TextField
-  Widget customTextField({
-    required TextEditingController controller,
-    required String hint,
-    bool obscure = false,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: InputDecoration(
-        hintText: hint,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _sectionTitle(ThemeData theme, String title) {
+    return Text(
+      title.toUpperCase(),
+      style: theme.textTheme.labelLarge?.copyWith(
+        color: theme.colorScheme.primary,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.1,
       ),
     );
+  }
+
+  Widget _customTextField({
+    required ThemeData theme,
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    bool obscure = false,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkText,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscure,
+          keyboardType: keyboardType,
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, size: 20, color: Colors.black45),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _customDropdown(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Role",
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkText,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.black.withOpacity(0.05)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: selectedRole,
+              isExpanded: true,
+              hint: const Text("Select your role"),
+              items: roles
+                  .map(
+                    (role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(role, style: theme.textTheme.bodyMedium),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedRole = value;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleSignup() async {
+    if (nameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty ||
+        selectedRole == null ||
+        !_agreedToTerms) {
+      _showSnackBar("Please fill all required fields and accept terms");
+      return;
+    }
+
+    if (passwordController.text != confirmPasswordController.text) {
+      _showSnackBar("Passwords do not match");
+      return;
+    }
+
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+        'name': nameController.text.trim(),
+        'role': selectedRole,
+        'nic': nicController.text.trim(),
+        'contact': contactController.text.trim(),
+        'email': emailController.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+      _showSnackBar("Signup successful!");
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginSignupScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message ?? "Signup failed");
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }

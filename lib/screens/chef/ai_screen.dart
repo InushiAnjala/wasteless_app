@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'recipe_screen.dart'; // <-- VERY IMPORTANT
+import '../../constants/colors.dart';
 
 class AIScreen extends StatelessWidget {
   final String foodName;
@@ -8,21 +9,25 @@ class AIScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFC8FEC8), Color(0xFFE9FFE9)],
+            colors: [
+              colorScheme.primary.withOpacity(0.1),
+              colorScheme.background,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -30,11 +35,11 @@ class AIScreen extends StatelessWidget {
                   onBack: () => Navigator.pop(context),
                   foodName: foodName,
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 24),
                 _SearchCard(foodName: foodName),
-                const SizedBox(height: 14),
+                const SizedBox(height: 24),
                 _QuickTags(foodName: foodName),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 Expanded(child: _RecipeList(foodName: foodName)),
               ],
             ),
@@ -53,72 +58,46 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: onBack,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE9FFE9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                size: 22,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'AI Food Recipes',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        IconButton.filledTonal(
+          onPressed: onBack,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'AI Recipe Studio',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Ideas using $foodName',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              Text(
+                'Creative ideas for $foodName',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.lightText,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF72C472),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.auto_awesome,
-              color: Colors.white,
-              size: 22,
-            ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
-      ),
+          child: Icon(
+            Icons.auto_awesome_rounded,
+            color: theme.colorScheme.primary,
+            size: 24,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -151,80 +130,75 @@ class _SearchCardState extends State<_SearchCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.search, color: Colors.black87),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  onSubmitted: _submitSearch,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    hintText: 'Search recipes...',
-                    hintStyle: TextStyle(color: Colors.black.withOpacity(0.45)),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _submitSearch(_controller.text),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF72C472),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'Find',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black.withOpacity(0.05)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search_rounded, color: theme.colorScheme.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    onSubmitted: _submitSearch,
+                    decoration: InputDecoration(
+                      hintText: 'What can we cook with ${widget.foodName}?',
+                      hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.black38,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
-              ),
-            ],
+                IconButton(
+                  onPressed: () => _submitSearch(_controller.text),
+                  icon: const Icon(Icons.send_rounded),
+                  color: theme.colorScheme.primary,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _Chip(
-                text: '${widget.foodName} soup',
+                text: 'Soup',
                 onTap: () => _submitSearch('${widget.foodName} soup'),
               ),
               _Chip(
-                text: '${widget.foodName} salad',
+                text: 'Salad',
                 onTap: () => _submitSearch('${widget.foodName} salad'),
               ),
               _Chip(
-                text: '${widget.foodName} fry',
+                text: 'Quick Fry',
                 onTap: () => _submitSearch('${widget.foodName} fry'),
               ),
               _Chip(
-                text: 'More ${widget.foodName} ideas',
+                text: 'See All',
                 onTap: () => _submitSearch('More ${widget.foodName} ideas'),
               ),
             ],
@@ -242,25 +216,30 @@ class _QuickTags extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recommended',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _Pill(text: 'Fresh $foodName'),
-                _Pill(text: 'Veges'),
-                _Pill(text: '15 min'),
-                _Pill(text: 'Low prep'),
-                _Pill(text: 'Trending'),
-              ],
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            'Recommended for You',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              _Pill(text: 'Fresh Ideas', icon: Icons.lightbulb_outline_rounded),
+              _Pill(text: 'Under 15m', icon: Icons.timer_outlined),
+              _Pill(text: 'Healthy', icon: Icons.favorite_outline_rounded),
+              _Pill(text: 'Zero Waste', icon: Icons.eco_outlined),
+            ],
           ),
         ),
       ],
@@ -276,27 +255,30 @@ class _RecipeList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recipes = <String>[
-      '$foodName Soup',
-      '$foodName Salad',
-      '$foodName Fry',
-      'More $foodName Recipes',
+      'Hearty $foodName Soup',
+      'Garden Fresh $foodName Salad',
+      'Sizzling $foodName Stir-fry',
+      'Roasted $foodName Bowl',
     ];
 
-    return ListView.separated(
-      padding: const EdgeInsets.only(top: 4, bottom: 12),
-      itemBuilder: (context, index) => _RecipeCard(
-        title: recipes[index],
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RecipeScreen(recipeText: recipes[index]),
-            ),
-          );
-        },
-      ),
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 24),
+      physics: const BouncingScrollPhysics(),
       itemCount: recipes.length,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: _RecipeCard(
+          title: recipes[index],
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecipeScreen(recipeText: recipes[index]),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -309,57 +291,61 @@ class _RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 14,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE9FFE9),
-                borderRadius: BorderRadius.circular(12),
+    final theme = Theme.of(context);
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.black.withOpacity(0.05)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  Icons.restaurant_menu_rounded,
+                  color: theme.colorScheme.primary,
+                  size: 28,
+                ),
               ),
-              child: const Icon(Icons.dining, color: Colors.black87),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Balanced ingredients and minimal waste ideas.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 4),
+                    Text(
+                      'AI-generated zero waste recipe',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.lightText,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.black54),
-          ],
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.lightText.withOpacity(0.3),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -374,15 +360,23 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE9FFE9),
-          borderRadius: BorderRadius.circular(12),
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.primary.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Text(
+            text,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -390,20 +384,34 @@ class _Chip extends StatelessWidget {
 
 class _Pill extends StatelessWidget {
   final String text;
+  final IconData icon;
 
-  const _Pill({required this.text});
+  const _Pill({required this.text, required this.icon});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF72C472).withOpacity(0.45)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
       ),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.darkText,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

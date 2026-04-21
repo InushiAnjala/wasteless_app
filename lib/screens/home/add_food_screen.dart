@@ -9,12 +9,14 @@ import 'package:flutter/services.dart'; // For HapticFeedback
 
 import 'main_screen.dart';
 import '../../constants/text_styles.dart';
+import '../../widgets/back_button.dart';
 
 class AddFoodScreen extends StatefulWidget {
   final String? foodId;
   final Map<String, dynamic>? foodData;
+  final bool adminMode;
 
-  const AddFoodScreen({super.key, this.foodId, this.foodData});
+  const AddFoodScreen({super.key, this.foodId, this.foodData, this.adminMode = false});
 
   @override
   State<AddFoodScreen> createState() => _AddFoodScreenState();
@@ -417,6 +419,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                         ),
                         child: Row(
                           children: [
+                            if (widget.adminMode)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                              ),
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
