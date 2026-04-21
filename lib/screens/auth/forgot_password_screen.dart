@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'otp_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../constants/colors.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -9,7 +10,50 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final contactController = TextEditingController();
+  final emailController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _resetPassword() async {
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter your email address")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password reset link sent! Please check your email."),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Delay slightly then pop back to login
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) Navigator.pop(context);
+      });
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "An error occurred")),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xffD4F8D3),
+      backgroundColor: AppColors.bgColor,
       body: SafeArea(
         child: Center(
           child: Container(
@@ -31,7 +75,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.green, width: 3),
+              border: Border.all(color: AppColors.primary, width: 3),
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -74,7 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   // Instruction
                   Center(
                     child: Text(
-                      "Please enter your contact number here.\nYou will receive an OTP to reset password.",
+                      "Please enter your registered email here.\nYou will receive a link to reset your password.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: screenHeight * 0.02,
@@ -85,23 +129,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   SizedBox(height: screenHeight * 0.03),
 
-                  // Contact Number label
-                  Text(
-                    "Contact Number",
+                  // Email Address label
+                  const Text(
+                    "Email Address",
                     style: TextStyle(
-                      fontSize: screenHeight * 0.022,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
 
                   SizedBox(height: screenHeight * 0.01),
 
-                  // Contact TextField
+                  // Email TextField
                   TextField(
-                    controller: contactController,
-                    keyboardType: TextInputType.phone,
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: "Enter contact number",
+                      hintText: "Enter your email",
                       contentPadding: EdgeInsets.symmetric(
                         vertical: screenHeight * 0.02,
                         horizontal: screenWidth * 0.04,
@@ -118,29 +162,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const OtpScreen()),
-                        );
-                      },
+                      onTap: _isLoading ? null : _resetPassword,
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           vertical: screenHeight * 0.02,
                         ),
                         decoration: BoxDecoration(
+                          color: _isLoading ? Colors.grey : Colors.white,
                           borderRadius: BorderRadius.circular(30),
-                          border: Border.all(color: Colors.green, width: 2),
+                          border: Border.all(color: AppColors.primary, width: 2),
                         ),
                         child: Center(
-                          child: Text(
-                            "Continue",
-                            style: TextStyle(
-                              fontSize: screenHeight * 0.022,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(color: Colors.green)
+                              : Text(
+                                  "Send Reset Link",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
