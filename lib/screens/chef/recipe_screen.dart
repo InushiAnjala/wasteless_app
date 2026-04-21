@@ -286,7 +286,3 @@ class _Header extends StatelessWidget {
     );
   }
 }
-
-// Unused widget declarations removed
-
-// Unused widget declarations removed

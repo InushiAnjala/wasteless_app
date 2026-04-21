@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
+import '../../services/report_service.dart';
 import 'package:intl/intl.dart';
 
 import '../../constants/text_styles.dart';
@@ -99,7 +100,22 @@ class ReportsScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton.filledTonal(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Generating PDF report..."),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            await ReportService.generateAndDownloadReport(
+                              context,
+                              adminMode: adminMode,
+                              userId: user.uid,
+                            );
+                          }
+                        },
                         icon: const Icon(Icons.file_download_rounded),
                       ),
                     ],
