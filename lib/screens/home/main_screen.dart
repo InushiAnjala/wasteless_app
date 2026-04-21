@@ -42,7 +42,7 @@ class _MainScreenState extends State<MainScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: Material(child: _screens[_currentIndex]),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [

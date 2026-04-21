@@ -23,201 +23,199 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.background,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.background,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.background,
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primary.withOpacity(0.1),
+            colorScheme.background,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        child: SafeArea(
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // Header
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-                sliver: SliverToBoxAdapter(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'WasteLess Chef',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.darkText,
-                            ),
+      ),
+      child: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Header
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'WasteLess Chef',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.darkText,
                           ),
-                          Text(
-                            'Kitchen Management',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.lightText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (!widget.adminMode)
-                        IconButton.filledTonal(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            if (!context.mounted) return;
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginSignupScreen(),
-                              ),
-                              (route) => false,
-                            );
-                          },
-                          icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                         ),
+                        Text(
+                          'Kitchen Management',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.lightText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!widget.adminMode)
+                      IconButton.filledTonal(
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          if (!context.mounted) return;
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginSignupScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Hero Card
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverToBoxAdapter(
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [colorScheme.primary, const Color(0xFF1B8E34)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white24,
+                        child: Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 30),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Welcome back, Chef!',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Ready to cook something amazing today?',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
               ),
+            ),
 
-              // Hero Card
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [colorScheme.primary, const Color(0xFF1B8E34)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.primary.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        const CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.white24,
-                          child: Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 30),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Welcome back, Chef!',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Ready to cook something amazing today?',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white70,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+            // Menu Options
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _menuButton(
+                    theme: theme,
+                    title: 'Kitchen Inventory',
+                    subtitle: 'Browse & manage current food items',
+                    icon: Icons.inventory_2_outlined,
+                    onTap: () {
+                      if (widget.onTabSelected != null) {
+                        widget.onTabSelected!(1);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChefFoodScreen(adminMode: widget.adminMode)),
+                        );
+                      }
+                    },
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  _menuButton(
+                    theme: theme,
+                    title: 'Out of Stock',
+                    subtitle: 'Items that need urgent restock',
+                    icon: Icons.warning_amber_rounded,
+                    iconColor: Colors.orange,
+                    onTap: () {
+                      if (widget.onTabSelected != null) {
+                        widget.onTabSelected!(2);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => NotInStockScreen(adminMode: widget.adminMode)),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _menuButton(
+                    theme: theme,
+                    title: 'Notifications',
+                    subtitle: 'Stay ahead of expiries and alerts',
+                    icon: Icons.notifications_active_rounded,
+                    iconColor: Colors.green,
+                    onTap: () {
+                      if (widget.onTabSelected != null) {
+                        widget.onTabSelected!(3);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => NotificationsScreen(adminMode: widget.adminMode)),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _menuButton(
+                    theme: theme,
+                    title: 'AI Chef Assistant',
+                    subtitle: 'Generate recipes from your items',
+                    icon: Icons.auto_awesome_rounded,
+                    iconColor: Colors.deepPurpleAccent,
+                    onTap: () {
+                      if (widget.onTabSelected != null) {
+                        widget.onTabSelected!(4);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                ]),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-              // Menu Options
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _menuButton(
-                      theme: theme,
-                      title: 'Kitchen Inventory',
-                      subtitle: 'Browse & manage current food items',
-                      icon: Icons.inventory_2_outlined,
-                      onTap: () {
-                        if (widget.onTabSelected != null) {
-                          widget.onTabSelected!(1);
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => ChefFoodScreen(adminMode: widget.adminMode)),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _menuButton(
-                      theme: theme,
-                      title: 'Out of Stock',
-                      subtitle: 'Items that need urgent restock',
-                      icon: Icons.warning_amber_rounded,
-                      iconColor: Colors.orange,
-                      onTap: () {
-                        if (widget.onTabSelected != null) {
-                          widget.onTabSelected!(2);
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => NotInStockScreen(adminMode: widget.adminMode)),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _menuButton(
-                      theme: theme,
-                      title: 'Notifications',
-                      subtitle: 'Stay ahead of expiries and alerts',
-                      icon: Icons.notifications_active_rounded,
-                      iconColor: Colors.green,
-                      onTap: () {
-                        if (widget.onTabSelected != null) {
-                          widget.onTabSelected!(3);
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => NotificationsScreen(adminMode: widget.adminMode)),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _menuButton(
-                      theme: theme,
-                      title: 'AI Chef Assistant',
-                      subtitle: 'Generate recipes from your items',
-                      icon: Icons.auto_awesome_rounded,
-                      iconColor: Colors.deepPurpleAccent,
-                      onTap: () {
-                        if (widget.onTabSelected != null) {
-                          widget.onTabSelected!(4);
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                  ]),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

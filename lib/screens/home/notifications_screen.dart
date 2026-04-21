@@ -9,109 +9,107 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
 
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFB7F5C7), Color(0xFFEFFDF3)],
-          ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFB7F5C7), Color(0xFFEFFDF3)],
         ),
+      ),
 
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.92),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.notifications_active,
-                            color: Colors.green,
-                            size: 26,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            "Notification",
-                            style: AppTextStyles.heading.copyWith(fontSize: 22),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Stay ahead of expiries and stock alerts.",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade700,
-                          height: 1.4,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.notifications_active,
+                          color: Colors.green,
+                          size: 26,
                         ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Notification",
+                          style: AppTextStyles.heading.copyWith(fontSize: 22),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Stay ahead of expiries and stock alerts.",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                        height: 1.4,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
 
-                const SizedBox(height: 22),
+              const SizedBox(height: 22),
 
-                _actionCard(
-                  title: "Customize Notification Dates",
-                  subtitle: "Set your alert windows for each category.",
-                  icon: Icons.tune_rounded,
-                  color: Colors.green.shade600,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const CustomizeNotificationsScreen(),
-                      ),
-                    );
-                  },
-                ),
+              _actionCard(
+                title: "Customize Notification Dates",
+                subtitle: "Set your alert windows for each category.",
+                icon: Icons.tune_rounded,
+                color: Colors.green.shade600,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const CustomizeNotificationsScreen(),
+                    ),
+                  );
+                },
+              ),
 
-                const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-                _actionCard(
-                  title: "View Notifications",
-                  subtitle: "See what’s expiring soon and mark as read.",
-                  icon: Icons.inbox_outlined,
-                  color: Colors.orange.shade700,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AlertScreen(adminMode: adminMode),
-                      ),
-                    );
-                  },
-                ),
+              _actionCard(
+                title: "View Notifications",
+                subtitle: "See what’s expiring soon and mark as read.",
+                icon: Icons.inbox_outlined,
+                color: Colors.orange.shade700,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AlertScreen(adminMode: adminMode),
+                    ),
+                  );
+                },
+              ),
 
-                const Spacer(),
-              ],
-            ),
+              const Spacer(),
+            ],
           ),
         ),
       ),

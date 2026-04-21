@@ -21,32 +21,30 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF9DE8B4), Color(0xFFF4FFF6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _header(),
-                const SizedBox(height: 18),
-                _searchBar(),
-                const SizedBox(height: 16),
-                _categoryChips(),
-                const SizedBox(height: 16),
-                Expanded(child: _foodList()),
-              ],
-            ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _header(),
+              const SizedBox(height: 18),
+              _searchBar(),
+              const SizedBox(height: 16),
+              _categoryChips(),
+              const SizedBox(height: 16),
+              Expanded(child: _foodList()),
+            ],
           ),
         ),
       ),

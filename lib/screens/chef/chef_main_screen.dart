@@ -43,7 +43,7 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: Material(child: _screens[_currentIndex]),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
