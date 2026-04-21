@@ -235,10 +235,46 @@ class _QuickTags extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
-              _Pill(text: 'Fresh Ideas', icon: Icons.lightbulb_outline_rounded),
-              _Pill(text: 'Under 15m', icon: Icons.timer_outlined),
-              _Pill(text: 'Healthy', icon: Icons.favorite_outline_rounded),
-              _Pill(text: 'Zero Waste', icon: Icons.eco_outlined),
+              _Pill(
+                text: 'Fresh Ideas',
+                icon: Icons.lightbulb_outline_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeScreen(recipeText: 'Fresh recipe ideas for $foodName'),
+                  ),
+                ),
+              ),
+              _Pill(
+                text: 'Under 15m',
+                icon: Icons.timer_outlined,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeScreen(recipeText: 'Quick $foodName recipes under 15 minutes'),
+                  ),
+                ),
+              ),
+              _Pill(
+                text: 'Healthy',
+                icon: Icons.favorite_outline_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeScreen(recipeText: 'Healthy $foodName recipes'),
+                  ),
+                ),
+              ),
+              _Pill(
+                text: 'Zero Waste',
+                icon: Icons.eco_outlined,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecipeScreen(recipeText: 'Zero waste cooking ideas for $foodName'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -382,35 +418,35 @@ class _Chip extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  final String text;
-  final IconData icon;
-
-  const _Pill({required this.text, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.05)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: theme.colorScheme.primary),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.darkText,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black.withOpacity(0.05)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  text,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.darkText,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
