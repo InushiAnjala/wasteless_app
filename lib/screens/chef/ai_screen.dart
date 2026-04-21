@@ -418,6 +418,16 @@ class _Chip extends StatelessWidget {
   }
 }
 
+class _Pill extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _Pill({required this.text, required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: Material(
