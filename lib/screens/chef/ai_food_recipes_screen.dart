@@ -16,7 +16,6 @@ class AIFoodRecipesScreen extends StatefulWidget {
 }
 
 class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
-  int _currentIndex = 3; // AI Recipes tab
   final TextEditingController _searchController = TextEditingController();
   final List<String> _allRecipes = const [
     'Pasta Soup',
@@ -43,29 +42,6 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
 
   List<String> _filtered = const [];
   bool _showSuggestions = false;
-
-  void _handleNav(int index) {
-    if (index == _currentIndex) return;
-    Widget target;
-    switch (index) {
-      case 0:
-        target = ChefHomeScreen(adminMode: widget.adminMode);
-        break;
-      case 1:
-        target = ChefFoodScreen(adminMode: widget.adminMode);
-        break;
-      case 2:
-        target = NotInStockScreen(adminMode: widget.adminMode);
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => target),
-    );
-  }
 
   @override
   void dispose() {
@@ -337,26 +313,6 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNav,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Food List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_shopping_cart),
-            label: 'Not in stock',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
-            label: 'AI Recipes',
-          ),
-        ],
       ),
     );
   }

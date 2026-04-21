@@ -103,12 +103,29 @@ class _AlertScreenState extends State<AlertScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Your Notifications',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                    Expanded(
+                      child: const Text(
+                        'Your Notifications',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _clearAll(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      icon: const Icon(Icons.done_all, color: Colors.green, size: 20),
+                      label: const Text(
+                        'Clear All',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -154,9 +171,7 @@ class _AlertScreenState extends State<AlertScreen> {
                         Query<Map<String, dynamic>> query = FirebaseFirestore
                             .instance
                             .collection('foods');
-                        if (!widget.adminMode) {
-                          query = query.where('userId', isEqualTo: uid);
-                        }
+                        // Roles share notifications to ensure kitchen & store coordination
                         return query.snapshots();
                       })(),
                       builder: (context, snapshot) {
@@ -544,6 +559,72 @@ class _AlertScreenState extends State<AlertScreen> {
     await FirebaseFirestore.instance.collection('foods').doc(docId).set({
       'notifRead': true,
     }, SetOptions(merge: true));
+  }
+
+  Future<void> _clearAll() async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    try {
+      // Show confirmation dialog
+      final bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Clear All Notifications?'),
+          content: const Text('This will mark all currently visible alerts as read.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.green),
+              child: const Text('Clear All'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
+      // Fetch the same notifications that are currently being shown
+      Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('foods');
+      query = query.where('notifRead', isEqualTo: false);
+
+      final snapshot = await query.get();
+      final now = DateTime.now();
+      final batch = FirebaseFirestore.instance.batch();
+
+      int count = 0;
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final String section = (data['section'] as String?) ?? 'Others';
+        final rule = _ruleForSection(section);
+        if (rule.daysThreshold <= 0) continue;
+
+        final DateTime expiry = (data['expiryDate'] as Timestamp).toDate();
+        final int daysUntil = expiry.difference(now).inDays;
+
+        if (daysUntil <= rule.daysThreshold) {
+          batch.update(doc.reference, {'notifRead': true});
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        await batch.commit();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cleared $count notifications')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to clear notifications: $e')),
+      );
+    }
   }
 }
 

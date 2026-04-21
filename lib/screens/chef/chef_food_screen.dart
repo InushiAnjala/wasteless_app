@@ -15,33 +15,9 @@ class ChefFoodScreen extends StatefulWidget {
 }
 
 class _ChefFoodScreenState extends State<ChefFoodScreen> {
-  int _currentIndex = 1; // Food List tab
   String searchText = "";
   String selectedCategory = "Veges";
   final List<String> categories = ["Veges", "Meat", "Fruits", "Others"];
-
-  void _handleNav(int index) {
-    if (index == _currentIndex) return;
-    Widget target;
-    switch (index) {
-      case 0:
-        target = ChefHomeScreen(adminMode: widget.adminMode);
-        break;
-      case 2:
-        target = NotInStockScreen(adminMode: widget.adminMode);
-        break;
-      case 3:
-        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => target),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,26 +49,6 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _handleNav,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Food List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.remove_shopping_cart),
-            label: 'Not in stock',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
-            label: 'AI Recipes',
-          ),
-        ],
       ),
     );
   }

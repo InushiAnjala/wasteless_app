@@ -5,42 +5,19 @@ import 'chef_food_screen.dart';
 import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 import '../onboarding/login_signup_screen.dart';
+import '../home/notifications_screen.dart';
 import '../../constants/colors.dart';
 
 class ChefHomeScreen extends StatefulWidget {
   final bool adminMode;
-  const ChefHomeScreen({super.key, this.adminMode = false});
+  final void Function(int index)? onTabSelected;
+  const ChefHomeScreen({super.key, this.adminMode = false, this.onTabSelected});
 
   @override
   State<ChefHomeScreen> createState() => _ChefHomeScreenState();
 }
 
 class _ChefHomeScreenState extends State<ChefHomeScreen> {
-  int _currentIndex = 0;
-
-  void _handleNav(int index) {
-    if (index == _currentIndex) return;
-    Widget target;
-    switch (index) {
-      case 1:
-        target = ChefFoodScreen(adminMode: widget.adminMode);
-        break;
-      case 2:
-        target = NotInStockScreen(adminMode: widget.adminMode);
-        break;
-      case 3:
-        target = AIFoodRecipesScreen(adminMode: widget.adminMode);
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => target),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -171,10 +148,14 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
                       subtitle: 'Browse & manage current food items',
                       icon: Icons.inventory_2_outlined,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ChefFoodScreen(adminMode: widget.adminMode)),
-                        );
+                        if (widget.onTabSelected != null) {
+                          widget.onTabSelected!(1);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ChefFoodScreen(adminMode: widget.adminMode)),
+                          );
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -185,10 +166,32 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
                       icon: Icons.warning_amber_rounded,
                       iconColor: Colors.orange,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => NotInStockScreen(adminMode: widget.adminMode)),
-                        );
+                        if (widget.onTabSelected != null) {
+                          widget.onTabSelected!(2);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotInStockScreen(adminMode: widget.adminMode)),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _menuButton(
+                      theme: theme,
+                      title: 'Notifications',
+                      subtitle: 'Stay ahead of expiries and alerts',
+                      icon: Icons.notifications_active_rounded,
+                      iconColor: Colors.green,
+                      onTap: () {
+                        if (widget.onTabSelected != null) {
+                          widget.onTabSelected!(3);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificationsScreen(adminMode: widget.adminMode)),
+                          );
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -199,10 +202,14 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
                       icon: Icons.auto_awesome_rounded,
                       iconColor: Colors.deepPurpleAccent,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
-                        );
+                        if (widget.onTabSelected != null) {
+                          widget.onTabSelected!(4);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
+                          );
+                        }
                       },
                     ),
                     const SizedBox(height: 32),
@@ -211,33 +218,6 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
               ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: _handleNav,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: colorScheme.primary,
-          unselectedItemColor: Colors.black38,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Dashboard'),
-            BottomNavigationBarItem(icon: Icon(Icons.inventory_rounded), label: 'Inventory'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_rounded), label: 'Restock'),
-            BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_rounded), label: 'AI Chef'),
-          ],
         ),
       ),
     );

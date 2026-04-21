@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home/main_screen.dart';
-import '../chef/chef_home_screen.dart';
+import '../chef/chef_main_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 import '../../constants/colors.dart';
 import '../../widgets/back_button.dart';
@@ -262,7 +262,7 @@ class _AdminChefPortal extends StatelessWidget {
       },
       child: Stack(
         children: [
-          const ChefHomeScreen(adminMode: true),
+          const ChefMainScreen(adminMode: true),
           Positioned(
             top: 12,
             left: 12,

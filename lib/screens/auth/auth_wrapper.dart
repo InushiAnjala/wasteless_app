@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../chef/chef_home_screen.dart';
+import '../chef/chef_main_screen.dart';
 import '../home/main_screen.dart';
 import '../onboarding/splash_screen.dart';
 
@@ -42,7 +42,7 @@ class AuthWrapper extends StatelessWidget {
             final role = roleSnapshot.data!['role'];
 
             if (role == 'Chef') {
-              return const ChefHomeScreen();
+              return const ChefMainScreen();
             } else {
               return const MainScreen();
             }
