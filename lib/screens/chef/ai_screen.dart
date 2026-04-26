@@ -128,6 +128,14 @@ class _SearchCardState extends State<_SearchCard> {
     );
   }
 
+  void _submitCustomSearch() {
+    final query = _controller.text.trim();
+    if (query.isEmpty) return;
+    
+    // Combine what the user typed with the selected ingredients
+    _submitSearch('$query using ${widget.foodName}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -161,7 +169,7 @@ class _SearchCardState extends State<_SearchCard> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    onSubmitted: _submitSearch,
+                    onSubmitted: (_) => _submitCustomSearch(),
                     decoration: InputDecoration(
                       hintText: 'What can we cook with ${widget.foodName}?',
                       hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -173,7 +181,7 @@ class _SearchCardState extends State<_SearchCard> {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => _submitSearch(_controller.text),
+                  onPressed: _submitCustomSearch,
                   icon: const Icon(Icons.send_rounded),
                   color: theme.colorScheme.primary,
                 ),
