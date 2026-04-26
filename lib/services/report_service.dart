@@ -9,7 +9,13 @@ class ReportService {
   static const int _expiringSoonDays = 3;
   static const double _lowStockThreshold = 2.0;
 
-  static Future<void> generateAndDownloadReport(BuildContext context, {required bool adminMode, required String userId}) async {
+  static Future<void> generateAndDownloadReport(BuildContext context, {
+    required bool adminMode,
+    required String userId,
+    String timeRange = "All",
+    DateTime? customStart,
+    DateTime? customEnd,
+  }) async {
     try {
       // 1. Fetch Data
       final QuerySnapshot snapshot = await (() {
@@ -20,8 +26,31 @@ class ReportService {
         return query.get();
       })();
 
-      final docs = snapshot.docs;
       final now = DateTime.now();
+      final docs = snapshot.docs.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final createdAt = data['createdAt'];
+        if (createdAt == null) return timeRange == "All";
+        
+        final createdDate = (createdAt as Timestamp).toDate();
+        
+        if (customStart != null && customEnd != null) {
+          // Normalize to start of day for start and end of day for end
+          final start = DateTime(customStart.year, customStart.month, customStart.day);
+          final end = DateTime(customEnd.year, customEnd.month, customEnd.day, 23, 59, 59);
+          return createdDate.isAfter(start.subtract(const Duration(seconds: 1))) && 
+                 createdDate.isBefore(end.add(const Duration(seconds: 1)));
+        }
+
+        if (timeRange == "All") return true;
+        
+        final difference = now.difference(createdDate).inDays;
+        if (timeRange == "7 Days") return difference <= 7;
+        if (timeRange == "1 Month") return difference <= 30;
+        if (timeRange == "4 Months") return difference <= 120;
+        
+        return true;
+      }).toList();
 
       // 2. Process Data
       int totalItems = docs.length;
@@ -88,6 +117,8 @@ class ReportService {
       // 3. Generate PDF
       final pdf = pw.Document();
 
+      final double sustainabilityScore = totalItems == 0 ? 100 : ((totalItems - expiredItems.length) / totalItems) * 100;
+
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
@@ -97,7 +128,9 @@ class ReportService {
             child: pw.Text("Page ${context.pageNumber} of ${context.pagesCount}", style: const pw.TextStyle(fontSize: 10)),
           ),
           build: (pw.Context context) => [
-            _buildHeader(now, adminMode),
+            _buildHeader(now, adminMode, timeRange, customStart, customEnd),
+            pw.SizedBox(height: 20),
+            _buildSustainabilitySection(sustainabilityScore),
             pw.SizedBox(height: 20),
             _buildSummaryCards(totalItems, expiringSoonItems.length, expiredItems.length, lowStockItems.length),
             pw.SizedBox(height: 30),
@@ -145,7 +178,12 @@ class ReportService {
     return 0;
   }
 
-  static pw.Widget _buildHeader(DateTime now, bool adminMode) {
+  static pw.Widget _buildHeader(DateTime now, bool adminMode, String timeRange, DateTime? start, DateTime? end) {
+    String periodText = "Period: $timeRange";
+    if (start != null && end != null) {
+      periodText = "Period: ${DateFormat('yyyy-MM-dd').format(start)} to ${DateFormat('yyyy-MM-dd').format(end)}";
+    }
+
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -154,7 +192,8 @@ class ReportService {
           children: [
             pw.Text("WASTELESS", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.green800)),
             pw.Text("Analytics & Insights Report", style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700)),
-            if (adminMode) pw.Text("Global System Statistics", style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey600)),
+            pw.Text(periodText, style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey600)),
+            if (adminMode) pw.Text("Global System Statistics", style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
           ],
         ),
         pw.Column(
@@ -165,6 +204,29 @@ class ReportService {
           ],
         ),
       ],
+    );
+  }
+
+  static pw.Widget _buildSustainabilitySection(double score) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(15),
+      decoration: const pw.BoxDecoration(
+        color: PdfColors.green50,
+        borderRadius: pw.BorderRadius.all(pw.Radius.circular(10)),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text("Kitchen Sustainability Score", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.green900)),
+              pw.Text(score >= 80 ? "Excellent Food Management" : score >= 50 ? "Good Progress" : "Needs Attention", style: const pw.TextStyle(fontSize: 12, color: PdfColors.green700)),
+            ],
+          ),
+          pw.Text("${score.round()}%", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.green900)),
+        ],
+      ),
     );
   }
 
