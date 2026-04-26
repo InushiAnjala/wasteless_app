@@ -49,139 +49,148 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header card
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.16),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF25C06D),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.22),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header card
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.16),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
                         ),
-                        child: const Icon(
-                          Icons.remove_shopping_cart,
-                          color: Colors.white,
-                          size: 18,
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF25C06D),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.22),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.remove_shopping_cart,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "Not in stock",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "Not in stock",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Track what needs replenishing and quantities.",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  // Entry card
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.12),
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                      border: Border.all(color: const Color(0xFFE7F1EA)),
+                    ),
+                    child: Column(
+                      children: [
+                        ..._rowList(),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: nameControllers.length >= _maxRows
+                                ? null
+                                : () => _addRow(),
+                            icon: const Icon(Icons.add_circle_outline, size: 20),
+                            label: Text(
+                              nameControllers.length >= _maxRows
+                                  ? 'Maximum items reached'
+                                  : 'Add another item',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF25C06D),
                               ),
                             ),
-                            SizedBox(height: 6),
-                            Text(
-                              "Track what needs replenishing and quantities.",
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF25C06D),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 2,
+                            ),
+                            onPressed: _submitNeeds,
+                            child: const Text(
+                              'Send to Kitchen Needs',
                               style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                // Entry card
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    border: Border.all(color: const Color(0xFFE7F1EA)),
-                  ),
-                  child: Column(
-                    children: [
-                      ..._rowList(),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: nameControllers.length >= _maxRows
-                              ? null
-                              : () => _addRow(),
-                          icon: const Icon(Icons.add),
-                          label: Text(
-                            nameControllers.length >= _maxRows
-                                ? 'Maximum items reached'
-                                : 'Add another item',
-                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF25C06D),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: _submitNeeds,
-                          child: const Text(
-                            'Send to Kitchen Needs',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -206,51 +215,77 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
       children: [
         Text(
           "$number.",
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF25C06D),
+          ),
         ),
 
-        const SizedBox(width: 20),
+        const SizedBox(width: 12),
 
         // Name Field
         Expanded(
-          flex: 2,
+          flex: 3,
           child: TextField(
             controller: nameControllers[index],
             decoration: const InputDecoration(
               hintText: "Item name",
-              hintStyle: TextStyle(color: Colors.black45),
+              hintStyle: TextStyle(color: Colors.black38, fontSize: 14),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 6),
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
             ),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
 
-        const SizedBox(width: 10),
+        const Text(
+          "|",
+          style: TextStyle(fontSize: 16, color: Colors.black12),
+        ),
 
-        const Text("|", style: TextStyle(fontSize: 18, color: Colors.black45)),
-
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
 
         // Amount Field
         Expanded(
-          flex: 3,
+          flex: 2,
           child: TextField(
             controller: amountControllers[index],
             decoration: const InputDecoration(
-              hintText: "Amount needed",
-              hintStyle: TextStyle(color: Colors.black45),
+              hintText: "Qty/Amount",
+              hintStyle: TextStyle(color: Colors.black38, fontSize: 14),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 6),
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
             ),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            keyboardType: TextInputType.number,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            keyboardType: TextInputType.text,
             onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
+
+        if (nameControllers.length > 1)
+          IconButton(
+            icon: const Icon(
+              Icons.remove_circle_outline,
+              color: Colors.redAccent,
+              size: 20,
+            ),
+            onPressed: () => _removeRow(index),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
       ],
     );
+  }
+
+  void _removeRow(int index) {
+    setState(() {
+      nameControllers[index].dispose();
+      amountControllers[index].dispose();
+      nameControllers.removeAt(index);
+      amountControllers.removeAt(index);
+    });
   }
 
   void _addRow({bool initial = false, String name = '', String amount = ''}) {
