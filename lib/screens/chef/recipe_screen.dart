@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../constants/colors.dart';
 
 class RecipeScreen extends StatefulWidget {
@@ -18,6 +20,49 @@ class _RecipeScreenState extends State<RecipeScreen> {
   late final ChatSession chat;
   final TextEditingController _questionController = TextEditingController();
   bool _isLoading = true;
+  bool _isSaving = false;
+  bool _isSaved = false;
+
+  Future<void> _saveRecipe(String recipeContent) async {
+    if (_isSaved || _isSaving || recipeContent.isEmpty) return;
+    
+    setState(() => _isSaving = true);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("User not logged in");
+
+      String title = widget.recipeText;
+      // Clean up the title if it's the raw prompt
+      if (title.startsWith("Please provide a detailed food recipe for ")) {
+        title = title.replaceAll("Please provide a detailed food recipe for ", "").replaceAll(". Make it well-structured and easy to follow.", "").trim();
+      }
+
+      await FirebaseFirestore.instance.collection('saved_recipes').add({
+        'userId': user.uid,
+        'title': title,
+        'content': recipeContent,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      setState(() => _isSaved = true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recipe saved successfully!'),
+            backgroundColor: Color(0xFF1E9E5A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save recipe: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
 
   @override
   void initState() {
@@ -112,7 +157,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                _Header(onBack: () => Navigator.pop(context)),
+                _Header(
+                  onBack: () => Navigator.pop(context),
+                  onSave: () => _saveRecipe(recipeContent),
+                  isSaving: _isSaving,
+                  isSaved: _isSaved,
+                  showSave: conversation.length > 1,
+                ),
 
                 const SizedBox(height: 24),
 
@@ -246,8 +297,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
 class _Header extends StatelessWidget {
   final VoidCallback onBack;
+  final VoidCallback? onSave;
+  final bool isSaving;
+  final bool isSaved;
+  final bool showSave;
 
-  const _Header({required this.onBack});
+  const _Header({
+    required this.onBack,
+    this.onSave,
+    this.isSaving = false,
+    this.isSaved = false,
+    this.showSave = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -278,10 +339,25 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        CircleAvatar(
-          backgroundColor: theme.colorScheme.primary,
-          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
-        ),
+        if (showSave)
+          IconButton.filledTonal(
+            onPressed: isSaving || isSaved ? null : onSave,
+            icon: isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(
+                    isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                    color: isSaved ? theme.colorScheme.primary : null,
+                  ),
+          )
+        else
+          CircleAvatar(
+            backgroundColor: theme.colorScheme.primary,
+            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+          ),
       ],
     );
   }

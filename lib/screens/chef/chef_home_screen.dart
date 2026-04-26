@@ -6,6 +6,7 @@ import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 import '../home/notifications_screen.dart';
+import 'saved_recipes_screen.dart';
 import '../../constants/colors.dart';
 import '../../widgets/back_button.dart';
 
@@ -218,6 +219,20 @@ class _ChefHomeScreenState extends State<ChefHomeScreen> {
                           MaterialPageRoute(builder: (context) => AIFoodRecipesScreen(adminMode: widget.adminMode)),
                         );
                       }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _menuButton(
+                    theme: theme,
+                    title: 'Saved Recipes',
+                    subtitle: 'View your bookmarked recipes',
+                    icon: Icons.bookmark_rounded,
+                    iconColor: Colors.teal,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SavedRecipesScreen()),
+                      );
                     },
                   ),
                   const SizedBox(height: 32),
