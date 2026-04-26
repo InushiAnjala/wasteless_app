@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/notification_service.dart';
 
 class CustomizeNotificationsScreen extends StatefulWidget {
   const CustomizeNotificationsScreen({super.key});
@@ -78,6 +79,8 @@ class _CustomizeNotificationsScreenState
 
     if (!mounted) return;
     setState(() => _isEditing = false);
+    // Reschedule all phone notifications with updated thresholds
+    NotificationService.instance.scheduleAllNotifications();
   }
 
   // ---------------- UI ----------------

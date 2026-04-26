@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/notification_service.dart';
 import 'home_screen.dart';
 import 'food_list_screen.dart';
 import 'kitchen_needs_screen.dart';
@@ -32,6 +33,8 @@ class _MainScreenState extends State<MainScreen> {
       NotificationsScreen(adminMode: widget.adminMode),
       ReportsScreen(adminMode: widget.adminMode),
     ];
+    // Schedule / refresh phone notifications every time the home screen loads
+    NotificationService.instance.scheduleAllNotifications();
   }
 
   void _onTabSelected(int index) {

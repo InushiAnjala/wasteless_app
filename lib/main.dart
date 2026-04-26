@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'constants/colors.dart';
 import 'firebase_options.dart';
+import 'services/notification_service.dart';
 
 // 🔴 THIS LINE IS VERY IMPORTANT
 import 'screens/auth/auth_wrapper.dart';
@@ -10,8 +11,10 @@ import 'screens/auth/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.instance.initialize();
   runApp(const WasteLessApp());
 }
+
 
 class WasteLessApp extends StatelessWidget {
   const WasteLessApp({super.key});

@@ -10,6 +10,7 @@ import 'package:flutter/services.dart'; // For HapticFeedback
 import 'main_screen.dart';
 import '../../constants/text_styles.dart';
 import '../../widgets/back_button.dart';
+import '../../services/notification_service.dart';
 
 class AddFoodScreen extends StatefulWidget {
   final String? foodId;
@@ -363,7 +364,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       });
     }
 
-    if (!mounted) return; // Add check
+    if (!mounted) return;
+    // Reschedule notifications so new/edited item is included immediately
+    NotificationService.instance.scheduleAllNotifications();
     Navigator.pop(context);
   }
 
