@@ -99,6 +99,7 @@ class NotificationService {
     // (reserves 1000–1999 for future use; test uses 1–99)
     int thresholdId = 2000;
     int expiryId = 3000;
+    int staggerDelaySeconds = 5;
 
     for (final doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
@@ -145,6 +146,18 @@ class NotificationService {
                 'Expires in $thresholdDays days (${_fmtDate(expiryDate)}). Use it before it goes bad!',
             scheduledAt: thresholdAt8am,
           );
+        } else if (thresholdAt8am.year == now.year &&
+                   thresholdAt8am.month == now.month &&
+                   thresholdAt8am.day == now.day) {
+          // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
+          await _scheduleNotification(
+            id: thresholdId++,
+            title: '${_categoryEmoji(section)} $name is expiring soon!',
+            body:
+                'Expires in $thresholdDays days (${_fmtDate(expiryDate)}). Use it before it goes bad!',
+            scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
+          );
+          staggerDelaySeconds += 2; // Stagger next notification by 2s
         }
       }
 
@@ -164,6 +177,18 @@ class NotificationService {
               'Your $section item "$name" expires today (${_fmtDate(expiryDate)}). Use or discard it now!',
           scheduledAt: expiryAt8am,
         );
+      } else if (expiryAt8am.year == now.year &&
+                 expiryAt8am.month == now.month &&
+                 expiryAt8am.day == now.day) {
+        // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
+        await _scheduleNotification(
+          id: expiryId++,
+          title: '⚠️ $name expires TODAY!',
+          body:
+              'Your $section item "$name" expires today (${_fmtDate(expiryDate)}). Use or discard it now!',
+          scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
+        );
+        staggerDelaySeconds += 2; // Stagger next notification by 2s
       }
     }
   }
