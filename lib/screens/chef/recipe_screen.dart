@@ -22,6 +22,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isSaved = false;
+  String? _errorMessage;
 
   Future<void> _saveRecipe(String recipeContent) async {
     if (_isSaved || _isSaving || recipeContent.isEmpty) return;
@@ -81,21 +82,35 @@ class _RecipeScreenState extends State<RecipeScreen> {
   }
 
   Future<void> _fetchInitialRecipe() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
     final prompt =
         "Please provide a detailed food recipe for ${widget.recipeText}. Make it well-structured and easy to follow.";
 
     try {
       if (apiKey == "YOUR_API_KEY_HERE") {
-        throw Exception("You must replace YOUR_API_KEY_HERE with your actual Gemini API key in recipe_screen.dart");
+        throw Exception("API key not configured.");
       }
       final response = await chat.sendMessage(Content.text(prompt));
       conversation.add(Content.model([TextPart(response.text ?? "")]));
       if (mounted) setState(() {});
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to generate recipe: $e')),
-      );
+      final errStr = e.toString();
+      String friendlyMessage;
+      if (errStr.contains('503') || errStr.contains('UNAVAILABLE') || errStr.contains('high demand')) {
+        friendlyMessage = 'The AI is currently experiencing high demand. Please try again in a moment.';
+      } else if (errStr.contains('network') || errStr.contains('SocketException')) {
+        friendlyMessage = 'No internet connection. Please check your network and try again.';
+      } else if (errStr.contains('API key')) {
+        friendlyMessage = 'Invalid API key. Please check your configuration.';
+      } else {
+        friendlyMessage = 'Something went wrong. Please try again.';
+      }
+      setState(() => _errorMessage = friendlyMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -218,17 +233,55 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                       color: colorScheme.primary,
                                     ),
                                   )
-                                : SingleChildScrollView(
-                                    padding: const EdgeInsets.all(24),
-                                    physics: const BouncingScrollPhysics(),
-                                    child: Text(
-                                      recipeContent,
-                                      style: theme.textTheme.bodyLarge?.copyWith(
-                                        height: 1.6,
-                                        color: AppColors.darkText,
+                                : _errorMessage != null
+                                    ? Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.wifi_tethering_error_rounded,
+                                                  size: 56,
+                                                  color: Colors.orange.shade400),
+                                              const SizedBox(height: 16),
+                                              Text(
+                                                _errorMessage!,
+                                                textAlign: TextAlign.center,
+                                                style: theme.textTheme.bodyLarge?.copyWith(
+                                                  color: Colors.black54,
+                                                  height: 1.5,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 24),
+                                              ElevatedButton.icon(
+                                                onPressed: _fetchInitialRecipe,
+                                                icon: const Icon(Icons.refresh_rounded),
+                                                label: const Text('Try Again'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: colorScheme.primary,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 24, vertical: 12),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(16),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : SingleChildScrollView(
+                                        padding: const EdgeInsets.all(24),
+                                        physics: const BouncingScrollPhysics(),
+                                        child: Text(
+                                          recipeContent,
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            height: 1.6,
+                                            color: AppColors.darkText,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
                           ),
 
                           const SizedBox(height: 8),
