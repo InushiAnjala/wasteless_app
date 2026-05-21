@@ -30,6 +30,7 @@ dependencies:
   path_provider: ^2.1.5
   flutter_local_notifications: ^18.0.0
   timezone: ^0.9.4
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -44,3 +45,4 @@ flutter:
     - assets/onboarding_1.png
     - assets/onboarding_2.png
     - assets/onboarding_3.png
+    - .env

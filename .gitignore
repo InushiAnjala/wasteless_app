@@ -43,10 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-<<<<<<< HEAD
-
 # Git Backups
 .git_migrated/
 .git_outer_backup/
-=======
->>>>>>> 0459bece8bdde4df634011f788a989042e99139c
+
+# Environment secrets
+.env

@@ -57,6 +57,12 @@ exports.generateRecipe = functions.runWith({ secrets: ["GEMINI_API_KEY"] }).http
       parts: [{ text: msg.content }]
     }));
 
+    // Add the current user prompt to contents
+    contents.push({
+      role: 'user',
+      parts: [{ text: prompt }]
+    });
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: contents,
