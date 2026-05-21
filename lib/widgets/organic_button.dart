@@ -26,11 +26,11 @@ class OrganicButton extends StatelessWidget {
           backgroundColor: isPrimary ? const Color(0xFF3CB371) : Colors.white,
           foregroundColor: isPrimary ? Colors.white : const Color(0xFF3CB371),
           elevation: isPrimary ? 12 : 0,
-          shadowColor: const Color(0xFF3CB371).withOpacity(0.4),
+          shadowColor: const Color(0xFF3CB371).withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: isPrimary 
-                ? BorderSide.none 
+            side: isPrimary
+                ? BorderSide.none
                 : const BorderSide(color: Color(0xFF3CB371), width: 2),
           ),
         ),

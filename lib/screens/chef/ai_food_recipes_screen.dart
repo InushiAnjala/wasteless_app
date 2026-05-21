@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'chef_home_screen.dart';
-import 'chef_food_screen.dart';
-import 'not_in_stock_screen.dart';
 import 'ai_recipe_detail_screen.dart';
-import 'ai_screen.dart';
 import 'recipe_screen.dart';
-import '../../widgets/back_button.dart';
 
 class AIFoodRecipesScreen extends StatefulWidget {
   final bool adminMode;
@@ -119,11 +114,11 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.16),
+                      color: Colors.green.withValues(alpha: 0.16),
                       blurRadius: 24,
                       offset: const Offset(0, 12),
                     ),
@@ -138,7 +133,7 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withOpacity(0.22),
+                            color: Colors.green.withValues(alpha: 0.22),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
                           ),
@@ -187,11 +182,11 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
+                        color: Colors.green.withValues(alpha: 0.12),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -210,7 +205,7 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                               decoration: const InputDecoration(
                                 hintText: "Search for food recipes",
                                 border: InputBorder.none,
-                             ),
+                              ),
                               style: const TextStyle(fontSize: 16),
                               textInputAction: TextInputAction.search,
                               onSubmitted: (_) => _submitSearch(),
@@ -232,12 +227,14 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE0E9E3)),
+                              border: Border.all(
+                                color: const Color(0xFFE0E9E3),
+                              ),
                             ),
                             child: ListView.separated(
                               shrinkWrap: true,
                               itemCount: _filtered.length,
-                              separatorBuilder: (_, __) => const Divider(
+                              separatorBuilder: (_, _) => const Divider(
                                 height: 1,
                                 color: Color(0xFFE7F1EA),
                               ),
@@ -283,7 +280,7 @@ class _AIFoodRecipesScreenState extends State<AIFoodRecipesScreen> {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.2),
+                        color: Colors.green.withValues(alpha: 0.2),
                         blurRadius: 18,
                         offset: const Offset(0, 10),
                       ),

@@ -7,7 +7,12 @@ import '../home/notifications_screen.dart';
 import '../../services/notification_service.dart';
 
 class ChefMainScreen extends StatefulWidget {
-  const ChefMainScreen({super.key, this.initialIndex = 0, this.adminMode = false, this.onTabChanged});
+  const ChefMainScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.adminMode = false,
+    this.onTabChanged,
+  });
 
   final int initialIndex;
   final bool adminMode;
@@ -26,7 +31,10 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _screens = [
-      ChefHomeScreen(onTabSelected: _onTabSelected, adminMode: widget.adminMode),
+      ChefHomeScreen(
+        onTabSelected: _onTabSelected,
+        adminMode: widget.adminMode,
+      ),
       ChefFoodScreen(adminMode: widget.adminMode),
       NotInStockScreen(adminMode: widget.adminMode),
       NotificationsScreen(adminMode: widget.adminMode),
@@ -55,7 +63,7 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -68,7 +76,10 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
           backgroundColor: Colors.white,
           selectedItemColor: colorScheme.primary,
           unselectedItemColor: Colors.black38,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: const [
             BottomNavigationBarItem(

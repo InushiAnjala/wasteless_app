@@ -39,10 +39,7 @@ class AppGradients {
 
   // Glass effect overlay
   static const LinearGradient glass = LinearGradient(
-    colors: [
-      Color(0x40FFFFFF),
-      Color(0x20FFFFFF),
-    ],
+    colors: [Color(0x40FFFFFF), Color(0x20FFFFFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -70,11 +67,7 @@ class AppGradients {
 
   // Shimmer gradient for loading states
   static const LinearGradient shimmer = LinearGradient(
-    colors: [
-      Color(0xFFE5E7EB),
-      Color(0xFFF3F4F6),
-      Color(0xFFE5E7EB),
-    ],
+    colors: [Color(0xFFE5E7EB), Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
     begin: Alignment(-1.0, 0.0),
     end: Alignment(1.0, 0.0),
   );
@@ -96,7 +89,7 @@ class GlassDecorations {
           : null,
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.1),
+          color: const Color(0xFF000000).withValues(alpha: 0.1),
           blurRadius: 20,
           offset: const Offset(0, 10),
         ),
@@ -105,21 +98,19 @@ class GlassDecorations {
   }
 
   // Premium glass card with stronger effect
-  static BoxDecoration premiumCard({
-    double borderRadius = 24,
-  }) {
+  static BoxDecoration premiumCard({double borderRadius = 24}) {
     return BoxDecoration(
       gradient: AppGradients.glass,
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(color: const Color(0x50FFFFFF), width: 2),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.15),
+          color: const Color(0xFF000000).withValues(alpha: 0.15),
           blurRadius: 30,
           offset: const Offset(0, 15),
         ),
         BoxShadow(
-          color: const Color(0xFFFFFFFF).withOpacity(0.1),
+          color: const Color(0xFFFFFFFF).withValues(alpha: 0.1),
           blurRadius: 10,
           offset: const Offset(-5, -5),
         ),
@@ -137,7 +128,7 @@ class GlassDecorations {
       borderRadius: BorderRadius.circular(borderRadius),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xFF10B981).withOpacity(0.3),
+          color: const Color(0xFF10B981).withValues(alpha: 0.3),
           blurRadius: 20,
           offset: const Offset(0, 10),
         ),

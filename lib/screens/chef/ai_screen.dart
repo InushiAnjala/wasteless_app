@@ -13,13 +13,13 @@ class AIScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.1),
+              colorScheme.surface,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -88,7 +88,7 @@ class _Header extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -131,7 +131,7 @@ class _SearchCardState extends State<_SearchCard> {
   void _submitCustomSearch() {
     final query = _controller.text.trim();
     if (query.isEmpty) return;
-    
+
     // Combine what the user typed with the selected ingredients
     _submitSearch('$query using ${widget.foodName}');
   }
@@ -146,7 +146,7 @@ class _SearchCardState extends State<_SearchCard> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -160,7 +160,7 @@ class _SearchCardState extends State<_SearchCard> {
             decoration: BoxDecoration(
               color: Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(0.05)),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
             ),
             child: Row(
               children: [
@@ -249,7 +249,9 @@ class _QuickTags extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecipeScreen(recipeText: 'Fresh recipe ideas for $foodName'),
+                    builder: (context) => RecipeScreen(
+                      recipeText: 'Fresh recipe ideas for $foodName',
+                    ),
                   ),
                 ),
               ),
@@ -259,7 +261,9 @@ class _QuickTags extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecipeScreen(recipeText: 'Quick $foodName recipes under 15 minutes'),
+                    builder: (context) => RecipeScreen(
+                      recipeText: 'Quick $foodName recipes under 15 minutes',
+                    ),
                   ),
                 ),
               ),
@@ -269,7 +273,8 @@ class _QuickTags extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecipeScreen(recipeText: 'Healthy $foodName recipes'),
+                    builder: (context) =>
+                        RecipeScreen(recipeText: 'Healthy $foodName recipes'),
                   ),
                 ),
               ),
@@ -279,7 +284,9 @@ class _QuickTags extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecipeScreen(recipeText: 'Zero waste cooking ideas for $foodName'),
+                    builder: (context) => RecipeScreen(
+                      recipeText: 'Zero waste cooking ideas for $foodName',
+                    ),
                   ),
                 ),
               ),
@@ -346,7 +353,7 @@ class _RecipeCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
           ),
           child: Row(
             children: [
@@ -354,7 +361,7 @@ class _RecipeCard extends StatelessWidget {
                 height: 60,
                 width: 60,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -386,7 +393,7 @@ class _RecipeCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.lightText.withOpacity(0.3),
+                color: AppColors.lightText.withValues(alpha: 0.3),
               ),
             ],
           ),
@@ -406,7 +413,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.primary.withOpacity(0.08),
+      color: theme.colorScheme.primary.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -448,7 +455,7 @@ class _Pill extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(0.05)),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
             ),
             child: Row(
               children: [

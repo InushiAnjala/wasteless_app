@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class AlertScreen extends StatefulWidget {
   final bool adminMode;
-  const AlertScreen({Key? key, this.adminMode = false}) : super(key: key);
+  const AlertScreen({super.key, this.adminMode = false});
 
   @override
   State<AlertScreen> createState() => _AlertScreenState();
@@ -83,7 +83,7 @@ class _AlertScreenState extends State<AlertScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
+                  color: Colors.white.withValues(alpha: 0.92),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: const [
                     BoxShadow(
@@ -118,7 +118,11 @@ class _AlertScreenState extends State<AlertScreen> {
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                       ),
-                      icon: const Icon(Icons.done_all, color: Colors.green, size: 20),
+                      icon: const Icon(
+                        Icons.done_all,
+                        color: Colors.green,
+                        size: 20,
+                      ),
                       label: const Text(
                         'Clear All',
                         style: TextStyle(
@@ -431,7 +435,7 @@ class _AlertScreenState extends State<AlertScreen> {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -443,7 +447,7 @@ class _AlertScreenState extends State<AlertScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: pillColor.withOpacity(0.1),
+              color: pillColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.notifications_active, color: pillColor, size: 20),
@@ -489,7 +493,7 @@ class _AlertScreenState extends State<AlertScreen> {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: pillColor.withOpacity(0.12),
+                        color: pillColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -575,7 +579,9 @@ class _AlertScreenState extends State<AlertScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Clear All Notifications?'),
-          content: const Text('This will mark all currently visible alerts as read.'),
+          content: const Text(
+            'This will mark all currently visible alerts as read.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -593,7 +599,9 @@ class _AlertScreenState extends State<AlertScreen> {
       if (confirm != true) return;
 
       // Fetch the same notifications that are currently being shown
-      Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('foods');
+      Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection(
+        'foods',
+      );
       query = query.where('notifRead', isEqualTo: false);
 
       final snapshot = await query.get();
@@ -619,9 +627,9 @@ class _AlertScreenState extends State<AlertScreen> {
       if (count > 0) {
         await batch.commit();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cleared $count notifications')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Cleared $count notifications')));
       }
     } catch (e) {
       if (!mounted) return;

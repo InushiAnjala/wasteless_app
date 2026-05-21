@@ -6,7 +6,6 @@ import '../../constants/colors.dart';
 import '../../services/report_service.dart';
 import 'package:intl/intl.dart';
 
-
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key, this.adminMode = false});
 
@@ -16,7 +15,8 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateMixin {
+class _ReportsScreenState extends State<ReportsScreen>
+    with TickerProviderStateMixin {
   String _selectedRange = "All";
   DateTime? _customStart;
   DateTime? _customEnd;
@@ -50,9 +50,9 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                ),
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+            ),
           ),
           child: child!,
         );
@@ -92,13 +92,13 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.1),
+              colorScheme.surface,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -117,7 +117,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 24,
                         offset: const Offset(0, 10),
                       ),
@@ -128,10 +128,14 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.analytics_rounded, color: colorScheme.primary, size: 28),
+                        child: Icon(
+                          Icons.analytics_rounded,
+                          color: colorScheme.primary,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -146,7 +150,9 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                               ),
                             ),
                             Text(
-                              widget.adminMode ? "Global System Statistics" : "Insights & Statistics",
+                              widget.adminMode
+                                  ? "Global System Statistics"
+                                  : "Insights & Statistics",
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.lightText,
                               ),
@@ -184,59 +190,88 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
 
                 // Premium Filter Bar (Glassmorphism-like)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: ["All", "7 Days", "1 Month", "4 Months", "Custom"].map((range) {
-                        final isSelected = _selectedRange == range;
-                        String label = range;
-                        if (range == "Custom" && _customStart != null && _customEnd != null) {
-                          label = "${DateFormat('MMM d').format(_customStart!)} - ${DateFormat('MMM d').format(_customEnd!)}";
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            if (range == "Custom") {
-                              _selectCustomRange();
-                            } else {
-                              setState(() {
-                                _selectedRange = range;
-                                _customStart = null;
-                                _customEnd = null;
-                              });
+                      children:
+                          [
+                            "All",
+                            "7 Days",
+                            "1 Month",
+                            "4 Months",
+                            "Custom",
+                          ].map((range) {
+                            final isSelected = _selectedRange == range;
+                            String label = range;
+                            if (range == "Custom" &&
+                                _customStart != null &&
+                                _customEnd != null) {
+                              label =
+                                  "${DateFormat('MMM d').format(_customStart!)} - ${DateFormat('MMM d').format(_customEnd!)}";
                             }
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: isSelected ? colorScheme.primary : Colors.transparent,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: colorScheme.primary.withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                )
-                              ] : [],
-                            ),
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : AppColors.lightText,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                fontSize: 13,
+                            return GestureDetector(
+                              onTap: () {
+                                if (range == "Custom") {
+                                  _selectCustomRange();
+                                } else {
+                                  setState(() {
+                                    _selectedRange = range;
+                                    _customStart = null;
+                                    _customEnd = null;
+                                  });
+                                }
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? colorScheme.primary
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: colorScheme.primary
+                                                .withValues(alpha: 0.3),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.lightText,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          }).toList(),
                     ),
                   ),
                 ),
@@ -281,24 +316,52 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                           final docs = allDocs.where((doc) {
                             final data = doc.data() as Map<String, dynamic>;
                             final createdAt = data['createdAt'];
-                            
+
                             if (_selectedRange == "All") return true;
-                            if (createdAt == null) return false; // Hide old items in specific ranges
-                            
-                            final createdDate = (createdAt as Timestamp).toDate();
-                            
-                            if (_selectedRange == "Custom" && _customStart != null && _customEnd != null) {
-                              final start = DateTime(_customStart!.year, _customStart!.month, _customStart!.day);
-                              final end = DateTime(_customEnd!.year, _customEnd!.month, _customEnd!.day, 23, 59, 59);
-                              return createdDate.isAfter(start.subtract(const Duration(seconds: 1))) && 
-                                     createdDate.isBefore(end.add(const Duration(seconds: 1)));
+                            if (createdAt == null) {
+                              return false; // Hide old items in specific ranges
                             }
 
-                            final difference = now.difference(createdDate).inDays;
-                            if (_selectedRange == "7 Days") return difference <= 7;
-                            if (_selectedRange == "1 Month") return difference <= 30;
-                            if (_selectedRange == "4 Months") return difference <= 120;
-                            
+                            final createdDate = (createdAt as Timestamp)
+                                .toDate();
+
+                            if (_selectedRange == "Custom" &&
+                                _customStart != null &&
+                                _customEnd != null) {
+                              final start = DateTime(
+                                _customStart!.year,
+                                _customStart!.month,
+                                _customStart!.day,
+                              );
+                              final end = DateTime(
+                                _customEnd!.year,
+                                _customEnd!.month,
+                                _customEnd!.day,
+                                23,
+                                59,
+                                59,
+                              );
+                              return createdDate.isAfter(
+                                    start.subtract(const Duration(seconds: 1)),
+                                  ) &&
+                                  createdDate.isBefore(
+                                    end.add(const Duration(seconds: 1)),
+                                  );
+                            }
+
+                            final difference = now
+                                .difference(createdDate)
+                                .inDays;
+                            if (_selectedRange == "7 Days") {
+                              return difference <= 7;
+                            }
+                            if (_selectedRange == "1 Month") {
+                              return difference <= 30;
+                            }
+                            if (_selectedRange == "4 Months") {
+                              return difference <= 120;
+                            }
+
                             return true;
                           }).toList();
 
@@ -317,8 +380,9 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                             if (expiry != null) {
                               final daysLeft = expiry.difference(now).inDays;
                               if (daysLeft < 0) {
-                                if (amount > 0)
+                                if (amount > 0) {
                                   expired++; // count only if remaining
+                                }
                               } else if (daysLeft <= _expiringSoonDays) {
                                 expiringSoon++;
                               }
@@ -342,16 +406,20 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                               .length;
 
                           final trendPoints = _monthlyTrendPoints(docs);
-                          
+
                           // Advanced Sustainability Score Calculation
-                          double sustainabilityScore = total == 0 ? 100 : ((total - expired) / total) * 100;
-                          
+                          double sustainabilityScore = total == 0
+                              ? 100
+                              : ((total - expired) / total) * 100;
+
                           // Category Distribution Calculation
                           Map<String, int> categoryCounts = {};
                           for (final doc in docs) {
                             final data = doc.data() as Map<String, dynamic>;
-                            final section = data['section'] as String? ?? 'Others';
-                            categoryCounts[section] = (categoryCounts[section] ?? 0) + 1;
+                            final section =
+                                data['section'] as String? ?? 'Others';
+                            categoryCounts[section] =
+                                (categoryCounts[section] ?? 0) + 1;
                           }
 
                           return SingleChildScrollView(
@@ -361,9 +429,14 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 20),
-                                
+
                                 // Sustainability Score Card
-                                _sustainabilityCard(colorScheme, sustainabilityScore, total, expired),
+                                _sustainabilityCard(
+                                  colorScheme,
+                                  sustainabilityScore,
+                                  total,
+                                  expired,
+                                ),
 
                                 const SizedBox(height: 24),
 
@@ -371,7 +444,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                                   label: "Key Metrics",
                                   icon: Icons.dashboard_customize_rounded,
                                 ),
-                                
+
                                 const SizedBox(height: 16),
 
                                 Wrap(
@@ -417,14 +490,20 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                                 const SizedBox(height: 32),
 
                                 // Smart Insight Card
-                                _smartInsightCard(colorScheme, docs, expired, expiringSoon),
+                                _smartInsightCard(
+                                  colorScheme,
+                                  docs,
+                                  expired,
+                                  expiringSoon,
+                                ),
 
                                 const SizedBox(height: 32),
 
                                 _sectionHeader(
                                   label: "Stock Trend Over Time",
                                   icon: Icons.show_chart_rounded,
-                                  subtitle: "X-Axis: Months | Y-Axis: Number of items scheduled to expire.",
+                                  subtitle:
+                                      "X-Axis: Months | Y-Axis: Number of items scheduled to expire.",
                                 ),
 
                                 const SizedBox(height: 16),
@@ -436,19 +515,23 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                                 _sectionHeader(
                                   label: "Category Distribution",
                                   icon: Icons.bar_chart_rounded,
-                                  subtitle: "Compares the amount of stock across your kitchen categories.",
+                                  subtitle:
+                                      "Compares the amount of stock across your kitchen categories.",
                                 ),
 
                                 const SizedBox(height: 16),
-                                
-                                _CategoryDistributionChart(categoryCounts: categoryCounts),
+
+                                _CategoryDistributionChart(
+                                  categoryCounts: categoryCounts,
+                                ),
 
                                 const SizedBox(height: 32),
 
                                 _sectionHeader(
                                   label: "Expiry Status Breakdown",
                                   icon: Icons.pie_chart_rounded,
-                                  subtitle: "Current ratio of Fresh, Expiring Soon, and Expired items.",
+                                  subtitle:
+                                      "Current ratio of Fresh, Expiring Soon, and Expired items.",
                                 ),
 
                                 const SizedBox(height: 16),
@@ -487,7 +570,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     Color? color,
     IconData? icon,
   }) {
-    final bg = (color ?? Colors.green).withOpacity(0.12);
+    final bg = (color ?? Colors.green).withValues(alpha: 0.12);
     final fg = color ?? Colors.green;
     return InkWell(
       borderRadius: BorderRadius.circular(18),
@@ -505,7 +588,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
               offset: Offset(0, 6),
             ),
           ],
-          border: Border.all(color: fg.withOpacity(0.35), width: 1),
+          border: Border.all(color: fg.withValues(alpha: 0.35), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -546,7 +629,11 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     );
   }
 
-  Widget _sectionHeader({required String label, required IconData icon, String? subtitle}) {
+  Widget _sectionHeader({
+    required String label,
+    required IconData icon,
+    String? subtitle,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -584,7 +671,11 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                   borderRadius: BorderRadius.circular(12),
                 ),
                 textStyle: const TextStyle(color: Colors.white, fontSize: 12),
-                child: Icon(Icons.info_outline_rounded, size: 18, color: Colors.grey.shade400),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: Colors.grey.shade400,
+                ),
               ),
             ],
           ],
@@ -597,19 +688,27 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   //                 NEW ADVANCED WIDGETS
   // --------------------------------------------------------
 
-  Widget _sustainabilityCard(ColorScheme colorScheme, double score, int total, int expired) {
+  Widget _sustainabilityCard(
+    ColorScheme colorScheme,
+    double score,
+    int total,
+    int expired,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.8)],
+          colors: [
+            colorScheme.primary,
+            colorScheme.primary.withValues(alpha: 0.8),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.3),
+            color: colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -655,9 +754,13 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  score >= 80 ? "Excellent Waste Control!" : score >= 50 ? "Doing Good, Keep it Up!" : "Needs Attention",
+                  score >= 80
+                      ? "Excellent Waste Control!"
+                      : score >= 50
+                      ? "Doing Good, Keep it Up!"
+                      : "Needs Attention",
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 14,
                   ),
                 ),
@@ -666,7 +769,10 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                   children: [
                     _miniIndicator(Icons.check_circle_outline, "$total Total"),
                     const SizedBox(width: 12),
-                    _miniIndicator(Icons.eco_outlined, "${total - expired} Fresh"),
+                    _miniIndicator(
+                      Icons.eco_outlined,
+                      "${total - expired} Fresh",
+                    ),
                   ],
                 ),
               ],
@@ -690,17 +796,25 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     );
   }
 
-  Widget _smartInsightCard(ColorScheme colorScheme, List<QueryDocumentSnapshot> docs, int expired, int expiringSoon) {
-    String message = "Your inventory is looking great! Try to consume items before they expire.";
+  Widget _smartInsightCard(
+    ColorScheme colorScheme,
+    List<QueryDocumentSnapshot> docs,
+    int expired,
+    int expiringSoon,
+  ) {
+    String message =
+        "Your inventory is looking great! Try to consume items before they expire.";
     IconData icon = Icons.lightbulb_outline_rounded;
     Color color = Colors.blue;
 
     if (expired > 5) {
-      message = "High waste detected this period. Consider buying smaller portions of frequently expired items.";
+      message =
+          "High waste detected this period. Consider buying smaller portions of frequently expired items.";
       icon = Icons.warning_amber_rounded;
       color = Colors.red;
     } else if (expiringSoon > 3) {
-      message = "You have several items expiring soon. Perfect time for a 'kitchen-sink' stew!";
+      message =
+          "You have several items expiring soon. Perfect time for a 'kitchen-sink' stew!";
       icon = Icons.auto_awesome_rounded;
       color = Colors.orange;
     }
@@ -708,16 +822,16 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color),
@@ -732,7 +846,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: color.withOpacity(0.8),
+                    color: color.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -740,7 +854,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
                   message,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.darkText.withOpacity(0.8),
+                    color: AppColors.darkText.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -1211,8 +1325,12 @@ class _TrendChart extends StatelessWidget {
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
               axisNameWidget: Text(
-                "Item Count", 
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade600)
+                "Item Count",
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600,
+                ),
               ),
               sideTitles: SideTitles(
                 showTitles: true,
@@ -1235,7 +1353,11 @@ class _TrendChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       points[idx].label,
-                      style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   );
                 },
@@ -1262,17 +1384,21 @@ class _TrendChart extends StatelessWidget {
               isStrokeCapRound: true,
               dotData: FlDotData(
                 show: true,
-                getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                  radius: 4,
-                  color: Colors.white,
-                  strokeWidth: 2,
-                  strokeColor: AppColors.primary,
-                ),
+                getDotPainter: (spot, percent, barData, index) =>
+                    FlDotCirclePainter(
+                      radius: 4,
+                      color: Colors.white,
+                      strokeWidth: 2,
+                      strokeColor: AppColors.primary,
+                    ),
               ),
               belowBarData: BarAreaData(
                 show: true,
                 gradient: LinearGradient(
-                  colors: [AppColors.primary.withOpacity(0.3), AppColors.primary.withOpacity(0.0)],
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.3),
+                    AppColors.primary.withValues(alpha: 0.0),
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -1315,7 +1441,11 @@ class _ExpiryPie extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 8)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
         ],
       ),
       child: Column(
@@ -1412,7 +1542,7 @@ class _CategoryDistributionChart extends StatelessWidget {
 
     final entries = categoryCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    
+
     final maxCount = entries.first.value.toDouble();
 
     return Container(
@@ -1421,7 +1551,11 @@ class _CategoryDistributionChart extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 8)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
         ],
       ),
       child: Column(
@@ -1436,20 +1570,20 @@ class _CategoryDistributionChart extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      e.key, 
+                      e.key,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                         color: AppColors.darkText,
-                      )
+                      ),
                     ),
                     Text(
-                      "${e.value} items", 
+                      "${e.value} items",
                       style: TextStyle(
-                        color: Colors.grey.shade500, 
+                        color: Colors.grey.shade500,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                      )
+                      ),
                     ),
                   ],
                 ),
@@ -1470,12 +1604,15 @@ class _CategoryDistributionChart extends StatelessWidget {
                         height: 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.primary.withOpacity(0.6)],
+                            colors: [
+                              AppColors.primary,
+                              AppColors.primary.withValues(alpha: 0.6),
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withOpacity(0.2),
+                              color: AppColors.primary.withValues(alpha: 0.2),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),

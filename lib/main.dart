@@ -17,7 +17,6 @@ void main() async {
   runApp(const WasteLessApp());
 }
 
-
 class WasteLessApp extends StatelessWidget {
   const WasteLessApp({super.key});
 
@@ -32,7 +31,6 @@ class WasteLessApp extends StatelessWidget {
           seedColor: AppColors.primary,
           primary: AppColors.primary,
           surface: Colors.white,
-          background: AppColors.bgColor,
         ),
         textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
         appBarTheme: AppBarTheme(
@@ -49,7 +47,9 @@ class WasteLessApp extends StatelessWidget {
         cardTheme: CardThemeData(
           color: Colors.white,
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -57,7 +57,9 @@ class WasteLessApp extends StatelessWidget {
             foregroundColor: Colors.white,
             textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
       ),

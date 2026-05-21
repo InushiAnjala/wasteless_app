@@ -9,7 +9,6 @@ import 'package:flutter/services.dart'; // For HapticFeedback
 
 import 'main_screen.dart';
 import '../../constants/text_styles.dart';
-import '../../widgets/back_button.dart';
 import '../../services/notification_service.dart';
 
 class AddFoodScreen extends StatefulWidget {
@@ -17,7 +16,12 @@ class AddFoodScreen extends StatefulWidget {
   final Map<String, dynamic>? foodData;
   final bool adminMode;
 
-  const AddFoodScreen({super.key, this.foodId, this.foodData, this.adminMode = false});
+  const AddFoodScreen({
+    super.key,
+    this.foodId,
+    this.foodData,
+    this.adminMode = false,
+  });
 
   @override
   State<AddFoodScreen> createState() => _AddFoodScreenState();
@@ -34,7 +38,6 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   final BarcodeScanner _barcodeScanner = BarcodeScanner();
 
   late stt.SpeechToText _speech;
-  bool _isListening = false;
   String _lastWords = "";
 
   static final RegExp _expiryRegex = RegExp(
@@ -156,9 +159,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   DateTime? _parseExpiryString(String rawDate) {
     final cleaned = rawDate.trim().replaceAll(RegExp(r'\s+'), ' ');
     final parts = cleaned
-      .split(RegExp(r'[\/\-\.\s:]'))
-      .where((p) => p.isNotEmpty)
-      .toList();
+        .split(RegExp(r'[\/\-\.\s:]'))
+        .where((p) => p.isNotEmpty)
+        .toList();
 
     if (parts.length < 2 || parts.length > 3) return null;
 
@@ -203,13 +206,16 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
     for (final match in _expiryRegex.allMatches(normalized)) {
       // If the matched date has a preceding MFD, skip it.
-      // But because the regex doesn't capture MFD, we can check the text 
+      // But because the regex doesn't capture MFD, we can check the text
       // immediately before the match index.
       int startIndex = match.start;
       int checkStart = (startIndex - 10) < 0 ? 0 : startIndex - 10;
-      String precedingText = normalized.substring(checkStart, startIndex).toUpperCase();
-      
-      if (precedingText.contains('MFD') || precedingText.contains('MANUFACTURED')) {
+      String precedingText = normalized
+          .substring(checkStart, startIndex)
+          .toUpperCase();
+
+      if (precedingText.contains('MFD') ||
+          precedingText.contains('MANUFACTURED')) {
         continue; // Skip this date
       }
 
@@ -224,16 +230,13 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   // ---------------- VOICE CAPTURE LOGIC ----------------
   Future<void> _startListening() async {
     bool available = await _speech.initialize(
-      onStatus: (val) {
-        if (val == 'done' || val == 'notListening') {
-          setState(() => _isListening = false);
-        }
-      },
-      onError: (val) => setState(() => _isListening = false),
+      onStatus: (_) {},
+      onError: (_) {},
     );
 
+    if (!mounted) return;
+
     if (available) {
-      setState(() => _isListening = true);
       HapticFeedback.heavyImpact();
 
       // Show a snackbar or small overlay telling them we are listening
@@ -246,28 +249,22 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
       await _speech.listen(
         onResult: (val) {
-          setState(() {
-            _lastWords = val.recognizedWords;
-            if (val.finalResult) {
-              _isListening = false;
-              _processVoiceInput(_lastWords);
-            }
-          });
+          if (!mounted) return;
+          _lastWords = val.recognizedWords;
+          if (val.finalResult) {
+            _processVoiceInput(_lastWords);
+          }
         },
       );
     } else {
-      setState(() => _isListening = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Speech recognition not available.")),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Speech recognition not available.")),
+      );
     }
   }
 
   void _stopListening() async {
     await _speech.stop();
-    setState(() => _isListening = false);
   }
 
   void _processVoiceInput(String text) {
@@ -286,7 +283,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       setState(() => selectedExpiryDate = parsed);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Captured date: ${parsed.day}/${parsed.month}/${parsed.year}"),
+          content: Text(
+            "Captured date: ${parsed.day}/${parsed.month}/${parsed.year}",
+          ),
           backgroundColor: const Color(0xFF1E9E5A),
         ),
       );
@@ -307,7 +306,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
 
       final inputImage = InputImage.fromFilePath(image.path);
       final recognizedText = await _textRecognizer.processImage(inputImage);
-      
+
       final parsedExpDate = _extractExpiryDate(recognizedText.text);
 
       if (!mounted) return;
@@ -517,7 +516,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.green.withValues(alpha: 0.1),
+                                      color: Colors.green.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       blurRadius: 14,
                                       offset: const Offset(0, 8),
                                     ),

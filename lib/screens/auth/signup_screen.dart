@@ -58,7 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
             child: OrganicShape(
               width: size.width * 0.8,
               height: size.height * 0.4,
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
             ),
           ),
           Positioned(
@@ -67,7 +67,7 @@ class _SignupScreenState extends State<SignupScreen> {
             child: OrganicShape(
               width: size.width * 0.6,
               height: size.height * 0.3,
-              color: AppColors.primary.withOpacity(0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
             ),
           ),
 
@@ -84,7 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.06),
+                        color: AppColors.primary.withValues(alpha: 0.06),
                         blurRadius: 30,
                         offset: const Offset(0, 15),
                       ),
@@ -195,7 +195,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       // Terms
                       InkWell(
-                        onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+                        onTap: () =>
+                            setState(() => _agreedToTerms = !_agreedToTerms),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -235,10 +236,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(height: 32),
 
                       // SIGNUP BUTTON
-                      OrganicButton(
-                        text: "Sign Up",
-                        onPressed: _handleSignup,
-                      ),
+                      OrganicButton(text: "Sign Up", onPressed: _handleSignup),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -290,20 +288,30 @@ class _SignupScreenState extends State<SignupScreen> {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, size: 20, color: Colors.black45),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             filled: true,
             fillColor: Colors.grey[50],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+              borderSide: BorderSide(
+                color: Colors.black.withValues(alpha: 0.05),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+              borderSide: BorderSide(
+                color: Colors.black.withValues(alpha: 0.05),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -328,7 +336,7 @@ class _SignupScreenState extends State<SignupScreen> {
           decoration: BoxDecoration(
             color: Colors.grey[50],
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -372,19 +380,23 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-        'name': nameController.text.trim(),
-        'role': selectedRole,
-        'nic': nicController.text.trim(),
-        'contact': contactController.text.trim(),
-        'email': emailController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+            'name': nameController.text.trim(),
+            'role': selectedRole,
+            'nic': nicController.text.trim(),
+            'contact': contactController.text.trim(),
+            'email': emailController.text.trim(),
+            'createdAt': FieldValue.serverTimestamp(),
+          });
 
       if (!mounted) return;
       _showSnackBar("Signup successful!");
@@ -400,6 +412,8 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

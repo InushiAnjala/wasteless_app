@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'add_food_screen.dart';
-import 'food_list_screen.dart';
-import 'notifications_screen.dart';
-import 'reports_screen.dart';
-import 'kitchen_needs_screen.dart';
 import '../onboarding/login_signup_screen.dart';
-import '../../constants/text_styles.dart';
 import '../../constants/colors.dart';
 import '../../widgets/back_button.dart';
 
@@ -29,7 +24,9 @@ class HomeScreen extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddFoodScreen(adminMode: adminMode)),
+            MaterialPageRoute(
+              builder: (context) => AddFoodScreen(adminMode: adminMode),
+            ),
           );
         },
       ),
@@ -67,8 +64,8 @@ class HomeScreen extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              colorScheme.primary.withOpacity(0.15),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.15),
+              colorScheme.surface,
             ],
           ),
         ),
@@ -83,7 +80,9 @@ class HomeScreen extends StatelessWidget {
                       if (adminMode)
                         Padding(
                           padding: const EdgeInsets.only(right: 16.0),
-                          child: WasteLessBackButton(onPressed: () => Navigator.pop(context)),
+                          child: WasteLessBackButton(
+                            onPressed: () => Navigator.pop(context),
+                          ),
                         ),
                       Expanded(
                         child: Column(
@@ -113,21 +112,25 @@ class HomeScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                            icon: const Icon(
+                              Icons.logout_rounded,
+                              color: Colors.redAccent,
+                            ),
                             onPressed: () async {
                               await FirebaseAuth.instance.signOut();
                               if (!context.mounted) return;
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const LoginSignupScreen(),
+                                  builder: (context) =>
+                                      const LoginSignupScreen(),
                                 ),
                                 (route) => false,
                               );
@@ -148,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: colorScheme.primary.withOpacity(0.3),
+                          color: colorScheme.primary.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -171,7 +174,7 @@ class HomeScreen extends StatelessWidget {
                               Text(
                                 'Track, reduce waste, and save money every day.',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                 ),
                               ),
                             ],
@@ -181,7 +184,11 @@ class HomeScreen extends StatelessWidget {
                         const CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.white24,
-                          child: Icon(Icons.eco_rounded, color: Colors.white, size: 32),
+                          child: Icon(
+                            Icons.eco_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                       ],
                     ),
@@ -192,22 +199,19 @@ class HomeScreen extends StatelessWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final item = items[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: menuButton(
-                          context,
-                          item.title,
-                          item.subtitle,
-                          item.icon,
-                          item.onTap,
-                        ),
-                      );
-                    },
-                    childCount: items.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final item = items[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: menuButton(
+                        context,
+                        item.title,
+                        item.subtitle,
+                        item.icon,
+                        item.onTap,
+                      ),
+                    );
+                  }, childCount: items.length),
                 ),
               ),
             ],
@@ -238,14 +242,14 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black.withOpacity(0.05)),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(icon, color: colorScheme.primary),
@@ -272,7 +276,10 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: AppColors.lightText.withOpacity(0.3)),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.lightText.withValues(alpha: 0.3),
+              ),
             ],
           ),
         ),

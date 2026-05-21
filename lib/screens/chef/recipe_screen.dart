@@ -118,10 +118,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
           _initializeLocalChat(_resolvedApiKey!);
           return;
         } else {
-          _firestoreError = "Document exists, but 'apiKey' field is empty or missing.";
+          _firestoreError =
+              "Document exists, but 'apiKey' field is empty or missing.";
         }
       } else {
-        _firestoreError = "Document 'app_settings/gemini' does not exist in Firestore.";
+        _firestoreError =
+            "Document 'app_settings/gemini' does not exist in Firestore.";
       }
     } catch (e) {
       _firestoreError = "Error fetching API key from Firestore: $e";
@@ -162,16 +164,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
       if (_useCloudFunction) {
         // Call Firebase Cloud Function
-        final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('generateRecipe');
-        
+        final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+          'generateRecipe',
+        );
+
         // Map conversation list to the format expected by the Cloud Function
         final List<Map<String, String>> historyList = conversation.map((c) {
           final role = c.role == 'model' ? 'assistant' : 'user';
-          final content = c.parts.whereType<TextPart>().map((p) => p.text).join('\n');
-          return {
-            'role': role,
-            'content': content,
-          };
+          final content = c.parts
+              .whereType<TextPart>()
+              .map((p) => p.text)
+              .join('\n');
+          return {'role': role, 'content': content};
         }).toList();
 
         final results = await callable.call(<String, dynamic>{
@@ -196,7 +200,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
         }
         final response = await _chat!.sendMessage(Content.text(prompt));
         replyText = response.text ?? "";
-        if (!conversation.any((c) => c.parts.any((p) => p is TextPart && p.text == replyText))) {
+        if (!conversation.any(
+          (c) => c.parts.any((p) => p is TextPart && p.text == replyText),
+        )) {
           conversation.add(Content.model([TextPart(replyText)]));
         }
       }
@@ -209,7 +215,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
       if (e.code == 'not-found' || e.code == 'unimplemented') {
         friendlyMessage = 'No Gemini API key or Cloud Function is configured.';
       } else {
-        friendlyMessage = 'Cloud Function error: [${e.code}] ${e.message ?? e.toString()}';
+        friendlyMessage =
+            'Cloud Function error: [${e.code}] ${e.message ?? e.toString()}';
       }
       setState(() => _errorMessage = friendlyMessage);
     } on PlatformException catch (e) {
@@ -229,13 +236,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
     } on FirebaseException catch (e) {
       if (!mounted) return;
       debugPrint("FirebaseException caught: [${e.code}] ${e.message}");
-      setState(() => _errorMessage = 'Firebase error: [${e.code}] ${e.message ?? e.toString()}');
+      setState(
+        () => _errorMessage =
+            'Firebase error: [${e.code}] ${e.message ?? e.toString()}',
+      );
     } catch (e) {
       if (!mounted) return;
       debugPrint("Generic Exception caught: $e");
       final errStr = e.toString().toLowerCase();
       String friendlyMessage;
-      
+
       if (errStr.contains('503') ||
           errStr.contains('unavailable') ||
           errStr.contains('high demand')) {
@@ -278,7 +288,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
         msg.contains('firebase_functions');
   }
 
-  Widget _buildSetupGuide(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildSetupGuide(
+    BuildContext context,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       physics: const BouncingScrollPhysics(),
@@ -365,8 +379,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
             colorScheme: colorScheme,
             icon: Icons.storage_rounded,
             title: "Option 1: Firestore Collection (Recommended)",
-            subtitle: "Easiest for local development. App reads key dynamically.",
-            content: "Create a Firestore document:\n"
+            subtitle:
+                "Easiest for local development. App reads key dynamically.",
+            content:
+                "Create a Firestore document:\n"
                 "• Collection: app_settings\n"
                 "• Document ID: gemini\n"
                 "• Field: apiKey (String value)",
@@ -389,7 +405,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
             icon: Icons.cloud_done_rounded,
             title: "Option 3: Firebase Cloud Function",
             subtitle: "Deploy the secure Cloud Function with your key:",
-            content: "firebase functions:secrets:set GEMINI_API_KEY=\"YOUR_KEY\"\n"
+            content:
+                "firebase functions:secrets:set GEMINI_API_KEY=\"YOUR_KEY\"\n"
                 "firebase deploy --only functions",
             isCode: true,
           ),
@@ -427,7 +444,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black.withOpacity(0.06)),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -451,16 +468,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.black54,
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.black54),
           ),
           const SizedBox(height: 12),
           if (isCode)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: SelectableText(
@@ -477,7 +492,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.04),
+                color: colorScheme.primary.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -500,16 +515,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
     try {
       String replyText;
       if (_useCloudFunction) {
-        final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('generateRecipe');
-        
+        final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+          'generateRecipe',
+        );
+
         // Map conversation list to the format expected by the Cloud Function
         final List<Map<String, String>> historyList = conversation.map((c) {
           final role = c.role == 'model' ? 'assistant' : 'user';
-          final content = c.parts.whereType<TextPart>().map((p) => p.text).join('\n');
-          return {
-            'role': role,
-            'content': content,
-          };
+          final content = c.parts
+              .whereType<TextPart>()
+              .map((p) => p.text)
+              .join('\n');
+          return {'role': role, 'content': content};
         }).toList();
 
         final results = await callable.call(<String, dynamic>{
@@ -533,7 +550,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
         }
         final response = await _chat!.sendMessage(Content.text(userQuestion));
         replyText = response.text ?? "";
-        if (!conversation.any((c) => c.parts.any((p) => p is TextPart && p.text == replyText))) {
+        if (!conversation.any(
+          (c) => c.parts.any((p) => p is TextPart && p.text == replyText),
+        )) {
           conversation.add(Content.model([TextPart(replyText)]));
         }
       }
@@ -542,7 +561,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
       if (mounted) setState(() {});
     } on FirebaseFunctionsException catch (e) {
       if (!mounted) return;
-      String friendlyMessage = (e.code == 'not-found' || e.code == 'unimplemented')
+      String friendlyMessage =
+          (e.code == 'not-found' || e.code == 'unimplemented')
           ? 'Cloud Function generateRecipe is not deployed/found.'
           : 'Cloud Function error: [${e.code}] ${e.message ?? e.toString()}';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -555,7 +575,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
       if (errStr.contains('not-found') ||
           errStr.contains('not_found') ||
           errStr.contains('firebase_functions')) {
-        friendlyMessage = 'Cloud Function generateRecipe is not deployed/found.';
+        friendlyMessage =
+            'Cloud Function generateRecipe is not deployed/found.';
       } else {
         friendlyMessage = 'Platform error: ${e.message ?? e.toString()}';
       }
@@ -569,7 +590,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
       if (errStr.contains('not-found') ||
           errStr.contains('not_found') ||
           errStr.contains('firebase_functions')) {
-        friendlyMessage = 'Cloud Function generateRecipe is not deployed/found.';
+        friendlyMessage =
+            'Cloud Function generateRecipe is not deployed/found.';
       } else {
         friendlyMessage = '$e';
       }
@@ -595,13 +617,13 @@ class _RecipeScreenState extends State<RecipeScreen> {
               .join('\n');
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.15),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.15),
+              colorScheme.surface,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -632,7 +654,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -646,10 +668,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.05),
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.05,
+                              ),
                               border: Border(
                                 bottom: BorderSide(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                 ),
                               ),
                             ),
@@ -679,57 +703,70 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                     ),
                                   )
                                 : _errorMessage != null
-                                    ? (_isConfigError
-                                        ? _buildSetupGuide(context, theme, colorScheme)
-                                        : SingleChildScrollView(
-                                            padding: const EdgeInsets.all(24),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                                              children: [
-                                                const SizedBox(height: 32),
-                                                Icon(
-                                                  Icons.wifi_tethering_error_rounded,
-                                                  size: 56,
-                                                  color: Colors.orange.shade400,
-                                                ),
-                                                const SizedBox(height: 16),
-                                                Text(
-                                                  _errorMessage!,
-                                                  textAlign: TextAlign.center,
-                                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                                    color: Colors.black54,
-                                                    height: 1.5,
+                                ? (_isConfigError
+                                      ? _buildSetupGuide(
+                                          context,
+                                          theme,
+                                          colorScheme,
+                                        )
+                                      : SingleChildScrollView(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              const SizedBox(height: 32),
+                                              Icon(
+                                                Icons
+                                                    .wifi_tethering_error_rounded,
+                                                size: 56,
+                                                color: Colors.orange.shade400,
+                                              ),
+                                              const SizedBox(height: 16),
+                                              Text(
+                                                _errorMessage!,
+                                                textAlign: TextAlign.center,
+                                                style: theme.textTheme.bodyLarge
+                                                    ?.copyWith(
+                                                      color: Colors.black54,
+                                                      height: 1.5,
+                                                    ),
+                                              ),
+                                              const SizedBox(height: 24),
+                                              Center(
+                                                child: ElevatedButton.icon(
+                                                  onPressed:
+                                                      _fetchInitialRecipe,
+                                                  icon: const Icon(
+                                                    Icons.refresh_rounded,
+                                                  ),
+                                                  label: const Text(
+                                                    'Try Again',
+                                                  ),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        colorScheme.primary,
+                                                    foregroundColor:
+                                                        Colors.white,
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 24,
+                                                          vertical: 12,
+                                                        ),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            16,
+                                                          ),
+                                                    ),
                                                   ),
                                                 ),
-                                                const SizedBox(height: 24),
-                                                Center(
-                                                  child: ElevatedButton.icon(
-                                                    onPressed: _fetchInitialRecipe,
-                                                    icon: const Icon(
-                                                      Icons.refresh_rounded,
-                                                    ),
-                                                    label: const Text('Try Again'),
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor:
-                                                          colorScheme.primary,
-                                                      foregroundColor: Colors.white,
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 24,
-                                                            vertical: 12,
-                                                      ),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(16),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 32),
-                                              ],
-                                            ),
-                                          ))
+                                              ),
+                                              const SizedBox(height: 32),
+                                            ],
+                                          ),
+                                        ))
                                 : SingleChildScrollView(
                                     padding: const EdgeInsets.all(24),
                                     physics: const BouncingScrollPhysics(),
@@ -757,7 +794,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                 color: Colors.grey[50],
                                 borderRadius: BorderRadius.circular(18),
                                 border: Border.all(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                 ),
                               ),
                               child: Row(

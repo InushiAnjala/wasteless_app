@@ -4,7 +4,6 @@ import '../home/main_screen.dart';
 import '../chef/chef_main_screen.dart';
 import '../onboarding/login_signup_screen.dart';
 import '../../constants/colors.dart';
-import '../../widgets/back_button.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
@@ -15,13 +14,13 @@ class AdminHomeScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.1),
+              colorScheme.surface,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -59,17 +58,18 @@ class AdminHomeScreen extends StatelessWidget {
                   color: const Color(0xFF1E9E5A),
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const _AdminChefPortal(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const _AdminChefPortal()),
                   ),
                 ),
                 const Spacer(),
                 Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -99,7 +99,7 @@ class AdminHomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -110,11 +110,14 @@ class AdminHomeScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.admin_panel_settings_rounded,
-                color: theme.colorScheme.primary, size: 28),
+            child: Icon(
+              Icons.admin_panel_settings_rounded,
+              color: theme.colorScheme.primary,
+              size: 28,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -175,7 +178,7 @@ class AdminHomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -186,7 +189,7 @@ class AdminHomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.08),
+                color: color.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(icon, color: color, size: 26),
@@ -213,7 +216,11 @@ class AdminHomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.black12, size: 16),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.black12,
+              size: 16,
+            ),
           ],
         ),
       ),
@@ -223,53 +230,35 @@ class AdminHomeScreen extends StatelessWidget {
 
 /// Keeps manager portal navigation on a separate route so the system back
 /// button returns to the admin hub instead of exiting the app.
-class _AdminManagerPortal extends StatefulWidget {
+class _AdminManagerPortal extends StatelessWidget {
   const _AdminManagerPortal();
 
   @override
-  State<_AdminManagerPortal> createState() => _AdminManagerPortalState();
-}
-
-class _AdminManagerPortalState extends State<_AdminManagerPortal> {
-  int _currentTabIndex = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         Navigator.pop(context);
-        return false;
       },
-      child: MainScreen(
-        adminMode: true,
-        onTabChanged: (index) => setState(() => _currentTabIndex = index),
-      ),
+      child: const MainScreen(adminMode: true),
     );
   }
 }
 
 /// Chef portal wrapper for the same back behavior.
-class _AdminChefPortal extends StatefulWidget {
+class _AdminChefPortal extends StatelessWidget {
   const _AdminChefPortal();
 
   @override
-  State<_AdminChefPortal> createState() => _AdminChefPortalState();
-}
-
-class _AdminChefPortalState extends State<_AdminChefPortal> {
-  int _currentTabIndex = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         Navigator.pop(context);
-        return false;
       },
-      child: ChefMainScreen(
-        adminMode: true,
-        onTabChanged: (index) => setState(() => _currentTabIndex = index),
-      ),
+      child: const ChefMainScreen(adminMode: true),
     );
   }
 }

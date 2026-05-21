@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'add_food_screen.dart';
-import '../../constants/text_styles.dart';
 
 class FoodListScreen extends StatefulWidget {
   const FoodListScreen({super.key, this.adminMode = false});
@@ -28,13 +27,13 @@ class _FoodListScreenState extends State<FoodListScreen> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.background,
+              colorScheme.primary.withValues(alpha: 0.1),
+              colorScheme.surface,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -54,7 +53,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 24,
                         offset: const Offset(0, 10),
                       ),
@@ -65,10 +64,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.kitchen_rounded, color: colorScheme.primary, size: 28),
+                        child: Icon(
+                          Icons.kitchen_rounded,
+                          color: colorScheme.primary,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -105,7 +108,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -116,7 +122,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: colorScheme.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
                   onChanged: (value) {
@@ -132,8 +141,9 @@ class _FoodListScreenState extends State<FoodListScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) => _categoryChip(theme, categories[index]),
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) =>
+                        _categoryChip(theme, categories[index]),
                   ),
                 ),
 
@@ -143,7 +153,9 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: (() {
-                      Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection("foods");
+                      Query<Map<String, dynamic>> query = FirebaseFirestore
+                          .instance
+                          .collection("foods");
                       if (!widget.adminMode) {
                         query = query
                             .where("section", isEqualTo: selectedCategory)
@@ -153,7 +165,12 @@ class _FoodListScreenState extends State<FoodListScreen> {
                     })(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)));
+                        return Center(
+                          child: Text(
+                            "Error: ${snapshot.error}",
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
                       }
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -164,20 +181,30 @@ class _FoodListScreenState extends State<FoodListScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[300]),
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 64,
+                                color: Colors.grey[300],
+                              ),
                               const SizedBox(height: 16),
-                              Text("No food items found", style: TextStyle(color: Colors.grey[400])),
+                              Text(
+                                "No food items found",
+                                style: TextStyle(color: Colors.grey[400]),
+                              ),
                             ],
                           ),
                         );
                       }
 
-                      List<QueryDocumentSnapshot<Object?>> docs = snapshot.data!.docs;
+                      List<QueryDocumentSnapshot<Object?>> docs =
+                          snapshot.data!.docs;
                       if (widget.adminMode) {
                         final cat = selectedCategory.toLowerCase();
                         docs = docs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
-                          final section = (data['section'] ?? '').toString().toLowerCase();
+                          final section = (data['section'] ?? '')
+                              .toString()
+                              .toLowerCase();
                           return section == cat;
                         }).toList();
                       }
@@ -218,21 +245,39 @@ class _FoodListScreenState extends State<FoodListScreen> {
                       });
 
                       if (filtered.isEmpty) {
-                        return Center(child: Text("No matches for search", style: TextStyle(color: Colors.grey[400])));
+                        return Center(
+                          child: Text(
+                            "No matches for search",
+                            style: TextStyle(color: Colors.grey[400]),
+                          ),
+                        );
                       }
 
                       return ListView.separated(
                         physics: const BouncingScrollPhysics(),
                         itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        separatorBuilder: (_, _) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final doc = filtered[index];
                           final data = doc.data() as Map<String, dynamic>;
-                          final DateTime expiry = (data["expiryDate"] as Timestamp).toDate();
-                          final int daysLeft = expiry.difference(DateTime.now()).inDays;
+                          final DateTime expiry =
+                              (data["expiryDate"] as Timestamp).toDate();
+                          final int daysLeft = expiry
+                              .difference(DateTime.now())
+                              .inDays;
 
-                          String expiryText = daysLeft == 0 ? "Today" : daysLeft == 1 ? "Tomorrow" : "$daysLeft days";
-                          return _foodCard(theme, doc.id, data, expiryText, daysLeft);
+                          String expiryText = daysLeft == 0
+                              ? "Today"
+                              : daysLeft == 1
+                              ? "Tomorrow"
+                              : "$daysLeft days";
+                          return _foodCard(
+                            theme,
+                            doc.id,
+                            data,
+                            expiryText,
+                            daysLeft,
+                          );
                         },
                       );
                     },
@@ -258,8 +303,20 @@ class _FoodListScreenState extends State<FoodListScreen> {
           color: active ? theme.colorScheme.primary : Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: active
-              ? [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
-              : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+              ? [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Text(
           category,
@@ -273,8 +330,16 @@ class _FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  Widget _foodCard(ThemeData theme, String docId, Map<String, dynamic> data, String expiry, int daysLeft) {
-    final Color badgeColor = daysLeft <= 2 ? Colors.orangeAccent : theme.colorScheme.primary;
+  Widget _foodCard(
+    ThemeData theme,
+    String docId,
+    Map<String, dynamic> data,
+    String expiry,
+    int daysLeft,
+  ) {
+    final Color badgeColor = daysLeft <= 2
+        ? Colors.orangeAccent
+        : theme.colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -283,7 +348,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -293,7 +358,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: badgeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              color: badgeColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Icon(Icons.restaurant_rounded, color: badgeColor, size: 24),
           ),
           const SizedBox(width: 16),
@@ -303,17 +371,32 @@ class _FoodListScreenState extends State<FoodListScreen> {
               children: [
                 Text(
                   data["name"],
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text("${data["amount"]} ${data["unit"]}", style: theme.textTheme.bodySmall),
+                Text(
+                  "${data["amount"]} ${data["unit"]}",
+                  style: theme.textTheme.bodySmall,
+                ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: badgeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Text(
                     "Expires in $expiry",
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: badgeColor),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: badgeColor,
+                    ),
                   ),
                 ),
               ],
@@ -322,12 +405,29 @@ class _FoodListScreenState extends State<FoodListScreen> {
           Column(
             children: [
               IconButton(
-                icon: const Icon(Icons.edit_rounded, color: Colors.blueAccent, size: 20),
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddFoodScreen(foodId: docId, foodData: data))),
+                icon: const Icon(
+                  Icons.edit_rounded,
+                  color: Colors.blueAccent,
+                  size: 20,
+                ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        AddFoodScreen(foodId: docId, foodData: data),
+                  ),
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                onPressed: () async => await FirebaseFirestore.instance.collection("foods").doc(docId).delete(),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.redAccent,
+                  size: 20,
+                ),
+                onPressed: () async => await FirebaseFirestore.instance
+                    .collection("foods")
+                    .doc(docId)
+                    .delete(),
               ),
             ],
           ),

@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../constants/colors.dart';
-import '../../widgets/back_button.dart';
-import 'chef_home_screen.dart';
-import 'not_in_stock_screen.dart';
-import 'ai_food_recipes_screen.dart';
 
 class ChefFoodScreen extends StatefulWidget {
   final bool adminMode;
@@ -58,11 +53,11 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.16),
+            color: Colors.green.withValues(alpha: 0.16),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -95,7 +90,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.22),
+                  color: Colors.green.withValues(alpha: 0.22),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -112,11 +107,11 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.12),
+            color: Colors.green.withValues(alpha: 0.12),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -251,14 +246,13 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
         return ListView.separated(
           itemCount: filtered.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final doc = filtered[index];
             final data = doc.data() as Map<String, dynamic>?;
 
             final String name = (data?["name"] ?? "Unnamed").toString();
             final dynamic amountField = data?["amount"];
-            final double currentAmount = _parseAmount(amountField);
             final String unit = (data?["unit"] ?? "").toString();
             final String amountLabel = _formatAmount(amountField, unit);
             final String category = (data?["section"] ?? "").toString();
@@ -327,11 +321,11 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.96),
+        color: Colors.white.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.12),
+            color: Colors.green.withValues(alpha: 0.12),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -421,7 +415,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.18),
+                    color: Colors.green.withValues(alpha: 0.18),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -460,7 +454,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 18,
                   offset: const Offset(0, 10),
                 ),
@@ -490,7 +484,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.16),
+                          color: Colors.white.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -516,7 +510,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                             Text(
                               'Log a quick request so the kitchen can stock up.',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.78),
+                                color: Colors.white.withValues(alpha: 0.78),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -662,7 +656,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
           throw Exception('Food item no longer exists');
         }
 
-        final foodData = foodSnap.data() as Map<String, dynamic>?;
+        final foodData = foodSnap.data();
         final currentAmount = _parseAmount(foodData?['amount']);
         if (requestedAmount > currentAmount) {
           throw Exception(

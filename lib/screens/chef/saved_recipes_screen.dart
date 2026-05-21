@@ -14,9 +14,12 @@ class SavedRecipesScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Saved Recipes', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Saved Recipes',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.darkText,
@@ -42,16 +45,24 @@ class SavedRecipesScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.bookmark_border_rounded, size: 80, color: Colors.grey[400]),
+                        Icon(
+                          Icons.bookmark_border_rounded,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           "No saved recipes yet.",
-                          style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           "Generate and save recipes from the AI Chef.",
-                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[500],
+                          ),
                         ),
                       ],
                     ),
@@ -104,7 +115,9 @@ class SavedRecipesScreen extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black.withOpacity(0.05)),
+                              border: Border.all(
+                                color: Colors.black.withValues(alpha: 0.05),
+                              ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -113,7 +126,9 @@ class SavedRecipesScreen extends StatelessWidget {
                                   height: 56,
                                   width: 56,
                                   decoration: BoxDecoration(
-                                    color: colorScheme.primary.withOpacity(0.1),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Icon(
@@ -125,22 +140,25 @@ class SavedRecipesScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         title,
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'Saved on $dateStr',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: AppColors.lightText,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.lightText,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -148,7 +166,9 @@ class SavedRecipesScreen extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Icon(
                                   Icons.chevron_right_rounded,
-                                  color: AppColors.lightText.withOpacity(0.3),
+                                  color: AppColors.lightText.withValues(
+                                    alpha: 0.3,
+                                  ),
                                 ),
                               ],
                             ),
@@ -168,7 +188,11 @@ class SavedRecipeDetailScreen extends StatelessWidget {
   final String title;
   final String content;
 
-  const SavedRecipeDetailScreen({super.key, required this.title, required this.content});
+  const SavedRecipeDetailScreen({
+    super.key,
+    required this.title,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -176,9 +200,12 @@ class SavedRecipeDetailScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.darkText,
@@ -190,7 +217,7 @@ class SavedRecipeDetailScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -204,10 +231,10 @@ class SavedRecipeDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.05),
+                  color: colorScheme.primary.withValues(alpha: 0.05),
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                     ),
                   ),
                 ),

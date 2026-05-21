@@ -7,7 +7,12 @@ import 'reports_screen.dart';
 import 'notifications_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key, this.initialIndex = 0, this.adminMode = false, this.onTabChanged});
+  const MainScreen({
+    super.key,
+    this.initialIndex = 0,
+    this.adminMode = false,
+    this.onTabChanged,
+  });
 
   final int initialIndex;
   final bool adminMode;
@@ -44,6 +49,7 @@ class _MainScreenState extends State<MainScreen> {
       widget.onTabChanged!(index);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -54,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -67,7 +73,10 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Colors.white,
           selectedItemColor: colorScheme.primary,
           unselectedItemColor: Colors.black38,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: const [
             BottomNavigationBarItem(

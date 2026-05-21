@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'chef_home_screen.dart';
-import 'chef_food_screen.dart';
-import 'ai_food_recipes_screen.dart';
-import '../../widgets/back_button.dart';
 
 class NotInStockScreen extends StatefulWidget {
   final bool adminMode;
   final void Function(int index)? onTabSelected;
-  const NotInStockScreen({super.key, this.adminMode = false, this.onTabSelected});
+  const NotInStockScreen({
+    super.key,
+    this.adminMode = false,
+    this.onTabSelected,
+  });
 
   @override
   State<NotInStockScreen> createState() => _NotInStockScreenState();
@@ -16,9 +16,6 @@ class NotInStockScreen extends StatefulWidget {
 
 class _NotInStockScreenState extends State<NotInStockScreen> {
   static const int _maxRows = 25;
-  static List<String> _draftNames = [];
-  static List<String> _draftAmounts = [];
-  bool _clearDraftOnDispose = false;
 
   // Controllers for dynamic rows
   final List<TextEditingController> nameControllers = [];
@@ -63,11 +60,11 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.16),
+                          color: Colors.green.withValues(alpha: 0.16),
                           blurRadius: 24,
                           offset: const Offset(0, 12),
                         ),
@@ -83,7 +80,7 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.green.withOpacity(0.22),
+                                color: Colors.green.withValues(alpha: 0.22),
                                 blurRadius: 16,
                                 offset: const Offset(0, 8),
                               ),
@@ -129,11 +126,11 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                       vertical: 18,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.12),
+                          color: Colors.green.withValues(alpha: 0.12),
                           blurRadius: 18,
                           offset: const Offset(0, 10),
                         ),
@@ -150,7 +147,10 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
                             onPressed: nameControllers.length >= _maxRows
                                 ? null
                                 : () => _addRow(),
-                            icon: const Icon(Icons.add_circle_outline, size: 20),
+                            icon: const Icon(
+                              Icons.add_circle_outline,
+                              size: 20,
+                            ),
                             label: Text(
                               nameControllers.length >= _maxRows
                                   ? 'Maximum items reached'
@@ -236,14 +236,10 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
               contentPadding: EdgeInsets.symmetric(vertical: 8),
             ),
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
 
-        const Text(
-          "|",
-          style: TextStyle(fontSize: 16, color: Colors.black12),
-        ),
+        const Text("|", style: TextStyle(fontSize: 16, color: Colors.black12)),
 
         const SizedBox(width: 8),
 
@@ -260,7 +256,6 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
             ),
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             keyboardType: TextInputType.text,
-            onChanged: (_) => _clearDraftOnDispose = false,
           ),
         ),
 
@@ -342,9 +337,6 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
         c.clear();
       }
 
-      _draftNames = [];
-      _draftAmounts = [];
-      _clearDraftOnDispose = true;
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -357,4 +349,3 @@ class _NotInStockScreenState extends State<NotInStockScreen> {
     }
   }
 }
-

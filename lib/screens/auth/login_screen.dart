@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: OrganicShape(
               width: size.width * 0.8,
               height: size.height * 0.4,
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
             ),
           ),
           Positioned(
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: OrganicShape(
               width: size.width * 0.6,
               height: size.height * 0.3,
-              color: AppColors.primary.withOpacity(0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
             ),
           ),
 
@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.06),
+                        color: AppColors.primary.withValues(alpha: 0.06),
                         blurRadius: 30,
                         offset: const Offset(0, 15),
                       ),
@@ -218,10 +218,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscure: _obscurePassword,
                         suffix: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             size: 20,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
 
@@ -232,7 +236,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ForgotPasswordScreen(),
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
                               ),
                             );
                           },
@@ -252,10 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 32),
 
                       // Login Button
-                      OrganicButton(
-                        text: "Login",
-                        onPressed: _loginUser,
-                      ),
+                      OrganicButton(text: "Login", onPressed: _loginUser),
 
                       const SizedBox(height: 24),
 
@@ -265,14 +267,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text(
                             "Don't have an account?",
                             style: GoogleFonts.rubik(
-                              textStyle: TextStyle(color: AppColors.lightText, fontSize: 14),
+                              textStyle: TextStyle(
+                                color: AppColors.lightText,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => SignupScreen()),
+                                MaterialPageRoute(
+                                  builder: (context) => SignupScreen(),
+                                ),
                               );
                             },
                             child: Text(
@@ -329,20 +336,30 @@ class _LoginScreenState extends State<LoginScreen> {
             hintText: hint,
             prefixIcon: Icon(icon, size: 20, color: Colors.black45),
             suffixIcon: suffix,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             filled: true,
             fillColor: Colors.grey[50],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+              borderSide: BorderSide(
+                color: Colors.black.withValues(alpha: 0.05),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.black.withOpacity(0.05)),
+              borderSide: BorderSide(
+                color: Colors.black.withValues(alpha: 0.05),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
           ),
         ),

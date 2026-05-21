@@ -61,11 +61,11 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.16),
+                        color: Colors.green.withValues(alpha: 0.16),
                         blurRadius: 22,
                         offset: const Offset(0, 10),
                       ),
@@ -93,7 +93,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.22),
+                              color: Colors.green.withValues(alpha: 0.22),
                               blurRadius: 16,
                               offset: const Offset(0, 8),
                             ),
@@ -141,11 +141,11 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.withOpacity(0.12),
+                        color: Colors.green.withValues(alpha: 0.12),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -412,7 +412,7 @@ class _AIRecipeDetailScreenState extends State<AIRecipeDetailScreen> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withOpacity(0.12),
+                color: Colors.green.withValues(alpha: 0.12),
                 blurRadius: 16,
                 offset: const Offset(0, 10),
               ),

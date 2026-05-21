@@ -8,7 +8,6 @@ class LoginSignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -22,7 +21,7 @@ class LoginSignupScreen extends StatelessWidget {
             child: _organicShape(
               width: size.width * 0.9,
               height: size.height * 0.45,
-              color: const Color(0xFF3CB371).withOpacity(0.12),
+              color: const Color(0xFF3CB371).withValues(alpha: 0.12),
             ),
           ),
           Positioned(
@@ -31,7 +30,7 @@ class LoginSignupScreen extends StatelessWidget {
             child: _organicShape(
               width: size.width * 0.7,
               height: size.height * 0.35,
-              color: const Color(0xFF3CB371).withOpacity(0.08),
+              color: const Color(0xFF3CB371).withValues(alpha: 0.08),
             ),
           ),
 
@@ -51,7 +50,9 @@ class LoginSignupScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3CB371).withOpacity(0.15),
+                            color: const Color(
+                              0xFF3CB371,
+                            ).withValues(alpha: 0.15),
                             blurRadius: 40,
                             spreadRadius: 10,
                           ),
@@ -80,14 +81,14 @@ class LoginSignupScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Text(
                       "Your journey to a sustainable kitchen.",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rubik(
                         textStyle: TextStyle(
                           fontSize: 17,
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           height: 1.4,
                         ),
                       ),
@@ -102,7 +103,9 @@ class LoginSignupScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
                         );
                       },
                     ),
@@ -116,20 +119,22 @@ class LoginSignupScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SignupScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const SignupScreen(),
+                          ),
                         );
                       },
                     ),
 
                     const SizedBox(height: 40),
-                    
+
                     Text(
                       "Making a difference, together.",
                       style: GoogleFonts.rubik(
                         textStyle: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3CB371).withOpacity(0.6),
+                          color: const Color(0xFF3CB371).withValues(alpha: 0.6),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -144,7 +149,11 @@ class LoginSignupScreen extends StatelessWidget {
     );
   }
 
-  Widget _organicShape({required double width, required double height, required Color color}) {
+  Widget _organicShape({
+    required double width,
+    required double height,
+    required Color color,
+  }) {
     return Container(
       width: width,
       height: height,
@@ -169,11 +178,11 @@ class LoginSignupScreen extends StatelessWidget {
           backgroundColor: isPrimary ? const Color(0xFF3CB371) : Colors.white,
           foregroundColor: isPrimary ? Colors.white : const Color(0xFF3CB371),
           elevation: isPrimary ? 12 : 0,
-          shadowColor: const Color(0xFF3CB371).withOpacity(0.4),
+          shadowColor: const Color(0xFF3CB371).withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: isPrimary 
-                ? BorderSide.none 
+            side: isPrimary
+                ? BorderSide.none
                 : const BorderSide(color: Color(0xFF3CB371), width: 2),
           ),
         ),

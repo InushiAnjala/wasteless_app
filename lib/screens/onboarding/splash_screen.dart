@@ -23,7 +23,7 @@ class SplashScreen extends StatelessWidget {
             child: OrganicShape(
               width: size.width * 0.9,
               height: size.height * 0.45,
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.primary.withValues(alpha: 0.12),
             ),
           ),
           Positioned(
@@ -32,7 +32,7 @@ class SplashScreen extends StatelessWidget {
             child: OrganicShape(
               width: size.width * 0.7,
               height: size.height * 0.35,
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
             ),
           ),
 
@@ -40,7 +40,10 @@ class SplashScreen extends StatelessWidget {
             child: Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 40,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -52,7 +55,7 @@ class SplashScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.15),
+                            color: AppColors.primary.withValues(alpha: 0.15),
                             blurRadius: 40,
                             spreadRadius: 10,
                           ),
@@ -82,14 +85,14 @@ class SplashScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     Text(
                       "Save food. Save money. Save the planet.",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rubik(
                         textStyle: TextStyle(
                           fontSize: 18,
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           height: 1.5,
                           fontWeight: FontWeight.w400,
                         ),
@@ -113,14 +116,14 @@ class SplashScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 24),
-                    
+
                     Text(
                       "Elevating your sustainable lifestyle.",
                       style: GoogleFonts.rubik(
                         textStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary.withOpacity(0.6),
+                          color: AppColors.primary.withValues(alpha: 0.6),
                           letterSpacing: 0.5,
                         ),
                       ),
