@@ -196,9 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           side: const BorderSide(color: Colors.green, width: 2),
                         ),
                       ),
-                      onPressed: () {
-                        // TODO: Add your logic
-                      },
+                      onPressed: () {},
                       child: Text(
                         "Reset Password",
                         style: TextStyle(
