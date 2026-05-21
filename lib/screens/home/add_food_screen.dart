@@ -759,12 +759,15 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                               color: Color(0xFFE53935),
                             ),
                             SizedBox(width: 10),
-                            Text(
-                              'Say it as: Day  →  Month  →  Year',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF2B2B2B),
+                            Expanded(
+                              child: Text(
+                                'Say it as: Day  →  Month  →  Year',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF2B2B2B),
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
