@@ -9,7 +9,8 @@ class ReportService {
   static const int _expiringSoonDays = 3;
   static const double _lowStockThreshold = 2.0;
 
-  static Future<void> generateAndDownloadReport(BuildContext context, {
+  static Future<void> generateAndDownloadReport(
+    BuildContext context, {
     required bool adminMode,
     required String userId,
     String timeRange = "All",
@@ -19,7 +20,8 @@ class ReportService {
     try {
       // 1. Fetch Data
       final QuerySnapshot snapshot = await (() {
-        Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection("foods");
+        Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+            .collection("foods");
         if (!adminMode) {
           query = query.where("userId", isEqualTo: userId);
         }
@@ -31,24 +33,37 @@ class ReportService {
         final data = doc.data() as Map<String, dynamic>;
         final createdAt = data['createdAt'];
         if (createdAt == null) return timeRange == "All";
-        
+
         final createdDate = (createdAt as Timestamp).toDate();
-        
+
         if (customStart != null && customEnd != null) {
           // Normalize to start of day for start and end of day for end
-          final start = DateTime(customStart.year, customStart.month, customStart.day);
-          final end = DateTime(customEnd.year, customEnd.month, customEnd.day, 23, 59, 59);
-          return createdDate.isAfter(start.subtract(const Duration(seconds: 1))) && 
-                 createdDate.isBefore(end.add(const Duration(seconds: 1)));
+          final start = DateTime(
+            customStart.year,
+            customStart.month,
+            customStart.day,
+          );
+          final end = DateTime(
+            customEnd.year,
+            customEnd.month,
+            customEnd.day,
+            23,
+            59,
+            59,
+          );
+          return createdDate.isAfter(
+                start.subtract(const Duration(seconds: 1)),
+              ) &&
+              createdDate.isBefore(end.add(const Duration(seconds: 1)));
         }
 
         if (timeRange == "All") return true;
-        
+
         final difference = now.difference(createdDate).inDays;
         if (timeRange == "7 Days") return difference <= 7;
         if (timeRange == "1 Month") return difference <= 30;
         if (timeRange == "4 Months") return difference <= 120;
-        
+
         return true;
       }).toList();
 
@@ -87,7 +102,9 @@ class ReportService {
           }
         }
 
-        final effectiveAmount = (expiry != null && expiry.isBefore(now)) ? 0.0 : amount;
+        final effectiveAmount = (expiry != null && expiry.isBefore(now))
+            ? 0.0
+            : amount;
         final key = name.trim().toLowerCase();
         final currentBest = bestAmountByName[key];
         if (currentBest == null || effectiveAmount > currentBest) {
@@ -117,7 +134,9 @@ class ReportService {
       // 3. Generate PDF
       final pdf = pw.Document();
 
-      final double sustainabilityScore = totalItems == 0 ? 100 : ((totalItems - expiredItems.length) / totalItems) * 100;
+      final double sustainabilityScore = totalItems == 0
+          ? 100
+          : ((totalItems - expiredItems.length) / totalItems) * 100;
 
       pdf.addPage(
         pw.MultiPage(
@@ -125,14 +144,22 @@ class ReportService {
           footer: (pw.Context context) => pw.Container(
             alignment: pw.Alignment.centerRight,
             margin: const pw.EdgeInsets.only(top: 10),
-            child: pw.Text("Page ${context.pageNumber} of ${context.pagesCount}", style: const pw.TextStyle(fontSize: 10)),
+            child: pw.Text(
+              "Page ${context.pageNumber} of ${context.pagesCount}",
+              style: const pw.TextStyle(fontSize: 10),
+            ),
           ),
           build: (pw.Context context) => [
             _buildHeader(now, adminMode, timeRange, customStart, customEnd),
             pw.SizedBox(height: 20),
             _buildSustainabilitySection(sustainabilityScore),
             pw.SizedBox(height: 20),
-            _buildSummaryCards(totalItems, expiringSoonItems.length, expiredItems.length, lowStockItems.length),
+            _buildSummaryCards(
+              totalItems,
+              expiringSoonItems.length,
+              expiredItems.length,
+              lowStockItems.length,
+            ),
             pw.SizedBox(height: 30),
             if (expiredItems.isNotEmpty) ...[
               _buildSectionTitle("Expired Items"),
@@ -153,7 +180,6 @@ class ReportService {
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'WasteLess_Analytics_${DateFormat('yyyyMMdd').format(now)}.pdf',
       );
-
     } catch (e) {
       debugPrint("Error generating report: $e");
       if (context.mounted) {
@@ -178,10 +204,17 @@ class ReportService {
     return 0;
   }
 
-  static pw.Widget _buildHeader(DateTime now, bool adminMode, String timeRange, DateTime? start, DateTime? end) {
+  static pw.Widget _buildHeader(
+    DateTime now,
+    bool adminMode,
+    String timeRange,
+    DateTime? start,
+    DateTime? end,
+  ) {
     String periodText = "Period: $timeRange";
     if (start != null && end != null) {
-      periodText = "Period: ${DateFormat('yyyy-MM-dd').format(start)} to ${DateFormat('yyyy-MM-dd').format(end)}";
+      periodText =
+          "Period: ${DateFormat('yyyy-MM-dd').format(start)} to ${DateFormat('yyyy-MM-dd').format(end)}";
     }
 
     return pw.Row(
@@ -190,10 +223,30 @@ class ReportService {
         pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text("WASTELESS", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.green800)),
-            pw.Text("Analytics & Insights Report", style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700)),
-            pw.Text(periodText, style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey600)),
-            if (adminMode) pw.Text("Global System Statistics", style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600)),
+            pw.Text(
+              "WASTELESS",
+              style: pw.TextStyle(
+                fontSize: 24,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.green800,
+              ),
+            ),
+            pw.Text(
+              "Analytics & Insights Report",
+              style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700),
+            ),
+            pw.Text(
+              periodText,
+              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
+            ),
+            if (adminMode)
+              pw.Text(
+                "Global System Statistics",
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey600,
+                ),
+              ),
           ],
         ),
         pw.Column(
@@ -220,17 +273,46 @@ class ReportService {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text("Kitchen Sustainability Score", style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.green900)),
-              pw.Text(score >= 80 ? "Excellent Food Management" : score >= 50 ? "Good Progress" : "Needs Attention", style: const pw.TextStyle(fontSize: 12, color: PdfColors.green700)),
+              pw.Text(
+                "Kitchen Sustainability Score",
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.green900,
+                ),
+              ),
+              pw.Text(
+                score >= 80
+                    ? "Excellent Food Management"
+                    : score >= 50
+                    ? "Good Progress"
+                    : "Needs Attention",
+                style: const pw.TextStyle(
+                  fontSize: 12,
+                  color: PdfColors.green700,
+                ),
+              ),
             ],
           ),
-          pw.Text("${score.round()}%", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.green900)),
+          pw.Text(
+            "${score.round()}%",
+            style: pw.TextStyle(
+              fontSize: 24,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.green900,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  static pw.Widget _buildSummaryCards(int total, int soon, int expired, int low) {
+  static pw.Widget _buildSummaryCards(
+    int total,
+    int soon,
+    int expired,
+    int low,
+  ) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -253,9 +335,19 @@ class ReportService {
       ),
       child: pw.Column(
         children: [
-          pw.Text(title, style: pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+          pw.Text(
+            title,
+            style: pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+          ),
           pw.SizedBox(height: 5),
-          pw.Text(value, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: color)),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: 18,
+              fontWeight: pw.FontWeight.bold,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -264,21 +356,39 @@ class ReportService {
   static pw.Widget _buildSectionTitle(String title) {
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 5),
-      decoration: const pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: PdfColors.green800, width: 1))),
-      child: pw.Text(title, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.green800)),
+      decoration: const pw.BoxDecoration(
+        border: pw.Border(
+          bottom: pw.BorderSide(color: PdfColors.green800, width: 1),
+        ),
+      ),
+      child: pw.Text(
+        title,
+        style: pw.TextStyle(
+          fontSize: 16,
+          fontWeight: pw.FontWeight.bold,
+          color: PdfColors.green800,
+        ),
+      ),
     );
   }
 
   static pw.Widget _buildExpiredTable(List<Map<String, dynamic>> items) {
     return pw.TableHelper.fromTextArray(
       headers: ['Item Name', 'Amount', 'Unit', 'Expiry Date'],
-      data: items.map((item) => [
-        item['name'],
-        item['amount'].toStringAsFixed(1),
-        item['unit'],
-        DateFormat('yyyy-MM-dd').format(item['expiry']),
-      ]).toList(),
-      headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+      data: items
+          .map(
+            (item) => [
+              item['name'],
+              item['amount'].toStringAsFixed(1),
+              item['unit'],
+              DateFormat('yyyy-MM-dd').format(item['expiry']),
+            ],
+          )
+          .toList(),
+      headerStyle: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        color: PdfColors.white,
+      ),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.red700),
       cellHeight: 30,
       cellAlignments: {
@@ -293,13 +403,20 @@ class ReportService {
   static pw.Widget _buildLowStockTable(List<Map<String, dynamic>> items) {
     return pw.TableHelper.fromTextArray(
       headers: ['Item Name', 'Amount', 'Unit', 'Section'],
-      data: items.map((item) => [
-        item['name'],
-        item['amount'].toStringAsFixed(1),
-        item['unit'],
-        item['section'],
-      ]).toList(),
-      headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+      data: items
+          .map(
+            (item) => [
+              item['name'],
+              item['amount'].toStringAsFixed(1),
+              item['unit'],
+              item['section'],
+            ],
+          )
+          .toList(),
+      headerStyle: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold,
+        color: PdfColors.white,
+      ),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
       cellHeight: 30,
       cellAlignments: {
