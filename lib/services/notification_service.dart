@@ -37,8 +37,9 @@ class NotificationService {
     // Set to Colombo (Sri Lanka)
     tz.setLocalLocation(tz.getLocation('Asia/Colombo'));
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
 
     const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -56,13 +57,15 @@ class NotificationService {
     // Request Android 13+ notification permission
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
 
     // Request iOS permission
     await _plugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
+          IOSFlutterLocalNotificationsPlugin
+        >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
 
     _initialized = true;
@@ -89,8 +92,9 @@ class NotificationService {
     await _plugin.cancelAll();
 
     // 3. Load all food items
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('foods').get();
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('foods')
+        .get();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -111,8 +115,11 @@ class NotificationService {
       if (expiryTs == null) continue;
 
       final DateTime expiryDate = expiryTs.toDate();
-      final DateTime expiryDay =
-          DateTime(expiryDate.year, expiryDate.month, expiryDate.day);
+      final DateTime expiryDay = DateTime(
+        expiryDate.year,
+        expiryDate.month,
+        expiryDate.day,
+      );
 
       // Skip items that already expired yesterday or earlier
       if (expiryDay.isBefore(today)) continue;
@@ -126,11 +133,11 @@ class NotificationService {
 
       final int thresholdDays = thresholds[section] ?? 0;
 
-
       // ── Notification 1: Threshold alert ──────────────────────────
       if (thresholdDays > 0) {
-        final DateTime thresholdDate =
-            expiryDate.subtract(Duration(days: thresholdDays));
+        final DateTime thresholdDate = expiryDate.subtract(
+          Duration(days: thresholdDays),
+        );
         final DateTime thresholdAt8am = DateTime(
           thresholdDate.year,
           thresholdDate.month,
@@ -147,8 +154,8 @@ class NotificationService {
             scheduledAt: thresholdAt8am,
           );
         } else if (thresholdAt8am.year == now.year &&
-                   thresholdAt8am.month == now.month &&
-                   thresholdAt8am.day == now.day) {
+            thresholdAt8am.month == now.month &&
+            thresholdAt8am.day == now.day) {
           // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
           await _scheduleNotification(
             id: thresholdId++,
@@ -178,8 +185,8 @@ class NotificationService {
           scheduledAt: expiryAt8am,
         );
       } else if (expiryAt8am.year == now.year &&
-                 expiryAt8am.month == now.month &&
-                 expiryAt8am.day == now.day) {
+          expiryAt8am.month == now.month &&
+          expiryAt8am.day == now.day) {
         // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
         await _scheduleNotification(
           id: expiryId++,
@@ -213,8 +220,7 @@ class NotificationService {
     const androidDetails = AndroidNotificationDetails(
       'wasteless_expiry_channel',
       'Food Expiry Alerts',
-      channelDescription:
-          'Notifies you when food items are about to expire.',
+      channelDescription: 'Notifies you when food items are about to expire.',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
