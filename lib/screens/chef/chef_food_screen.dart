@@ -520,9 +520,8 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                   padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
                   child: TextField(
                     controller: controller,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: 'Amount needed',
                       hintText: 'e.g., 5 $unit',
@@ -589,18 +588,18 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
                           onPressed: () {
                             final value = controller.text.trim();
                             Navigator.pop(context);
-                            final parsed = double.tryParse(value);
-                            if (parsed == null || parsed <= 0) {
+                            late final _NeedRequest request;
+                            try {
+                              request = _parseNeedRequest(value, unit);
+                            } on FormatException catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Enter a valid amount'),
-                                ),
+                                SnackBar(content: Text(e.message)),
                               );
                               return;
                             }
                             _submitNeed(
                               itemName: itemName,
-                              requestedAmount: parsed,
+                              request: request,
                               foodId: foodId,
                               unit: unit,
                             );
@@ -627,7 +626,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
   Future<void> _submitNeed({
     required String itemName,
-    required double requestedAmount,
+    required _NeedRequest request,
     required String foodId,
     required String unit,
   }) async {
@@ -644,13 +643,13 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
 
         final foodData = foodSnap.data();
         final currentAmount = _parseAmount(foodData?['amount']);
-        if (requestedAmount > currentAmount) {
+        if (request.stockAmount > currentAmount) {
           throw Exception(
             'Only ${_formatNumber(currentAmount)} $unit available. '
-            'You requested ${_formatNumber(requestedAmount)} $unit. Please request less.',
+            'You requested ${request.displayLabel}. Please request less.',
           );
         }
-        final newAmount = (currentAmount - requestedAmount).clamp(
+        final newAmount = (currentAmount - request.stockAmount).clamp(
           0,
           double.infinity,
         );
@@ -658,7 +657,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
         transaction.update(foodRef, {'amount': newAmount});
         transaction.set(needsRef, {
           'name': itemName,
-          'amount': '$requestedAmount $unit'.trim(),
+          'amount': request.displayLabel,
           'createdAt': DateTime.now(),
           // Mark as requested so it appears in the upper section (not the
           // pending/not-in-stock list) on the manager reports page.
@@ -668,7 +667,7 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Requested $requestedAmount $unit of $itemName'),
+          content: Text('Requested ${request.displayLabel} of $itemName'),
         ),
       );
     } catch (e) {
@@ -720,6 +719,133 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     return 0;
   }
 
+  _NeedRequest _parseNeedRequest(String input, String stockUnit) {
+    final match = RegExp(
+      r'^\s*([0-9]+(?:[\.,][0-9]+)?)\s*([A-Za-z]+)?\s*$',
+    ).firstMatch(input);
+    if (match == null) {
+      throw const FormatException('Enter an amount like 5 Kg or 500 g');
+    }
+
+    final numeric = double.tryParse(match.group(1)!.replaceAll(',', '.'));
+    if (numeric == null || numeric <= 0) {
+      throw const FormatException('Enter an amount greater than 0');
+    }
+
+    final typedUnit = match.group(2)?.trim();
+    if (typedUnit == null || typedUnit.isEmpty) {
+      return _NeedRequest(
+        stockAmount: numeric,
+        displayLabel: '${_formatNumber(numeric)} ${stockUnit.trim()}'.trim(),
+      );
+    }
+
+    final requestedKey = _normalizeUnit(typedUnit);
+    final stockKey = _normalizeUnit(stockUnit);
+    final requestedFamily = _unitFamily(requestedKey);
+    final stockFamily = _unitFamily(stockKey);
+
+    if (requestedFamily == null) {
+      throw const FormatException('Use a unit like Kg, g, L, ml, or Unit');
+    }
+
+    if (stockFamily == null || requestedFamily != stockFamily) {
+      final hintUnit = stockUnit.trim().isEmpty
+          ? 'this item'
+          : stockUnit.trim();
+      throw FormatException('Use a matching unit for $hintUnit');
+    }
+
+    final stockAmount =
+        numeric * _unitBaseFactor(requestedKey) / _unitBaseFactor(stockKey);
+
+    return _NeedRequest(
+      stockAmount: stockAmount,
+      displayLabel:
+          '${_formatNumber(numeric)} ${_unitDisplayLabel(requestedKey)}'.trim(),
+    );
+  }
+
+  String _normalizeUnit(String unit) {
+    final cleaned = unit.trim().toLowerCase().replaceAll('.', '');
+    switch (cleaned) {
+      case 'kg':
+      case 'kgs':
+      case 'kilogram':
+      case 'kilograms':
+      case 'kilo':
+      case 'kilos':
+        return 'kg';
+      case 'g':
+      case 'gram':
+      case 'grams':
+        return 'g';
+      case 'l':
+      case 'liter':
+      case 'liters':
+      case 'litre':
+      case 'litres':
+        return 'l';
+      case 'ml':
+      case 'milliliter':
+      case 'milliliters':
+      case 'millilitre':
+      case 'millilitres':
+        return 'ml';
+      case 'unit':
+      case 'units':
+      case 'piece':
+      case 'pieces':
+      case 'pc':
+      case 'pcs':
+        return 'unit';
+    }
+    return cleaned;
+  }
+
+  String? _unitFamily(String unitKey) {
+    switch (unitKey) {
+      case 'kg':
+      case 'g':
+        return 'weight';
+      case 'l':
+      case 'ml':
+        return 'volume';
+      case 'unit':
+        return 'count';
+    }
+    return null;
+  }
+
+  double _unitBaseFactor(String unitKey) {
+    switch (unitKey) {
+      case 'kg':
+      case 'l':
+        return 1000;
+      case 'g':
+      case 'ml':
+      case 'unit':
+      default:
+        return 1;
+    }
+  }
+
+  String _unitDisplayLabel(String unitKey) {
+    switch (unitKey) {
+      case 'kg':
+        return 'Kg';
+      case 'g':
+        return 'g';
+      case 'l':
+        return 'L';
+      case 'ml':
+        return 'ml';
+      case 'unit':
+        return 'Unit';
+    }
+    return unitKey;
+  }
+
   String _formatNumber(double value) {
     return value % 1 == 0
         ? value.toInt().toString()
@@ -744,4 +870,11 @@ class _ChefFoodScreenState extends State<ChefFoodScreen> {
     }
     return 'Amount: -';
   }
+}
+
+class _NeedRequest {
+  const _NeedRequest({required this.stockAmount, required this.displayLabel});
+
+  final double stockAmount;
+  final String displayLabel;
 }
