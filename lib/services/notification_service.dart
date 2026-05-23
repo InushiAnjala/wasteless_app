@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages all on-device scheduled push notifications for food expiry alerts.
 ///
@@ -85,6 +86,8 @@ class NotificationService {
   Future<void> scheduleAllNotifications() async {
     await initialize();
 
+    final prefs = await SharedPreferences.getInstance();
+
     // 1. Load notification preferences
     final Map<String, int> thresholds = await _loadThresholds();
 
@@ -98,6 +101,10 @@ class NotificationService {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final String todayKey = _dateKey(today);
+    final String? lastCatchUp = prefs.getString('last_catchup_date');
+    final bool allowCatchUp = lastCatchUp != todayKey;
+    bool scheduledCatchUp = false;
 
     // IDs: threshold alerts start at 2000, expiry-day at 3000
     // (reserves 1000–1999 for future use; test uses 1–99)
@@ -153,7 +160,8 @@ class NotificationService {
                 'Expires in $thresholdDays days (${_fmtDate(expiryDate)}). Use it before it goes bad!',
             scheduledAt: thresholdAt8am,
           );
-        } else if (thresholdAt8am.year == now.year &&
+        } else if (allowCatchUp &&
+            thresholdAt8am.year == now.year &&
             thresholdAt8am.month == now.month &&
             thresholdAt8am.day == now.day) {
           // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
@@ -165,6 +173,7 @@ class NotificationService {
             scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
           );
           staggerDelaySeconds += 2; // Stagger next notification by 2s
+          scheduledCatchUp = true;
         }
       }
 
@@ -184,7 +193,8 @@ class NotificationService {
               'Your $section item "$name" expires today (${_fmtDate(expiryDate)}). Use or discard it now!',
           scheduledAt: expiryAt8am,
         );
-      } else if (expiryAt8am.year == now.year &&
+      } else if (allowCatchUp &&
+          expiryAt8am.year == now.year &&
           expiryAt8am.month == now.month &&
           expiryAt8am.day == now.day) {
         // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
@@ -196,7 +206,12 @@ class NotificationService {
           scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
         );
         staggerDelaySeconds += 2; // Stagger next notification by 2s
+        scheduledCatchUp = true;
       }
+    }
+
+    if (scheduledCatchUp) {
+      await prefs.setString('last_catchup_date', todayKey);
     }
   }
 
@@ -275,6 +290,13 @@ class NotificationService {
     } catch (_) {
       return {};
     }
+  }
+
+  String _dateKey(DateTime date) {
+    final y = date.year.toString();
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
   }
 
   String _fmtDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
