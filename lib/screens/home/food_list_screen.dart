@@ -262,8 +262,18 @@ class _FoodListScreenState extends State<FoodListScreen> {
                           final data = doc.data() as Map<String, dynamic>;
                           final DateTime expiry =
                               (data["expiryDate"] as Timestamp).toDate();
-                          final int daysLeft = expiry
-                              .difference(DateTime.now())
+                          final DateTime today = DateTime(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          );
+                          final DateTime expiryDay = DateTime(
+                            expiry.year,
+                            expiry.month,
+                            expiry.day,
+                          );
+                          final int daysLeft = expiryDay
+                              .difference(today)
                               .inDays;
 
                           String expiryText = daysLeft == 0
