@@ -4,6 +4,7 @@ import 'chef_food_screen.dart';
 import 'not_in_stock_screen.dart';
 import 'ai_food_recipes_screen.dart';
 import '../home/notifications_screen.dart';
+import '../../services/notification_service.dart';
 
 class ChefMainScreen extends StatefulWidget {
   const ChefMainScreen({
@@ -39,6 +40,8 @@ class _ChefMainScreenState extends State<ChefMainScreen> {
       NotificationsScreen(adminMode: widget.adminMode),
       AIFoodRecipesScreen(adminMode: widget.adminMode),
     ];
+    // Schedule / refresh phone notifications on app open
+    NotificationService.instance.scheduleAllNotifications();
   }
 
   void _onTabSelected(int index) {

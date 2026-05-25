@@ -2,15 +2,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages all on-device scheduled push notifications for food expiry alerts.
 ///
 /// Two notifications are scheduled per food item:
-///   1. Threshold alert  – fires at 8 AM, N days before expiry (per category pref)
-///                         If that 8 AM is already past today, fires in 5 seconds.
+///   1. Threshold alert  – fires at 8 AM, N days before expiry (per category pref).
 ///   2. Expiry-day alert – fires at 8 AM on the actual expiry date.
-///                         If item expires today and 8 AM already passed, fires in 5 seconds.
 ///
 /// Call [initialize] once at app start, then [scheduleAllNotifications]
 /// whenever the food list or preferences might have changed.
@@ -80,13 +77,9 @@ class NotificationService {
   /// cancels every previously scheduled notification, then re-schedules
   /// fresh ones for every relevant item.
   ///
-  /// KEY FIX: If the ideal fire time (8 AM) is already past today, we
-  /// immediately schedule the notification for 5 seconds from now instead
-  /// of silently skipping it.
+  /// Notifications are scheduled only for 8 AM; past times are skipped.
   Future<void> scheduleAllNotifications() async {
     await initialize();
-
-    final prefs = await SharedPreferences.getInstance();
 
     // 1. Load notification preferences
     final Map<String, int> thresholds = await _loadThresholds();
@@ -101,16 +94,10 @@ class NotificationService {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final String todayKey = _dateKey(today);
-    final String? lastCatchUp = prefs.getString('last_catchup_date');
-    final bool allowCatchUp = lastCatchUp != todayKey;
-    bool scheduledCatchUp = false;
-
     // IDs: threshold alerts start at 2000, expiry-day at 3000
     // (reserves 1000–1999 for future use; test uses 1–99)
     int thresholdId = 2000;
     int expiryId = 3000;
-    int staggerDelaySeconds = 5;
 
     for (final doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
@@ -160,20 +147,6 @@ class NotificationService {
                 'Expires in $thresholdDays days (${_fmtDate(expiryDate)}). Use it before it goes bad!',
             scheduledAt: thresholdAt8am,
           );
-        } else if (allowCatchUp &&
-            thresholdAt8am.year == now.year &&
-            thresholdAt8am.month == now.month &&
-            thresholdAt8am.day == now.day) {
-          // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
-          await _scheduleNotification(
-            id: thresholdId++,
-            title: '${_categoryEmoji(section)} $name is expiring soon!',
-            body:
-                'Expires in $thresholdDays days (${_fmtDate(expiryDate)}). Use it before it goes bad!',
-            scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
-          );
-          staggerDelaySeconds += 2; // Stagger next notification by 2s
-          scheduledCatchUp = true;
         }
       }
 
@@ -193,25 +166,7 @@ class NotificationService {
               'Your $section item "$name" expires today (${_fmtDate(expiryDate)}). Use or discard it now!',
           scheduledAt: expiryAt8am,
         );
-      } else if (allowCatchUp &&
-          expiryAt8am.year == now.year &&
-          expiryAt8am.month == now.month &&
-          expiryAt8am.day == now.day) {
-        // If it was supposed to fire today at 8 AM but we missed it, fire it staggered
-        await _scheduleNotification(
-          id: expiryId++,
-          title: '⚠️ $name expires TODAY!',
-          body:
-              'Your $section item "$name" expires today (${_fmtDate(expiryDate)}). Use or discard it now!',
-          scheduledAt: now.add(Duration(seconds: staggerDelaySeconds)),
-        );
-        staggerDelaySeconds += 2; // Stagger next notification by 2s
-        scheduledCatchUp = true;
       }
-    }
-
-    if (scheduledCatchUp) {
-      await prefs.setString('last_catchup_date', todayKey);
     }
   }
 
@@ -290,13 +245,6 @@ class NotificationService {
     } catch (_) {
       return {};
     }
-  }
-
-  String _dateKey(DateTime date) {
-    final y = date.year.toString();
-    final m = date.month.toString().padLeft(2, '0');
-    final d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
   }
 
   String _fmtDate(DateTime d) => '${d.day}/${d.month}/${d.year}';

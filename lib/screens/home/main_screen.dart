@@ -4,6 +4,7 @@ import 'food_list_screen.dart';
 import 'kitchen_needs_screen.dart';
 import 'reports_screen.dart';
 import 'notifications_screen.dart';
+import '../../services/notification_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({
@@ -37,6 +38,8 @@ class _MainScreenState extends State<MainScreen> {
       NotificationsScreen(adminMode: widget.adminMode),
       ReportsScreen(adminMode: widget.adminMode),
     ];
+    // Schedule / refresh phone notifications on app open
+    NotificationService.instance.scheduleAllNotifications();
   }
 
   void _onTabSelected(int index) {
